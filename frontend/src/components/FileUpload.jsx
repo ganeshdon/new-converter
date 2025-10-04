@@ -121,6 +121,13 @@ const FileUpload = ({ onFileUpload, onTestExcel, onDirectDownload, onSimpleDownl
               >
                 Download CSV Now
               </Button>
+              <Button 
+                onClick={onTestAI}
+                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
+                data-testid="test-ai-button"
+              >
+                Test AI Service
+              </Button>
             </div>
           </div>
         </div>
