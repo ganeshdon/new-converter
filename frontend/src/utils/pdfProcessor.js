@@ -1,7 +1,12 @@
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.149/build/pdf.worker.mjs`;
+// Configure PDF.js worker - try multiple CDN sources
+try {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.149/pdf.worker.min.mjs`;
+} catch (error) {
+  console.warn('Primary PDF worker failed, trying backup:', error);
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.149/build/pdf.worker.mjs`;
+}
 
 export const processBankStatementPDF = async (file) => {
   try {
