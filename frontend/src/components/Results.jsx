@@ -5,44 +5,118 @@ import { saveAs } from 'file-saver';
 
 const Results = ({ extractedData, excelFile, filename, onReset }) => {
   const handleDownload = () => {
-    console.log('Download button clicked');
-    console.log('Excel file:', excelFile);
-    console.log('Excel file size:', excelFile?.size);
-    console.log('Excel file type:', excelFile?.type);
+    console.log('Download button clicked - generating comprehensive CSV');
     
-    if (!excelFile) {
-      console.error('No Excel file available for download');
-      alert('No Excel file available. Please try generating the file again.');
+    if (!extractedData) {
+      alert('No data available for download. Please try processing the file again.');
       return;
     }
     
     try {
       const originalName = filename?.replace('.pdf', '') || 'bank-statement';
-      const excelFilename = `${originalName}-converted.xlsx`;
       
-      console.log('Attempting to download:', excelFilename);
+      // Create comprehensive CSV with all extracted data
+      let csvData = `BANK STATEMENT DATA EXTRACTION\n\n`;
       
-      // Create download using URL.createObjectURL method
-      const url = URL.createObjectURL(excelFile);
+      // Account Summary Section
+      csvData += `ACCOUNT SUMMARY\n`;
+      csvData += `Field,Value\n`;
+      csvData += `Account Number,${extractedData.accountInfo?.accountNumber || 'Not found'}\n`;
+      csvData += `Statement Date,${extractedData.accountInfo?.statementDate || 'Not found'}\n`;
+      csvData += `Beginning Balance,$${(extractedData.accountInfo?.beginningBalance || 0).toFixed(2)}\n`;
+      csvData += `Ending Balance,$${(extractedData.accountInfo?.endingBalance || 0).toFixed(2)}\n\n`;
+      
+      // Deposits Section
+      if (extractedData.deposits && extractedData.deposits.length > 0) {
+        csvData += `DEPOSITS & OTHER CREDITS\n`;
+        csvData += `Description,Date Credited,Amount\n`;
+        extractedData.deposits.forEach(deposit => {
+          csvData += `"${deposit.description}",${deposit.dateCredited},$${deposit.amount.toFixed(2)}\n`;
+        });
+        csvData += `\n`;
+      }
+      
+      // ATM Withdrawals Section  
+      if (extractedData.atmWithdrawals && extractedData.atmWithdrawals.length > 0) {
+        csvData += `ATM WITHDRAWALS & DEBITS\n`;
+        csvData += `Description,Transaction Date,Date Posted,Amount\n`;
+        extractedData.atmWithdrawals.forEach(atm => {
+          csvData += `"${atm.description}",${atm.tranDate},${atm.datePosted},$${Math.abs(atm.amount).toFixed(2)}\n`;
+        });
+        csvData += `\n`;
+      }
+      
+      // Checks Paid Section
+      if (extractedData.checksPaid && extractedData.checksPaid.length > 0) {
+        csvData += `CHECKS PAID\n`;
+        csvData += `Date Paid,Check Number,Amount,Reference Number\n`;
+        extractedData.checksPaid.forEach(check => {
+          csvData += `${check.datePaid},${check.checkNumber},$${check.amount.toFixed(2)},${check.referenceNumber}\n`;
+        });
+        csvData += `\n`;
+      }
+      
+      // Card Purchases Section
+      if (extractedData.visaPurchases && extractedData.visaPurchases.length > 0) {
+        csvData += `CARD PURCHASES\n`;
+        csvData += `Description,Transaction Date,Date Posted,Amount\n`;
+        extractedData.visaPurchases.forEach(visa => {
+          csvData += `"${visa.description}",${visa.tranDate},${visa.datePosted},$${Math.abs(visa.amount).toFixed(2)}\n`;
+        });
+        csvData += `\n`;
+      }
+      
+      // All Transactions Combined
+      csvData += `ALL TRANSACTIONS SUMMARY\n`;
+      csvData += `Date,Type,Description,Amount\n`;
+      
+      // Combine all transactions
+      const allTransactions = [];
+      
+      if (extractedData.deposits) {
+        extractedData.deposits.forEach(dep => allTransactions.push({
+          date: dep.dateCredited, type: 'Deposit', description: dep.description, amount: dep.amount
+        }));
+      }
+      
+      if (extractedData.atmWithdrawals) {
+        extractedData.atmWithdrawals.forEach(atm => allTransactions.push({
+          date: atm.tranDate, type: 'ATM Withdrawal', description: atm.description, amount: atm.amount
+        }));
+      }
+      
+      if (extractedData.checksPaid) {
+        extractedData.checksPaid.forEach(check => allTransactions.push({
+          date: check.datePaid, type: 'Check', description: `Check #${check.checkNumber}`, amount: -check.amount
+        }));
+      }
+      
+      if (extractedData.visaPurchases) {
+        extractedData.visaPurchases.forEach(visa => allTransactions.push({
+          date: visa.tranDate, type: 'Card Purchase', description: visa.description, amount: visa.amount
+        }));
+      }
+      
+      // Sort by date
+      allTransactions.sort((a, b) => a.date.localeCompare(b.date));
+      
+      // Add to CSV
+      allTransactions.forEach(trans => {
+        const amount = trans.amount >= 0 ? `$${trans.amount.toFixed(2)}` : `-$${Math.abs(trans.amount).toFixed(2)}`;
+        csvData += `${trans.date},${trans.type},"${trans.description}",${amount}\n`;
+      });
+      
+      // Download comprehensive CSV
+      const dataUrl = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvData);
       const link = document.createElement('a');
-      link.href = url;
-      link.download = excelFilename;
-      link.style.display = 'none';
-      
-      // Add to DOM, click, and remove
-      document.body.appendChild(link);
+      link.href = dataUrl;
+      link.download = `${originalName}-complete-data.csv`;
       link.click();
-      document.body.removeChild(link);
       
-      // Clean up the object URL
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-      }, 100);
-      
-      console.log('Download completed successfully');
+      console.log('Comprehensive CSV download completed');
       
     } catch (error) {
-      console.error('Download error:', error);
+      console.error('CSV download error:', error);
       alert('Download failed: ' + error.message);
     }
   };
