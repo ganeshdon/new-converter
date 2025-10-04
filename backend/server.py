@@ -38,6 +38,13 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
+class BankStatementData(BaseModel):
+    accountInfo: dict
+    deposits: list
+    atmWithdrawals: list
+    checksPaid: list
+    visaPurchases: Optional[list] = []
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
