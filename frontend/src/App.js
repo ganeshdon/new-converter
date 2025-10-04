@@ -77,97 +77,82 @@ const App = () => {
   };
 
   const generateComprehensiveCSV = (data) => {
-    let csvData = `BANK STATEMENT DATA EXTRACTION (AI-POWERED)\n\n`;
+    // Create CSV in competitor's exact format - multi-column structure with all data in parallel
     
-    // Account Summary Section
-    csvData += `ACCOUNT SUMMARY\n`;
-    csvData += `Field,Value\n`;
-    csvData += `Account Number,${data.accountInfo?.accountNumber || 'Not found'}\n`;
-    csvData += `Statement Date,${data.accountInfo?.statementDate || 'Not found'}\n`;
-    csvData += `Beginning Balance,$${(data.accountInfo?.beginningBalance || 0).toFixed(2)}\n`;
-    csvData += `Ending Balance,$${(data.accountInfo?.endingBalance || 0).toFixed(2)}\n\n`;
+    // Build header row with all column headers across
+    let csvLines = [];
     
-    // Deposits Section
-    if (data.deposits && data.deposits.length > 0) {
-      csvData += `DEPOSITS & OTHER CREDITS\n`;
-      csvData += `Description,Date Credited,Amount\n`;
-      data.deposits.forEach(deposit => {
-        csvData += `"${deposit.description}",${deposit.dateCredited},$${deposit.amount.toFixed(2)}\n`;
-      });
-      csvData += `\n`;
+    // Account summary info in first columns, then transaction headers across
+    const maxTransactions = Math.max(
+      data.deposits?.length || 0,
+      data.atmWithdrawals?.length || 0, 
+      data.checksPaid?.length || 0,
+      data.visaPurchases?.length || 0
+    );
+    
+    // Header row with account summary and all transaction type headers
+    const headerRow = [
+      'Account Summary', 'Value', '', // Account info columns
+      'Description', 'Date Credited', 'Amount', '', // Deposits columns  
+      'Description', 'Tran Date', 'Date Paid', 'Amount', '', // ATM columns
+      'Date Paid', 'Check Number', 'Amount', 'Reference Number', '', // Checks columns
+      'Description', 'Tran Date', 'Date Paid', 'Amount' // Visa columns
+    ];
+    csvLines.push(headerRow.join(','));
+    
+    // Row 2: Column sub-headers
+    const subHeaderRow = [
+      'Account Number', data.accountInfo?.accountNumber || '', '',
+      'DEPOSITS & OTHER CREDITS', '', '', '',
+      'ATM WITHDRAWALS & DEBITS', '', '', '', '',
+      'CHECKS PAID', '', '', '', '',
+      'CARD PURCHASES', '', '', ''
+    ];
+    csvLines.push(subHeaderRow.join(','));
+    
+    // Row 3: Statement date and first transaction data
+    let rowData = [
+      'Statement Date', data.accountInfo?.statementDate || '', '',
+      data.deposits?.[0]?.description || '', data.deposits?.[0]?.dateCredited || '', data.deposits?.[0]?.amount ? `$${data.deposits[0].amount.toFixed(2)}` : '', '',
+      data.atmWithdrawals?.[0]?.description || '', data.atmWithdrawals?.[0]?.tranDate || '', data.atmWithdrawals?.[0]?.datePosted || '', data.atmWithdrawals?.[0]?.amount ? `$${Math.abs(data.atmWithdrawals[0].amount).toFixed(2)}` : '', '',
+      data.checksPaid?.[0]?.datePaid || '', data.checksPaid?.[0]?.checkNumber || '', data.checksPaid?.[0]?.amount ? `$${data.checksPaid[0].amount.toFixed(2)}` : '', data.checksPaid?.[0]?.referenceNumber || '', '',
+      data.visaPurchases?.[0]?.description || '', data.visaPurchases?.[0]?.tranDate || '', data.visaPurchases?.[0]?.datePosted || '', data.visaPurchases?.[0]?.amount ? `$${Math.abs(data.visaPurchases[0].amount).toFixed(2)}` : ''
+    ];
+    csvLines.push(rowData.join(','));
+    
+    // Row 4: Beginning Balance
+    rowData = [
+      'Beginning Balance', `$${(data.accountInfo?.beginningBalance || 0).toFixed(2)}`, '',
+      data.deposits?.[1]?.description || '', data.deposits?.[1]?.dateCredited || '', data.deposits?.[1]?.amount ? `$${data.deposits[1].amount.toFixed(2)}` : '', '',
+      data.atmWithdrawals?.[1]?.description || '', data.atmWithdrawals?.[1]?.tranDate || '', data.atmWithdrawals?.[1]?.datePosted || '', data.atmWithdrawals?.[1]?.amount ? `$${Math.abs(data.atmWithdrawals[1].amount).toFixed(2)}` : '', '',
+      data.checksPaid?.[1]?.datePaid || '', data.checksPaid?.[1]?.checkNumber || '', data.checksPaid?.[1]?.amount ? `$${data.checksPaid[1].amount.toFixed(2)}` : '', data.checksPaid?.[1]?.referenceNumber || '', '',
+      data.visaPurchases?.[1]?.description || '', data.visaPurchases?.[1]?.tranDate || '', data.visaPurchases?.[1]?.datePosted || '', data.visaPurchases?.[1]?.amount ? `$${Math.abs(data.visaPurchases[1].amount).toFixed(2)}` : ''
+    ];
+    csvLines.push(rowData.join(','));
+    
+    // Row 5: Ending Balance  
+    rowData = [
+      'Ending Balance', `$${(data.accountInfo?.endingBalance || 0).toFixed(2)}`, '',
+      data.deposits?.[2]?.description || '', data.deposits?.[2]?.dateCredited || '', data.deposits?.[2]?.amount ? `$${data.deposits[2].amount.toFixed(2)}` : '', '',
+      data.atmWithdrawals?.[2]?.description || '', data.atmWithdrawals?.[2]?.tranDate || '', data.atmWithdrawals?.[2]?.datePosted || '', data.atmWithdrawals?.[2]?.amount ? `$${Math.abs(data.atmWithdrawals[2].amount).toFixed(2)}` : '', '',
+      data.checksPaid?.[2]?.datePaid || '', data.checksPaid?.[2]?.checkNumber || '', data.checksPaid?.[2]?.amount ? `$${data.checksPaid[2].amount.toFixed(2)}` : '', data.checksPaid?.[2]?.referenceNumber || '', '',
+      data.visaPurchases?.[2]?.description || '', data.visaPurchases?.[2]?.tranDate || '', data.visaPurchases?.[2]?.datePosted || '', data.visaPurchases?.[2]?.amount ? `$${Math.abs(data.visaPurchases[2].amount).toFixed(2)}` : ''
+    ];
+    csvLines.push(rowData.join(','));
+    
+    // Continue with remaining transaction data rows
+    for (let i = 3; i < maxTransactions; i++) {
+      rowData = [
+        '', '', '', // Empty account summary columns
+        data.deposits?.[i]?.description || '', data.deposits?.[i]?.dateCredited || '', data.deposits?.[i]?.amount ? `$${data.deposits[i].amount.toFixed(2)}` : '', '',
+        data.atmWithdrawals?.[i]?.description || '', data.atmWithdrawals?.[i]?.tranDate || '', data.atmWithdrawals?.[i]?.datePosted || '', data.atmWithdrawals?.[i]?.amount ? `$${Math.abs(data.atmWithdrawals[i].amount).toFixed(2)}` : '', '',
+        data.checksPaid?.[i]?.datePaid || '', data.checksPaid?.[i]?.checkNumber || '', data.checksPaid?.[i]?.amount ? `$${data.checksPaid[i].amount.toFixed(2)}` : '', data.checksPaid?.[i]?.referenceNumber || '', '',
+        data.visaPurchases?.[i]?.description || '', data.visaPurchases?.[i]?.tranDate || '', data.visaPurchases?.[i]?.datePosted || '', data.visaPurchases?.[i]?.amount ? `$${Math.abs(data.visaPurchases[i].amount).toFixed(2)}` : ''
+      ];
+      csvLines.push(rowData.join(','));
     }
     
-    // ATM Withdrawals Section  
-    if (data.atmWithdrawals && data.atmWithdrawals.length > 0) {
-      csvData += `ATM WITHDRAWALS & DEBITS\n`;
-      csvData += `Description,Transaction Date,Date Posted,Amount\n`;
-      data.atmWithdrawals.forEach(atm => {
-        csvData += `"${atm.description}",${atm.tranDate},${atm.datePosted},$${Math.abs(atm.amount).toFixed(2)}\n`;
-      });
-      csvData += `\n`;
-    }
-    
-    // Checks Paid Section
-    if (data.checksPaid && data.checksPaid.length > 0) {
-      csvData += `CHECKS PAID\n`;
-      csvData += `Date Paid,Check Number,Amount,Reference Number\n`;
-      data.checksPaid.forEach(check => {
-        csvData += `${check.datePaid},${check.checkNumber},$${check.amount.toFixed(2)},${check.referenceNumber}\n`;
-      });
-      csvData += `\n`;
-    }
-    
-    // Card Purchases Section
-    if (data.visaPurchases && data.visaPurchases.length > 0) {
-      csvData += `CARD PURCHASES\n`;
-      csvData += `Description,Transaction Date,Date Posted,Amount\n`;
-      data.visaPurchases.forEach(visa => {
-        csvData += `"${visa.description}",${visa.tranDate},${visa.datePosted},$${Math.abs(visa.amount).toFixed(2)}\n`;
-      });
-      csvData += `\n`;
-    }
-    
-    // All Transactions Combined
-    csvData += `ALL TRANSACTIONS SUMMARY\n`;
-    csvData += `Date,Type,Description,Amount\n`;
-    
-    // Combine all transactions
-    const allTransactions = [];
-    
-    if (data.deposits) {
-      data.deposits.forEach(dep => allTransactions.push({
-        date: dep.dateCredited, type: 'Deposit', description: dep.description, amount: dep.amount
-      }));
-    }
-    
-    if (data.atmWithdrawals) {
-      data.atmWithdrawals.forEach(atm => allTransactions.push({
-        date: atm.tranDate, type: 'ATM Withdrawal', description: atm.description, amount: atm.amount
-      }));
-    }
-    
-    if (data.checksPaid) {
-      data.checksPaid.forEach(check => allTransactions.push({
-        date: check.datePaid, type: 'Check', description: `Check #${check.checkNumber}`, amount: -check.amount
-      }));
-    }
-    
-    if (data.visaPurchases) {
-      data.visaPurchases.forEach(visa => allTransactions.push({
-        date: visa.tranDate, type: 'Card Purchase', description: visa.description, amount: visa.amount
-      }));
-    }
-    
-    // Sort by date
-    allTransactions.sort((a, b) => a.date.localeCompare(b.date));
-    
-    // Add to CSV
-    allTransactions.forEach(trans => {
-      const amount = trans.amount >= 0 ? `$${trans.amount.toFixed(2)}` : `-$${Math.abs(trans.amount).toFixed(2)}`;
-      csvData += `${trans.date},${trans.type},"${trans.description}",${amount}\n`;
-    });
-    
-    return csvData;
+    return csvLines.join('\n');
   };
 
   const handleReset = () => {
