@@ -174,25 +174,36 @@ const parseATMWithdrawals = (text) => {
 
 const parseChecksPaid = (text) => {
   const checksPaid = [];
+  console.log('Parsing checks paid...');
   
-  // Find the checks section
-  const checksMatch = text.match(/Checks?\s*Paid[\s\S]*?(?=ATM|VISA|Deposits|$)/i);
-  if (!checksMatch) return checksPaid;
+  // Find the checks section - match your PDF format
+  const checksMatch = text.match(/Checks\s*Paid[\s\S]*?(?=Total\s+Checks|$)/i);
+  if (!checksMatch) {
+    console.log('No checks section found');
+    return checksPaid;
+  }
   
   const checksSection = checksMatch[0];
+  console.log('Checks section:', checksSection);
   
-  // Pattern: "05-12 1001 $75.00 00012576589" or "05-12 1001 75.00 00012576589"
-  const checkPattern = /(\d{2}-\d{2})\s+(\d+)\s+\$?([\d,]+\.\d{2})\s+(\d+)/g;
-  let match;
+  // Your format shows: "05-12  1001  75.00  00012576589"
+  const lines = checksSection.split('\n');
   
-  while ((match = checkPattern.exec(checksSection)) !== null) {
-    const [, datePaid, checkNumber, amount, referenceNumber] = match;
-    checksPaid.push({
-      datePaid,
-      checkNumber,
-      amount: parseFloat(amount.replace(/,/g, '')),
-      referenceNumber
-    });
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Match pattern: date  checkNum  amount  refNum
+    const checkMatch = line.match(/^(\d{2}-\d{2})\s+(\d+)\s+([\d,]+\.\d{2})\s+(\d+)$/);
+    if (checkMatch) {
+      const [, datePaid, checkNumber, amount, referenceNumber] = checkMatch;
+      checksPaid.push({
+        datePaid,
+        checkNumber,
+        amount: parseFloat(amount.replace(/,/g, '')),
+        referenceNumber
+      });
+      console.log('Found check:', { datePaid, checkNumber, amount, referenceNumber });
+    }
   }
   
   return checksPaid;
