@@ -15,7 +15,8 @@ export const generateSimpleExcelFile = (data) => {
         ['Statement Date', data.accountInfo?.statementDate || 'N/A'],
         ['Beginning Balance', '$' + (data.accountInfo?.beginningBalance || 0).toFixed(2)],
         ['Ending Balance', '$' + (data.accountInfo?.endingBalance || 0).toFixed(2)]
-      ];\n      
+      ];
+      
       // Create summary sheet
       const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
       XLSX.utils.book_append_sheet(workbook, summarySheet, 'Account Summary');
