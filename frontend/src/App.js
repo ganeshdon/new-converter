@@ -61,6 +61,41 @@ const App = () => {
     setError(null);
   };
 
+  const handleDirectDownload = async () => {
+    try {
+      console.log('Direct download test started...');
+      const { processTestBankStatement } = await import('./utils/testProcessor');
+      const { generateSimpleExcelFile } = await import('./utils/simpleExcelGenerator');
+      const { saveAs } = await import('file-saver');
+      
+      // Generate test data and Excel file
+      const testData = processTestBankStatement();
+      const excelBlob = await generateSimpleExcelFile(testData);
+      
+      console.log('Generated Excel blob:', excelBlob);
+      
+      // Direct download
+      saveAs(excelBlob, 'test-bank-statement.xlsx');
+      
+      // Fallback download method
+      setTimeout(() => {
+        const url = URL.createObjectURL(excelBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'test-bank-statement-fallback.xlsx';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 1000);
+      
+      toast.success('Direct download test executed!');
+    } catch (error) {
+      console.error('Direct download test failed:', error);
+      toast.error('Direct download failed: ' + error.message);
+    }
+  };
+
   const handleTestExcel = async () => {
     console.log('Starting Excel test...');
     setCurrentStep('processing');
