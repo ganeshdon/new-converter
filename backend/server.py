@@ -97,9 +97,9 @@ async def extract_with_ai(pdf_path: str):
     try:
         from emergentintegrations.llm.chat import LlmChat, UserMessage, FileContentWithMimeType
         
-        # Initialize AI chat with Emergent LLM key
+        # Initialize AI chat with your Gemini API key
         chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
+            api_key=GEMINI_API_KEY,
             session_id=f"pdf-extraction-{os.urandom(8).hex()}",
             system_message="""You are a specialized bank statement data extraction expert. 
             Your task is to extract ALL transaction data from PDF bank statements with 100% accuracy.
