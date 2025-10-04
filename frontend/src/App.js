@@ -65,32 +65,117 @@ const App = () => {
     setError(null);
   };
 
-  const handleSimpleDownload = () => {
-    // Create CSV data directly - this always works
-    const csvData = `Account Summary
-Account Number,000009752
-Statement Date,June 5 2003
-Beginning Balance,$7126.11
-Ending Balance,$10521.19
-
-Deposits
-Date,Description,Amount
-05-15,Deposit Ref Nbr: 130012345,$3615.08
-
-Checks Paid
-Date,Check Number,Amount,Reference
-05-12,1001,$75.00,00012576589
-05-18,1002,$30.00,00036547854
-05-24,1003,$200.00,00094613547`;
-    
-    // Use data URL - works in all browsers
-    const dataUrl = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvData);
-    const link = document.createElement('a');
-    link.href = dataUrl;
-    link.download = 'bank-statement.csv';
-    link.click();
-    
-    toast.success('CSV file downloaded!');
+  const handleSimpleDownload = async () => {
+    try {
+      console.log('Creating comprehensive CSV with all transaction data...');
+      const { processTestBankStatement } = await import('./utils/testProcessor');
+      
+      // Get sample data to show the format
+      const data = processTestBankStatement();
+      
+      // Create comprehensive CSV with all transaction types
+      let csvData = `BANK STATEMENT DATA EXTRACTION\n\n`;
+      
+      // Account Summary Section
+      csvData += `ACCOUNT SUMMARY\n`;
+      csvData += `Field,Value\n`;
+      csvData += `Account Number,${data.accountInfo?.accountNumber || ''}\n`;
+      csvData += `Statement Date,${data.accountInfo?.statementDate || ''}\n`;
+      csvData += `Beginning Balance,$${(data.accountInfo?.beginningBalance || 0).toFixed(2)}\n`;
+      csvData += `Ending Balance,$${(data.accountInfo?.endingBalance || 0).toFixed(2)}\n\n`;
+      
+      // Deposits Section
+      if (data.deposits && data.deposits.length > 0) {
+        csvData += `DEPOSITS & OTHER CREDITS\n`;
+        csvData += `Description,Date Credited,Amount\n`;
+        data.deposits.forEach(deposit => {
+          csvData += `"${deposit.description}",${deposit.dateCredited},$${deposit.amount.toFixed(2)}\n`;
+        });
+        csvData += `\n`;
+      }
+      
+      // ATM Withdrawals Section  
+      if (data.atmWithdrawals && data.atmWithdrawals.length > 0) {
+        csvData += `ATM WITHDRAWALS & DEBITS\n`;
+        csvData += `Description,Transaction Date,Date Posted,Amount\n`;
+        data.atmWithdrawals.forEach(atm => {
+          csvData += `"${atm.description}",${atm.tranDate},${atm.datePosted},$${Math.abs(atm.amount).toFixed(2)}\n`;
+        });
+        csvData += `\n`;
+      }
+      
+      // Checks Paid Section
+      if (data.checksPaid && data.checksPaid.length > 0) {
+        csvData += `CHECKS PAID\n`;
+        csvData += `Date Paid,Check Number,Amount,Reference Number\n`;
+        data.checksPaid.forEach(check => {
+          csvData += `${check.datePaid},${check.checkNumber},$${check.amount.toFixed(2)},${check.referenceNumber}\n`;
+        });
+        csvData += `\n`;
+      }
+      
+      // Card Purchases Section
+      if (data.visaPurchases && data.visaPurchases.length > 0) {
+        csvData += `CARD PURCHASES\n`;
+        csvData += `Description,Transaction Date,Date Posted,Amount\n`;
+        data.visaPurchases.forEach(visa => {
+          csvData += `"${visa.description}",${visa.tranDate},${visa.datePosted},$${Math.abs(visa.amount).toFixed(2)}\n`;
+        });
+        csvData += `\n`;
+      }
+      
+      // All Transactions Combined
+      csvData += `ALL TRANSACTIONS SUMMARY\n`;
+      csvData += `Date,Type,Description,Amount\n`;
+      
+      // Add all transactions chronologically
+      const allTransactions = [];
+      
+      if (data.deposits) {
+        data.deposits.forEach(dep => allTransactions.push({
+          date: dep.dateCredited, type: 'Deposit', description: dep.description, amount: dep.amount
+        }));
+      }
+      
+      if (data.atmWithdrawals) {
+        data.atmWithdrawals.forEach(atm => allTransactions.push({
+          date: atm.tranDate, type: 'ATM Withdrawal', description: atm.description, amount: atm.amount  
+        }));
+      }
+      
+      if (data.checksPaid) {
+        data.checksPaid.forEach(check => allTransactions.push({
+          date: check.datePaid, type: 'Check', description: `Check #${check.checkNumber}`, amount: -check.amount
+        }));
+      }
+      
+      if (data.visaPurchases) {
+        data.visaPurchases.forEach(visa => allTransactions.push({
+          date: visa.tranDate, type: 'Card Purchase', description: visa.description, amount: visa.amount
+        }));
+      }
+      
+      // Sort by date
+      allTransactions.sort((a, b) => a.date.localeCompare(b.date));
+      
+      // Add to CSV
+      allTransactions.forEach(trans => {
+        const amount = trans.amount >= 0 ? `$${trans.amount.toFixed(2)}` : `-$${Math.abs(trans.amount).toFixed(2)}`;
+        csvData += `${trans.date},${trans.type},"${trans.description}",${amount}\n`;
+      });
+      
+      // Download the comprehensive CSV
+      const dataUrl = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvData);
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = 'complete-bank-statement.csv';
+      link.click();
+      
+      toast.success('Complete bank statement CSV downloaded!');
+    } catch (error) {
+      console.error('CSV generation failed:', error);
+      toast.error('Failed to generate CSV: ' + error.message);
+    }
   };
 
   const handleDirectDownload = async () => {
