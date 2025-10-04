@@ -146,26 +146,35 @@ const parseDeposits = (text) => {
 
 const parseATMWithdrawals = (text) => {
   const atmWithdrawals = [];
+  console.log('Parsing ATM withdrawals...');
   
   // Find the ATM section
-  const atmMatch = text.match(/ATM\s*Withdrawals?\s*&?\s*Debits?[\s\S]*?(?=Checks|VISA|Deposits|$)/i);
-  if (!atmMatch) return atmWithdrawals;
+  const atmMatch = text.match(/ATM\s*Withdrawals?\s*&?\s*Debits?[\s\S]*?(?=Checks|VISA|Total\s+ATM|$)/i);
+  if (!atmMatch) {
+    console.log('No ATM section found');
+    return atmWithdrawals;
+  }
   
   const atmSection = atmMatch[0];
+  console.log('ATM section:', atmSection);
   
-  // Pattern: "05-18 05-19 ATM Withdrawal 1000 Walnut St M119 Kansas City MO 00005678 -$20.00"
-  const atmPattern = /(\d{2}-\d{2})\s+(\d{2}-\d{2})\s+([^-$]*?)\s*-?\$?([\d,]+\.\d{2})/g;
-  let match;
+  const lines = atmSection.split('\n');
   
-  while ((match = atmPattern.exec(atmSection)) !== null) {
-    const [, tranDate, datePosted, description, amount] = match;
-    if (description.trim() && !description.toLowerCase().includes('atm withdrawal')) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Look for ATM transaction lines
+    // Format: "ATM Withdrawal 1000 Walnut St M119 Kansas City MO 00005678  05-18  05-19  20.00"
+    const atmMatch = line.match(/ATM\s+Withdrawal\s+(.*?)\s+(\d{2}-\d{2})\s+(\d{2}-\d{2})\s+([\d,]+\.\d{2})/i);
+    if (atmMatch) {
+      const [, description, tranDate, datePosted, amount] = atmMatch;
       atmWithdrawals.push({
         tranDate,
         datePosted,
-        description: description.trim(),
+        description: `ATM Withdrawal ${description.trim()}`,
         amount: -parseFloat(amount.replace(/,/g, '')) // Negative for withdrawals
       });
+      console.log('Found ATM withdrawal:', { tranDate, datePosted, description, amount });
     }
   }
   
