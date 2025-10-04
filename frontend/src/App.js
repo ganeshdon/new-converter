@@ -61,6 +61,40 @@ const App = () => {
     setError(null);
   };
 
+  const handleSimpleDownload = () => {
+    try {
+      console.log('Simple download test started...');
+      
+      // Create a simple text file
+      const textContent = 'This is a test file to verify download functionality works.\n\nBank Statement to Excel Converter\nTest completed successfully!';
+      const blob = new Blob([textContent], { type: 'text/plain' });
+      
+      console.log('Text blob created:', blob);
+      console.log('Blob size:', blob.size);
+      
+      // Create download
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'test-download.txt';
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      toast.success('Simple text file download triggered!');
+      console.log('Simple download completed');
+    } catch (error) {
+      console.error('Simple download failed:', error);
+      toast.error('Simple download failed: ' + error.message);
+    }
+  };
+
   const handleDirectDownload = async () => {
     try {
       console.log('Direct download test started...');
