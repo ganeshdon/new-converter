@@ -91,21 +91,12 @@ const FileUpload = ({ onFileUpload }) => {
             <p className="text-gray-500" data-testid="or-text">or</p>
           </div>
           
-          <div className="space-y-3">
-            <Button 
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg"
-              data-testid="browse-button"
-            >
-              Browse Files
-            </Button>
-            <div className="text-sm text-gray-500">or</div>
-            <Button 
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg"
-              data-testid="browse-button"
-            >
-              Browse Files
-            </Button>
-          </div>
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg"
+            data-testid="browse-button"
+          >
+            Browse Files
+          </Button>
         </div>
       </div>
 
