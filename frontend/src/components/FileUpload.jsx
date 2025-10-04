@@ -119,7 +119,7 @@ const FileUpload = ({ onFileUpload, onTestExcel, onDirectDownload, onSimpleDownl
                 className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
                 data-testid="simple-download-button"
               >
-                Simple Text Download
+                Download CSV Now
               </Button>
             </div>
           </div>
