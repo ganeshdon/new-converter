@@ -56,7 +56,7 @@ const FileUpload = ({ onFileUpload }) => {
 
       {/* Upload Zone */}
       <div
-        className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 cursor-pointer
+        className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300
           ${dragActive 
             ? 'border-blue-500 bg-blue-50 scale-102' 
             : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
@@ -65,7 +65,6 @@ const FileUpload = ({ onFileUpload }) => {
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        onClick={onButtonClick}
         data-testid="upload-zone"
       >
         <input
