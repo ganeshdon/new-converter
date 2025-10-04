@@ -5,10 +5,46 @@ import { saveAs } from 'file-saver';
 
 const Results = ({ extractedData, excelFile, filename, onReset }) => {
   const handleDownload = () => {
-    if (excelFile) {
+    console.log('Download button clicked');
+    console.log('Excel file:', excelFile);
+    console.log('Filename:', filename);
+    
+    if (!excelFile) {
+      console.error('No Excel file available for download');
+      alert('No Excel file available. Please try generating the file again.');
+      return;
+    }
+    
+    try {
       const originalName = filename?.replace('.pdf', '') || 'bank-statement';
       const excelFilename = `${originalName}-converted.xlsx`;
+      
+      console.log('Attempting to download:', excelFilename);
+      
+      // Try using file-saver
       saveAs(excelFile, excelFilename);
+      
+      // Fallback method using URL.createObjectURL
+      setTimeout(() => {
+        try {
+          const url = URL.createObjectURL(excelFile);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = excelFilename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          console.log('Fallback download method executed');
+        } catch (fallbackError) {
+          console.error('Fallback download failed:', fallbackError);
+          alert('Download failed. Please try again or contact support.');
+        }
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Download failed: ' + error.message);
     }
   };
 
