@@ -31,30 +31,140 @@ const App = () => {
 
   const processFile = async (file) => {
     try {
-      console.log('Processing real PDF file:', file.name);
+      console.log('Processing PDF with AI:', file.name);
       
-      // Import PDF processing function
-      const { processBankStatementPDF } = await import('./utils/pdfProcessor');
-      const { generateSimpleExcelFile } = await import('./utils/simpleExcelGenerator');
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // Call AI-powered backend endpoint
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/process-pdf`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to process PDF');
+      }
+      
+      const result = await response.json();
+      console.log('AI Extraction Result:', result);
+      
+      if (!result.success || !result.data) {
+        throw new Error('Invalid response from AI processing');
+      }
+      
+      const extractedData = result.data;
+      setExtractedData(extractedData);
 
-      // Extract data from PDF
-      const data = await processBankStatementPDF(file);
-      console.log('Extracted PDF data:', data);
-      setExtractedData(data);
-
-      // Generate Excel file with real data
-      const excelBlob = await generateSimpleExcelFile(data);
-      console.log('Generated Excel with real data:', excelBlob);
-      setExcelFile(excelBlob);
+      // Generate CSV with AI-extracted data
+      const csvContent = generateComprehensiveCSV(extractedData);
+      setExcelFile(new Blob([csvContent], { type: 'text/csv' }));
 
       setCurrentStep('results');
-      toast.success('Bank statement processed successfully!');
+      toast.success('AI extraction completed successfully!');
     } catch (error) {
-      console.error('Processing error:', error);
+      console.error('AI Processing error:', error);
       setError(error.message);
       setCurrentStep('error');
-      toast.error(error.message || 'Failed to process the bank statement.');
+      toast.error(error.message || 'Failed to process the bank statement with AI.');
     }
+  };
+
+  const generateComprehensiveCSV = (data) => {
+    let csvData = `BANK STATEMENT DATA EXTRACTION (AI-POWERED)\n\n`;
+    
+    // Account Summary Section
+    csvData += `ACCOUNT SUMMARY\n`;
+    csvData += `Field,Value\n`;
+    csvData += `Account Number,${data.accountInfo?.accountNumber || 'Not found'}\n`;
+    csvData += `Statement Date,${data.accountInfo?.statementDate || 'Not found'}\n`;
+    csvData += `Beginning Balance,$${(data.accountInfo?.beginningBalance || 0).toFixed(2)}\n`;
+    csvData += `Ending Balance,$${(data.accountInfo?.endingBalance || 0).toFixed(2)}\n\n`;
+    
+    // Deposits Section
+    if (data.deposits && data.deposits.length > 0) {
+      csvData += `DEPOSITS & OTHER CREDITS\n`;
+      csvData += `Description,Date Credited,Amount\n`;
+      data.deposits.forEach(deposit => {
+        csvData += `"${deposit.description}",${deposit.dateCredited},$${deposit.amount.toFixed(2)}\n`;
+      });
+      csvData += `\n`;
+    }
+    
+    // ATM Withdrawals Section  
+    if (data.atmWithdrawals && data.atmWithdrawals.length > 0) {
+      csvData += `ATM WITHDRAWALS & DEBITS\n`;
+      csvData += `Description,Transaction Date,Date Posted,Amount\n`;
+      data.atmWithdrawals.forEach(atm => {
+        csvData += `"${atm.description}",${atm.tranDate},${atm.datePosted},$${Math.abs(atm.amount).toFixed(2)}\n`;
+      });
+      csvData += `\n`;
+    }
+    
+    // Checks Paid Section
+    if (data.checksPaid && data.checksPaid.length > 0) {
+      csvData += `CHECKS PAID\n`;
+      csvData += `Date Paid,Check Number,Amount,Reference Number\n`;
+      data.checksPaid.forEach(check => {
+        csvData += `${check.datePaid},${check.checkNumber},$${check.amount.toFixed(2)},${check.referenceNumber}\n`;
+      });
+      csvData += `\n`;
+    }
+    
+    // Card Purchases Section
+    if (data.visaPurchases && data.visaPurchases.length > 0) {
+      csvData += `CARD PURCHASES\n`;
+      csvData += `Description,Transaction Date,Date Posted,Amount\n`;
+      data.visaPurchases.forEach(visa => {
+        csvData += `"${visa.description}",${visa.tranDate},${visa.datePosted},$${Math.abs(visa.amount).toFixed(2)}\n`;
+      });
+      csvData += `\n`;
+    }
+    
+    // All Transactions Combined
+    csvData += `ALL TRANSACTIONS SUMMARY\n`;
+    csvData += `Date,Type,Description,Amount\n`;
+    
+    // Combine all transactions
+    const allTransactions = [];
+    
+    if (data.deposits) {
+      data.deposits.forEach(dep => allTransactions.push({
+        date: dep.dateCredited, type: 'Deposit', description: dep.description, amount: dep.amount
+      }));
+    }
+    
+    if (data.atmWithdrawals) {
+      data.atmWithdrawals.forEach(atm => allTransactions.push({
+        date: atm.tranDate, type: 'ATM Withdrawal', description: atm.description, amount: atm.amount
+      }));
+    }
+    
+    if (data.checksPaid) {
+      data.checksPaid.forEach(check => allTransactions.push({
+        date: check.datePaid, type: 'Check', description: `Check #${check.checkNumber}`, amount: -check.amount
+      }));
+    }
+    
+    if (data.visaPurchases) {
+      data.visaPurchases.forEach(visa => allTransactions.push({
+        date: visa.tranDate, type: 'Card Purchase', description: visa.description, amount: visa.amount
+      }));
+    }
+    
+    // Sort by date
+    allTransactions.sort((a, b) => a.date.localeCompare(b.date));
+    
+    // Add to CSV
+    allTransactions.forEach(trans => {
+      const amount = trans.amount >= 0 ? `$${trans.amount.toFixed(2)}` : `-$${Math.abs(trans.amount).toFixed(2)}`;
+      csvData += `${trans.date},${trans.type},"${trans.description}",${amount}\n`;
+    });
+    
+    return csvData;
   };
 
   const handleReset = () => {
