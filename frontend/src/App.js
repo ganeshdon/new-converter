@@ -379,7 +379,7 @@ const App = () => {
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 'upload':
-        return <FileUpload onFileUpload={handleFileUpload} onTestExcel={handleTestExcel} onDirectDownload={handleDirectDownload} onSimpleDownload={handleSimpleDownload} onTestAI={handleTestAI} />;
+        return <FileUpload onFileUpload={handleFileUpload} />;
       case 'processing':
         return <ProcessingState filename={uploadedFile?.name} />;
       case 'results':
