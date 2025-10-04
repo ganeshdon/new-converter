@@ -7,7 +7,8 @@ const Results = ({ extractedData, excelFile, filename, onReset }) => {
   const handleDownload = () => {
     console.log('Download button clicked');
     console.log('Excel file:', excelFile);
-    console.log('Filename:', filename);
+    console.log('Excel file size:', excelFile?.size);
+    console.log('Excel file type:', excelFile?.type);
     
     if (!excelFile) {
       console.error('No Excel file available for download');
@@ -21,26 +22,24 @@ const Results = ({ extractedData, excelFile, filename, onReset }) => {
       
       console.log('Attempting to download:', excelFilename);
       
-      // Try using file-saver
-      saveAs(excelFile, excelFilename);
+      // Create download using URL.createObjectURL method
+      const url = URL.createObjectURL(excelFile);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = excelFilename;
+      link.style.display = 'none';
       
-      // Fallback method using URL.createObjectURL
+      // Add to DOM, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the object URL
       setTimeout(() => {
-        try {
-          const url = URL.createObjectURL(excelFile);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = excelFilename;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-          console.log('Fallback download method executed');
-        } catch (fallbackError) {
-          console.error('Fallback download failed:', fallbackError);
-          alert('Download failed. Please try again or contact support.');
-        }
-      }, 1000);
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      console.log('Download completed successfully');
       
     } catch (error) {
       console.error('Download error:', error);
