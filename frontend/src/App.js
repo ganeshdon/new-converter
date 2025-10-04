@@ -88,7 +88,8 @@ const App = () => {
       
       // Generate Excel file
       console.log('Step 5: Creating Excel file...');
-      const excelBlob = generateExcelFile(testData);
+      const { generateSimpleExcelFile } = await import('./utils/simpleExcelGenerator');
+      const excelBlob = await generateSimpleExcelFile(testData);
       console.log('Excel blob created:', excelBlob);
       setExcelFile(excelBlob);
       
