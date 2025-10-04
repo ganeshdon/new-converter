@@ -61,6 +61,33 @@ const App = () => {
     setError(null);
   };
 
+  const handleTestExcel = async () => {
+    try {
+      console.log('Testing Excel generation...');
+      const { processTestBankStatement } = await import('./utils/testProcessor');
+      const { generateExcelFile } = await import('./utils/excelGenerator');
+      
+      // Generate test data
+      const testData = processTestBankStatement();
+      setExtractedData(testData);
+      
+      // Generate Excel file
+      const excelBlob = generateExcelFile(testData);
+      setExcelFile(excelBlob);
+      
+      // Set fake filename for test
+      setUploadedFile({ name: 'test-bank-statement.pdf' });
+      setCurrentStep('results');
+      
+      toast.success('Test Excel file generated successfully!');
+    } catch (error) {
+      console.error('Test Excel generation error:', error);
+      setError('Failed to generate test Excel file: ' + error.message);
+      setCurrentStep('error');
+      toast.error('Test Excel generation failed');
+    }
+  };
+
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 'upload':
