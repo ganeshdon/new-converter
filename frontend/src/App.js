@@ -62,29 +62,47 @@ const App = () => {
   };
 
   const handleTestExcel = async () => {
+    console.log('Starting Excel test...');
+    setCurrentStep('processing');
+    setUploadedFile({ name: 'test-bank-statement.pdf' });
+    
     try {
-      console.log('Testing Excel generation...');
+      console.log('Step 1: Importing modules...');
+      
+      // Test XLSX availability
+      if (typeof window.XLSX === 'undefined') {
+        console.log('XLSX not available globally, importing...');
+      }
+      
       const { processTestBankStatement } = await import('./utils/testProcessor');
+      console.log('Step 2: Test processor imported');
+      
       const { generateExcelFile } = await import('./utils/excelGenerator');
+      console.log('Step 3: Excel generator imported');
       
       // Generate test data
+      console.log('Step 4: Generating test data...');
       const testData = processTestBankStatement();
+      console.log('Test data:', testData);
       setExtractedData(testData);
       
       // Generate Excel file
+      console.log('Step 5: Creating Excel file...');
       const excelBlob = generateExcelFile(testData);
+      console.log('Excel blob created:', excelBlob);
       setExcelFile(excelBlob);
       
-      // Set fake filename for test
-      setUploadedFile({ name: 'test-bank-statement.pdf' });
+      console.log('Step 6: Setting results state...');
       setCurrentStep('results');
       
       toast.success('Test Excel file generated successfully!');
+      console.log('Test completed successfully');
     } catch (error) {
       console.error('Test Excel generation error:', error);
-      setError('Failed to generate test Excel file: ' + error.message);
+      console.error('Error stack:', error.stack);
+      setError(`Failed to generate test Excel file: ${error.message}`);
       setCurrentStep('error');
-      toast.error('Test Excel generation failed');
+      toast.error('Test Excel generation failed: ' + error.message);
     }
   };
 
