@@ -110,25 +110,34 @@ const parseAccountInfo = (text) => {
 
 const parseDeposits = (text) => {
   const deposits = [];
+  console.log('Parsing deposits...');
   
-  // Find the deposits section
-  const depositsMatch = text.match(/Deposits\s*&?\s*Other\s*Credits[\s\S]*?(?=ATM|Checks|VISA|$)/i);
-  if (!depositsMatch) return deposits;
+  // Find the deposits section - match your PDF format
+  const depositsMatch = text.match(/Deposits\s*&?\s*Other\s*Credits[\s\S]*?(?=ATM|Total\s+Deposits|$)/i);
+  if (!depositsMatch) {
+    console.log('No deposits section found');
+    return deposits;
+  }
   
   const depositsSection = depositsMatch[0];
+  console.log('Deposits section:', depositsSection);
   
-  // Pattern: "05-15 Deposit Ref Nbr: 130012345 $3,615.08" or "05-15 Deposit Ref Nbr: 130012345 3,615.08"
-  const depositPattern = /(\d{2}-\d{2})\s+([^$\d]*?)\s*\$?([\d,]+\.\d{2})/g;
-  let match;
+  // Pattern for your format: "Deposit    Ref Nbr: 130012345    05-15    $3,615.08"
+  const lines = depositsSection.split('\n');
   
-  while ((match = depositPattern.exec(depositsSection)) !== null) {
-    const [, date, description, amount] = match;
-    if (description.trim() && !description.toLowerCase().includes('deposits & other credits')) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Look for deposit lines with Ref Nbr pattern
+    const depositMatch = line.match(/Deposit\s+Ref\s+Nbr:\s*(\d+)\s+(\d{2}-\d{2})\s+\$?([\d,]+\.\d{2})/i);
+    if (depositMatch) {
+      const [, refNbr, date, amount] = depositMatch;
       deposits.push({
         dateCredited: date,
-        description: description.trim(),
+        description: `Deposit Ref Nbr: ${refNbr}`,
         amount: parseFloat(amount.replace(/,/g, ''))
       });
+      console.log('Found deposit:', { date, refNbr, amount });
     }
   }
   
