@@ -151,7 +151,7 @@ async def extract_with_ai(pdf_path: str):
             - Negative amounts for withdrawals/debits
             - Include complete descriptions and reference numbers
             - Return ONLY valid JSON, no additional text"""
-        ).with_model("openai", "gpt-4o")
+        ).with_model("gemini", "gemini-2.0-flash")
         
         # Prepare PDF file for processing
         pdf_file = FileContentWithMimeType(
