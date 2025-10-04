@@ -18,7 +18,7 @@ load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
-EMERGENT_LLM_KEY = os.getenv("EMERGENT_LLM_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
