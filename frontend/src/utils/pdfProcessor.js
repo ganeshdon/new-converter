@@ -70,30 +70,39 @@ const parseBankStatementText = (text) => {
 
 const parseAccountInfo = (text) => {
   const accountInfo = {};
+  console.log('Parsing account info from text:', text.substring(0, 500));
   
-  // Extract account number - patterns: "Account # 000009752" or "Account Number: 000009752"
-  const accountMatch = text.match(/Account\s*#?\s*:?\s*(\d+)/i);
+  // Extract account number - multiple patterns for your bank format
+  const accountMatch = text.match(/Account\s*#?\s*(\d+)/i) || 
+                      text.match(/Primary\s+Account\s+Number:?\s*(\d+)/i) ||
+                      text.match(/CONNECTIONS\s+CHECKING\s+Account\s*#?\s*(\d+)/i);
   if (accountMatch) {
     accountInfo.accountNumber = accountMatch[1];
+    console.log('Found account number:', accountMatch[1]);
   }
   
-  // Extract statement date - patterns: "June 5, 2003" or "Statement Date: June 5, 2003"
+  // Extract statement date - patterns from your PDF
   const dateMatch = text.match(/Statement\s+Date:?\s*([A-Za-z]+\s+\d{1,2},?\s+\d{4})/i) || 
-                   text.match(/([A-Za-z]+\s+\d{1,2},?\s+\d{4})/i);
+                   text.match(/June\s+\d{1,2},?\s+\d{4}/i);
   if (dateMatch) {
-    accountInfo.statementDate = dateMatch[1];
+    accountInfo.statementDate = dateMatch[0];
+    console.log('Found statement date:', dateMatch[0]);
   }
   
-  // Extract beginning balance - patterns: "Beginning Balance: $7,126.11" or "Beginning Balance $7,126.11"
-  const beginningMatch = text.match(/Beginning\s+Balance:?\s*\$?([\d,]+\.\d{2})/i);
+  // Extract beginning balance - from your PDF format
+  const beginningMatch = text.match(/Beginning\s+Balance\s+on\s+[A-Za-z]+\s+\d{1,2},?\s+\d{4}\s*\$?([\d,]+\.\d{2})/i) ||
+                        text.match(/Beginning\s+Balance:?\s*\$?([\d,]+\.\d{2})/i);
   if (beginningMatch) {
     accountInfo.beginningBalance = parseFloat(beginningMatch[1].replace(/,/g, ''));
+    console.log('Found beginning balance:', beginningMatch[1]);
   }
   
-  // Extract ending balance - patterns: "Ending Balance: $10,521.19" or "Ending Balance $10,521.19"
-  const endingMatch = text.match(/Ending\s+Balance:?\s*\$?([\d,]+\.\d{2})/i);
+  // Extract ending balance - from your PDF format  
+  const endingMatch = text.match(/Ending\s+Balance\s+on\s+[A-Za-z]+\s+\d{1,2},?\s+\d{4}\s*\$?([\d,]+\.\d{2})/i) ||
+                     text.match(/Ending\s+Balance:?\s*\$?([\d,]+\.\d{2})/i);
   if (endingMatch) {
     accountInfo.endingBalance = parseFloat(endingMatch[1].replace(/,/g, ''));
+    console.log('Found ending balance:', endingMatch[1]);
   }
   
   return accountInfo;
