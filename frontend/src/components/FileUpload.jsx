@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 
-const FileUpload = ({ onFileUpload }) => {
+const FileUpload = ({ onFileUpload, onTestExcel }) => {
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef(null);
 
