@@ -31,16 +31,20 @@ const App = () => {
 
   const processFile = async (file) => {
     try {
+      console.log('Processing real PDF file:', file.name);
+      
       // Import PDF processing function
       const { processBankStatementPDF } = await import('./utils/pdfProcessor');
-      const { generateExcelFile } = await import('./utils/excelGenerator');
+      const { generateSimpleExcelFile } = await import('./utils/simpleExcelGenerator');
 
       // Extract data from PDF
       const data = await processBankStatementPDF(file);
+      console.log('Extracted PDF data:', data);
       setExtractedData(data);
 
-      // Generate Excel file
-      const excelBlob = generateExcelFile(data);
+      // Generate Excel file with real data
+      const excelBlob = await generateSimpleExcelFile(data);
+      console.log('Generated Excel with real data:', excelBlob);
       setExcelFile(excelBlob);
 
       setCurrentStep('results');
