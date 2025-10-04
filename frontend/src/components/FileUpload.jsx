@@ -99,13 +99,22 @@ const FileUpload = ({ onFileUpload, onTestExcel }) => {
               Browse Files
             </Button>
             <div className="text-sm text-gray-500">or</div>
-            <Button 
-              onClick={onTestExcel}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
-              data-testid="test-excel-button"
-            >
-              Test with Sample Data
-            </Button>
+            <div className="space-y-2">
+              <Button 
+                onClick={onTestExcel}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
+                data-testid="test-excel-button"
+              >
+                Test with Sample Data
+              </Button>
+              <Button 
+                onClick={onDirectDownload}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
+                data-testid="direct-download-button"
+              >
+                Direct Download Test
+              </Button>
+            </div>
           </div>
         </div>
       </div>
