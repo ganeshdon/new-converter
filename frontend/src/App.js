@@ -39,6 +39,9 @@ const App = () => {
       
       // Call AI-powered backend endpoint
       const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
+      console.log('Backend URL:', backendUrl);
+      console.log('Uploading file:', file.name, 'Size:', file.size);
+      
       const response = await fetch(`${backendUrl}/api/process-pdf`, {
         method: 'POST',
         body: formData
