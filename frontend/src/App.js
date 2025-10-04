@@ -66,30 +66,34 @@ const App = () => {
       console.log('Direct download test started...');
       const { processTestBankStatement } = await import('./utils/testProcessor');
       const { generateSimpleExcelFile } = await import('./utils/simpleExcelGenerator');
-      const { saveAs } = await import('file-saver');
       
       // Generate test data and Excel file
       const testData = processTestBankStatement();
       const excelBlob = await generateSimpleExcelFile(testData);
       
       console.log('Generated Excel blob:', excelBlob);
+      console.log('Blob size:', excelBlob.size);
+      console.log('Blob type:', excelBlob.type);
       
-      // Direct download
-      saveAs(excelBlob, 'test-bank-statement.xlsx');
+      // Create download link and trigger download
+      const url = URL.createObjectURL(excelBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'test-bank-statement.xlsx';
+      link.style.display = 'none';
       
-      // Fallback download method
+      // Add to DOM, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up
       setTimeout(() => {
-        const url = URL.createObjectURL(excelBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'test-bank-statement-fallback.xlsx';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
         URL.revokeObjectURL(url);
-      }, 1000);
+      }, 100);
       
-      toast.success('Direct download test executed!');
+      toast.success('Excel file download started!');
+      console.log('Download triggered successfully');
     } catch (error) {
       console.error('Direct download test failed:', error);
       toast.error('Direct download failed: ' + error.message);
