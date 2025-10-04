@@ -99,36 +99,12 @@ const FileUpload = ({ onFileUpload, onTestExcel, onDirectDownload, onSimpleDownl
               Browse Files
             </Button>
             <div className="text-sm text-gray-500">or</div>
-            <div className="space-y-2">
-              <Button 
-                onClick={onTestExcel}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
-                data-testid="test-excel-button"
-              >
-                Test with Sample Data
-              </Button>
-              <Button 
-                onClick={onDirectDownload}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
-                data-testid="direct-download-button"
-              >
-                Direct Download Test
-              </Button>
-              <Button 
-                onClick={onSimpleDownload}
-                className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
-                data-testid="simple-download-button"
-              >
-                Download CSV Now
-              </Button>
-              <Button 
-                onClick={onTestAI}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
-                data-testid="test-ai-button"
-              >
-                Test AI Service
-              </Button>
-            </div>
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg"
+              data-testid="browse-button"
+            >
+              Browse Files
+            </Button>
           </div>
         </div>
       </div>
