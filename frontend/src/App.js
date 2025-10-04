@@ -163,21 +163,7 @@ const App = () => {
     setError(null);
   };
 
-  const handleTestAI = async () => {
-    try {
-      console.log('Testing AI service configuration...');
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
-      
-      const response = await fetch(`${backendUrl}/api/`);
-      const result = await response.text();
-      
-      console.log('API Test Response:', result);
-      toast.success('Backend API is working! ' + result);
-    } catch (error) {
-      console.error('API Test failed:', error);
-      toast.error('Backend API failed: ' + error.message);
-    }
-  };
+  // Test functions removed - clean production interface
 
   const handleSimpleDownload = async () => {
     try {
