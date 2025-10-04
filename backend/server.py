@@ -62,6 +62,135 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+@api_router.post("/process-pdf")
+async def process_pdf_with_ai(file: UploadFile = File(...)):
+    """Process PDF bank statement using AI for enhanced accuracy"""
+    
+    if not file.filename.lower().endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="Only PDF files are supported")
+    
+    if not EMERGENT_LLM_KEY:
+        raise HTTPException(status_code=500, detail="AI service not configured")
+    
+    try:
+        # Save uploaded file temporarily
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+            content = await file.read()
+            tmp_file.write(content)
+            tmp_file_path = tmp_file.name
+        
+        # Process with AI
+        extracted_data = await extract_with_ai(tmp_file_path)
+        
+        # Clean up temp file
+        os.unlink(tmp_file_path)
+        
+        return {"success": True, "data": extracted_data}
+        
+    except Exception as e:
+        logger.error(f"PDF processing error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to process PDF: {str(e)}")
+
+async def extract_with_ai(pdf_path: str):
+    """Use OpenAI to extract bank statement data from PDF"""
+    
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage, FileContentWithMimeType
+        
+        # Initialize AI chat with Emergent LLM key
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"pdf-extraction-{os.urandom(8).hex()}",
+            system_message="""You are a specialized bank statement data extraction expert. 
+            Your task is to extract ALL transaction data from PDF bank statements with 100% accuracy.
+            
+            Extract and return data in this exact JSON structure:
+            {
+              "accountInfo": {
+                "accountNumber": "string",
+                "statementDate": "string", 
+                "beginningBalance": number,
+                "endingBalance": number
+              },
+              "deposits": [
+                {
+                  "dateCredited": "MM-DD format",
+                  "description": "full description",
+                  "amount": number
+                }
+              ],
+              "atmWithdrawals": [
+                {
+                  "tranDate": "MM-DD format",
+                  "datePosted": "MM-DD format", 
+                  "description": "full description",
+                  "amount": negative_number
+                }
+              ],
+              "checksPaid": [
+                {
+                  "datePaid": "MM-DD format",
+                  "checkNumber": "string",
+                  "amount": number,
+                  "referenceNumber": "string"
+                }
+              ],
+              "visaPurchases": [
+                {
+                  "tranDate": "MM-DD format",
+                  "datePosted": "MM-DD format",
+                  "description": "full description", 
+                  "amount": negative_number
+                }
+              ]
+            }
+            
+            CRITICAL REQUIREMENTS:
+            - Extract ALL transactions with exact amounts, dates, and descriptions
+            - Use exact date formats (MM-DD like "05-15")
+            - Negative amounts for withdrawals/debits
+            - Include complete descriptions and reference numbers
+            - Return ONLY valid JSON, no additional text"""
+        ).with_model("openai", "gpt-4o")
+        
+        # Prepare PDF file for processing
+        pdf_file = FileContentWithMimeType(
+            file_path=pdf_path,
+            mime_type="application/pdf"
+        )
+        
+        # Create message with PDF attachment
+        user_message = UserMessage(
+            text="Extract ALL bank statement transaction data from this PDF with complete accuracy. Return only the JSON structure specified in the system message.",
+            file_contents=[pdf_file]
+        )
+        
+        # Get AI response
+        response = await chat.send_message(user_message)
+        logger.info(f"AI Response: {response}")
+        
+        # Parse JSON response
+        import json
+        try:
+            # Clean response and extract JSON
+            response_text = response.strip()
+            if response_text.startswith("```json"):
+                response_text = response_text[7:-3]
+            elif response_text.startswith("```"):
+                response_text = response_text[3:-3]
+            
+            extracted_data = json.loads(response_text)
+            return extracted_data
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON parsing error: {e}")
+            logger.error(f"Raw response: {response}")
+            raise Exception("AI returned invalid JSON format")
+            
+    except Exception as e:
+        logger.error(f"AI extraction error: {str(e)}")
+        raise Exception(f"AI extraction failed: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
