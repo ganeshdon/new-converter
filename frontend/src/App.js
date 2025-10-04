@@ -77,7 +77,7 @@ const App = () => {
       const { processTestBankStatement } = await import('./utils/testProcessor');
       console.log('Step 2: Test processor imported');
       
-      const { generateExcelFile } = await import('./utils/excelGenerator');
+      const { generateSimpleExcelFile } = await import('./utils/simpleExcelGenerator');
       console.log('Step 3: Excel generator imported');
       
       // Generate test data
@@ -88,7 +88,6 @@ const App = () => {
       
       // Generate Excel file
       console.log('Step 5: Creating Excel file...');
-      const { generateSimpleExcelFile } = await import('./utils/simpleExcelGenerator');
       const excelBlob = await generateSimpleExcelFile(testData);
       console.log('Excel blob created:', excelBlob);
       setExcelFile(excelBlob);
