@@ -308,6 +308,121 @@ async def process_pdf_with_ai(file: UploadFile = File(...), current_user: dict =
         logger.error(f"PDF processing error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to process PDF: {str(e)}")
 
+@app.get("/api/documents", response_model=List[DocumentResponse])
+async def get_documents(current_user: dict = Depends(verify_token)):
+    """Get user's document history"""
+    documents = await documents_collection.find(
+        {"user_id": current_user["user_id"]}
+    ).sort("conversion_date", -1).to_list(length=100)
+    
+    return [DocumentResponse(
+        id=doc["_id"],
+        original_filename=doc["original_filename"],
+        file_size=doc["file_size"],
+        page_count=doc["page_count"],
+        pages_deducted=doc["pages_deducted"],
+        conversion_date=doc["conversion_date"],
+        download_count=doc.get("download_count", 0),
+        status=doc["status"]
+    ) for doc in documents]
+
+@app.get("/api/documents/{doc_id}/download")
+async def download_document(doc_id: str, current_user: dict = Depends(verify_token)):
+    """Download converted document (mock implementation)"""
+    document = await documents_collection.find_one({
+        "_id": doc_id,
+        "user_id": current_user["user_id"]
+    })
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    # In a real implementation, you'd retrieve the actual converted file
+    # For now, we'll return a sample CSV
+    sample_csv = """Account Summary,Value,
+Account Number,000009752,
+Statement Date,June 5 2003,
+Beginning Balance,$7126.11,
+Ending Balance,$10521.19,"""
+    
+    # Update download count
+    await documents_collection.update_one(
+        {"_id": doc_id},
+        {"$inc": {"download_count": 1}}
+    )
+    
+    from fastapi.responses import Response
+    return Response(
+        content=sample_csv,
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={document['original_filename'].replace('.pdf', '-converted.csv')}"}
+    )
+
+@app.delete("/api/documents/{doc_id}")
+async def delete_document(doc_id: str, current_user: dict = Depends(verify_token)):
+    """Delete a document"""
+    result = await documents_collection.delete_one({
+        "_id": doc_id,
+        "user_id": current_user["user_id"]
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    return {"message": "Document deleted successfully"}
+
+@app.get("/api/pricing/plans")
+async def get_pricing_plans():
+    """Get available pricing plans"""
+    plans = [
+        {
+            "tier": "daily_free",
+            "name": "Daily Free",
+            "price_monthly": 0,
+            "price_annual": 0,
+            "pages_limit": 7,
+            "features": ["7 pages per day", "Resets every 24 hours", "Basic support"],
+            "is_popular": False
+        },
+        {
+            "tier": "basic",
+            "name": "Basic Plan", 
+            "price_monthly": 13.99,
+            "price_annual": 11.19,
+            "pages_limit": 500,
+            "features": ["500 pages per month", "Email support", "30-day history"],
+            "is_popular": True
+        },
+        {
+            "tier": "premium",
+            "name": "Premium Plan",
+            "price_monthly": 27.99,
+            "price_annual": 22.39,
+            "pages_limit": 1100,
+            "features": ["1,100 pages per month", "Priority support", "90-day history"],
+            "is_popular": False
+        },
+        {
+            "tier": "platinum",
+            "name": "Platinum Plan",
+            "price_monthly": 49.99,
+            "price_annual": 39.99,
+            "pages_limit": 4500,
+            "features": ["4,500 pages per month", "Priority support", "API access"],
+            "is_popular": False
+        },
+        {
+            "tier": "enterprise",
+            "name": "Enterprise Plan",
+            "price_monthly": -1,  # Custom pricing
+            "price_annual": -1,
+            "pages_limit": -1,  # Unlimited
+            "features": ["Unlimited pages", "Custom integrations", "Dedicated support"],
+            "is_popular": False
+        }
+    ]
+    return plans
+
 async def count_pdf_pages(pdf_path: str) -> int:
     """Count pages in PDF file"""
     try:
