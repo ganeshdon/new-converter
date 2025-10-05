@@ -109,62 +109,41 @@ user_problem_statement: |
   authentication system.
 
 backend:
-  - task: "Authentication endpoints (signup/login/logout)"
+  - task: "Anonymous conversion tracking endpoints"
     implemented: true
-    working: true  
-    file: "server.py, auth.py, models.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Basic JWT auth endpoints implemented but not tested yet"
-      - working: true
-        agent: "testing"
-        comment: "All authentication endpoints tested successfully. Fixed bcrypt password hashing issue and timezone handling. Signup, login, logout, JWT token validation all working correctly. User gets 7 daily free pages as expected."
-        
-  - task: "User profile and credits management"
-    implemented: true
-    working: true
-    file: "server.py"
-    stuck_count: 0
-    priority: "high" 
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "User profile, pages check, document management endpoints created"
-      - working: true
-        agent: "testing"
-        comment: "User profile endpoint working correctly. Pages check system functioning properly - correctly shows 7 pages remaining for daily free tier. Documents endpoint returns empty list for new users as expected."
-        
-  - task: "Google OAuth integration"
-    implemented: true
-    working: true
+    working: "NA"
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-      - working: false
+      - working: "NA"
         agent: "main"
-        comment: "Not yet implemented, need to add Google OAuth endpoints"
-      - working: true
-        agent: "testing"
-        comment: "Google OAuth integration fully tested and working! Fixed timezone comparison issue in session validation. All OAuth endpoints working correctly: /api/auth/oauth/session-data processes X-Session-ID headers, creates/links users by email, stores session tokens with 7-day expiry. OAuth session tokens authenticate successfully for all protected endpoints (profile, pages check, documents). OAuth logout properly invalidates sessions. Dual authentication system (JWT + OAuth) working perfectly."
+        comment: "Anonymous conversion endpoints implemented: /api/anonymous/check for limit checking and /api/anonymous/convert for PDF processing. Uses browser fingerprint + IP tracking."
         
-  - task: "Stripe integration for payments"
-    implemented: false
-    working: false
+  - task: "Browser fingerprint validation"
+    implemented: true
+    working: "NA"
     file: "server.py"
     stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
+    priority: "high"
+    needs_retesting: true
     status_history:
-      - working: false
+      - working: "NA"
         agent: "main"
-        comment: "Not implemented, will use test keys as requested"
+        comment: "Backend validates X-Browser-Fingerprint header and tracks conversions by fingerprint + IP combination to prevent abuse."
+        
+  - task: "Anonymous PDF processing with AI"
+    implemented: true
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Anonymous PDF processing uses same AI extraction as authenticated users but with different endpoint and tracking. Records conversion in anonymous_conversions collection."
 
 frontend:
   - task: "Anonymous user home page experience"
