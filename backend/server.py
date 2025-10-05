@@ -40,6 +40,7 @@ users_collection = db.users
 documents_collection = db.documents
 subscriptions_collection = db.subscriptions
 user_sessions_collection = db.user_sessions
+anonymous_conversions_collection = db.anonymous_conversions
 
 # Create the main app without a prefix
 app = FastAPI()
