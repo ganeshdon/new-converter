@@ -310,7 +310,8 @@ async def get_current_user(request: Request):
     
     # Try as JWT token
     try:
-        return verify_token(token)
+        payload = verify_token(None, token)  # Pass token directly since verify_token expects credentials
+        return payload
     except HTTPException:
         raise HTTPException(status_code=401, detail="Invalid token")
 
