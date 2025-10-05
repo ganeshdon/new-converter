@@ -308,6 +308,38 @@ async def process_pdf_with_ai(file: UploadFile = File(...), current_user: dict =
         logger.error(f"PDF processing error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to process PDF: {str(e)}")
 
+async def count_pdf_pages(pdf_path: str) -> int:
+    """Count pages in PDF file"""
+    try:
+        import PyPDF2
+        with open(pdf_path, 'rb') as file:
+            reader = PyPDF2.PdfReader(file)
+            return len(reader.pages)
+    except Exception as e:
+        print(f"Error counting PDF pages: {e}")
+        return 1  # Default to 1 page if counting fails
+
+async def check_and_reset_daily_pages(user_id: str):
+    """Check if daily free tier user needs page reset"""
+    user = await users_collection.find_one({"_id": user_id})
+    if not user or user["subscription_tier"] != SubscriptionTier.DAILY_FREE:
+        return
+    
+    now = datetime.now(timezone.utc)
+    last_reset = user.get("daily_reset_time", now)
+    
+    # Check if 24 hours have passed
+    if (now - last_reset).total_seconds() >= 24 * 3600:  # 24 hours
+        await users_collection.update_one(
+            {"_id": user_id},
+            {
+                "$set": {
+                    "pages_remaining": 7,  # Reset to 7 pages
+                    "daily_reset_time": now
+                }
+            }
+        )
+
 async def extract_with_ai(pdf_path: str):
     """Use OpenAI to extract bank statement data from PDF"""
     
