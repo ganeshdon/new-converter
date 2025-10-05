@@ -231,9 +231,14 @@ const Pricing = () => {
               <Button
                 onClick={() => handlePlanSelect(plan)}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium mb-6 transition-colors"
-                disabled={user?.subscription_tier === plan.id}
+                disabled={user?.subscription_tier === plan.id || loadingPlan === plan.id || checkingStatus}
               >
-                {user?.subscription_tier === plan.id ? 'Current Plan' : plan.buttonText}
+                {loadingPlan === plan.id ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Processing...
+                  </>
+                ) : user?.subscription_tier === plan.id ? 'Current Plan' : plan.buttonText}
               </Button>
               
               {plan.features.length > 0 && (
