@@ -2,8 +2,11 @@ import React from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { saveAs } from 'file-saver';
+import { UserPlus, CreditCard } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const Results = ({ extractedData, excelFile, filename, onReset, pagesUsed = 0 }) => {
+const Results = ({ extractedData, excelFile, filename, onReset, pagesUsed = 0, isAnonymous = false }) => {
+  const navigate = useNavigate();
   const handleDownload = () => {
     console.log('Download button clicked - generating comprehensive CSV');
     
