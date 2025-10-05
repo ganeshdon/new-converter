@@ -88,39 +88,7 @@ const Pricing = () => {
     return `$${plan.price[billingInterval]}`;
   };
 
-  const trustBadges = [
-    { icon: '💳', text: 'All paid plans include 7-day free trial' },
-    { icon: '🔒', text: '100% secure & private - data never stored on servers' },
-    { icon: '✨', text: 'Cancel anytime, no questions asked' },
-    { icon: '⭐', text: 'Trusted by 10,000+ users worldwide' }
-  ];
-
-  const faqs = [
-    {
-      question: 'What counts as a page?',
-      answer: 'Each page in your PDF bank statement counts as one page toward your limit. A 5-page statement uses 5 pages from your allocation.'
-    },
-    {
-      question: 'Can I change plans anytime?',
-      answer: 'Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately and your billing is prorated.'
-    },
-    {
-      question: 'What happens if I exceed my limit?',
-      answer: 'You\'ll be prompted to upgrade your plan or wait until your next reset period. We\'ll always warn you before you hit your limit.'
-    },
-    {
-      question: 'Do you offer refunds?',
-      answer: 'Yes, we offer a 30-day money-back guarantee on all paid plans. No questions asked.'
-    },
-    {
-      question: 'Is my financial data secure?',
-      answer: 'Absolutely. Your files are processed locally in your browser and never permanently stored on our servers. We\'re SOC 2 compliant.'
-    },
-    {
-      question: 'Do unused pages roll over?',
-      answer: 'Pages reset on your billing cycle. Daily Free resets every 24 hours, while paid plans reset monthly on your billing date.'
-    }
-  ];
+  // Removed unused data arrays
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
