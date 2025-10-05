@@ -468,7 +468,7 @@ async def process_pdf_with_ai(file: UploadFile = File(...), current_user: dict =
         raise HTTPException(status_code=500, detail=f"Failed to process PDF: {str(e)}")
 
 @api_router.get("/documents", response_model=List[DocumentResponse])
-async def get_documents(request: Request, current_user: dict = Depends(get_current_user)):
+async def get_documents(current_user: dict = Depends(get_current_user)):
     """Get user's document history"""
     documents = await documents_collection.find(
         {"user_id": current_user["user_id"]}
