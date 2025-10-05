@@ -374,7 +374,7 @@ async def check_pages(pages_request: PagesCheckRequest, request: Request, curren
         await check_and_reset_daily_pages(user["_id"])
         user = await users_collection.find_one({"_id": user["_id"]})
     
-    can_convert = user["pages_remaining"] >= request.page_count
+    can_convert = user["pages_remaining"] >= pages_request.page_count
     
     if user["subscription_tier"] == SubscriptionTier.DAILY_FREE:
         daily_reset_time = user["daily_reset_time"]
