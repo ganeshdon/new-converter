@@ -39,7 +39,39 @@ const Converter = () => {
     initFingerprint();
   }, [isAuthenticated]);
 
+  // Check anonymous conversion limit
+  const checkAnonymousLimit = async (fingerprint) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
+      
+      const response = await fetch(`${backendUrl}/api/anonymous/check`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          browser_fingerprint: fingerprint
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setAnonymousData(data);
+      }
+    } catch (error) {
+      console.error('Error checking anonymous limit:', error);
+    }
+  };
+
   const formatPagesDisplay = () => {
+    if (isAnonymous) {
+      if (anonymousData?.can_convert) {
+        return 'You have 1 free conversion available!';
+      } else {
+        return 'Free conversion used - Sign up for unlimited access';
+      }
+    }
+    
     if (!user) return '';
     
     if (user.subscription_tier === 'enterprise') {
@@ -54,6 +86,10 @@ const Converter = () => {
   };
 
   const getResetMessage = () => {
+    if (isAnonymous) {
+      return 'Sign up for unlimited conversions with advanced features';
+    }
+    
     if (user?.subscription_tier === 'daily_free') {
       return 'Pages reset every 24 hours';
     }
