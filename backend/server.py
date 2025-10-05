@@ -224,10 +224,16 @@ async def check_pages(request: PagesCheckRequest, current_user: dict = Depends(v
     can_convert = user["pages_remaining"] >= request.page_count
     
     if user["subscription_tier"] == SubscriptionTier.DAILY_FREE:
-        next_reset = user["daily_reset_time"] + timedelta(days=1)
+        daily_reset_time = user["daily_reset_time"]
+        if daily_reset_time and daily_reset_time.tzinfo is None:
+            daily_reset_time = daily_reset_time.replace(tzinfo=timezone.utc)
+        next_reset = daily_reset_time + timedelta(days=1)
         message = f"You have {user['pages_remaining']} pages remaining today. Resets in {(next_reset - datetime.now(timezone.utc)).seconds // 3600} hours."
     else:
-        next_reset = user.get("billing_cycle_start", datetime.now(timezone.utc)) + timedelta(days=30)
+        billing_cycle_start = user.get("billing_cycle_start", datetime.now(timezone.utc))
+        if billing_cycle_start and billing_cycle_start.tzinfo is None:
+            billing_cycle_start = billing_cycle_start.replace(tzinfo=timezone.utc)
+        next_reset = billing_cycle_start + timedelta(days=30)
         message = f"You have {user['pages_remaining']} pages remaining this month."
     
     if not can_convert:
