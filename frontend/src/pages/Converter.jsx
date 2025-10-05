@@ -27,17 +27,55 @@ const Converter = () => {
   // Initialize browser fingerprint for anonymous users
   useEffect(() => {
     const initFingerprint = async () => {
-      const fingerprint = await getBrowserFingerprint();
-      setBrowserFingerprint(fingerprint);
-      
-      if (!isAuthenticated) {
-        setIsAnonymous(true);
-        await checkAnonymousLimit(fingerprint);
+      try {
+        const fingerprint = await getBrowserFingerprint();
+        setBrowserFingerprint(fingerprint);
+        
+        if (!isAuthenticated) {
+          setIsAnonymous(true);
+          await checkAnonymousLimit(fingerprint);
+        }
+      } catch (error) {
+        console.error('Fingerprinting failed, using fallback:', error);
+        // Fallback fingerprint using simpler methods
+        const fallbackFingerprint = generateFallbackFingerprint();
+        setBrowserFingerprint(fallbackFingerprint);
+        
+        if (!isAuthenticated) {
+          setIsAnonymous(true);
+          await checkAnonymousLimit(fallbackFingerprint);
+        }
       }
     };
     
     initFingerprint();
   }, [isAuthenticated]);
+
+  // Fallback fingerprint generation
+  const generateFallbackFingerprint = () => {
+    const components = [
+      navigator.userAgent,
+      navigator.language,
+      screen.width + 'x' + screen.height,
+      screen.colorDepth,
+      new Date().getTimezoneOffset(),
+      navigator.platform,
+      navigator.cookieEnabled,
+      !!window.localStorage,
+      !!window.sessionStorage
+    ];
+    
+    // Simple hash function
+    let hash = 0;
+    const str = components.join('|');
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    
+    return 'fallback_' + Math.abs(hash).toString(16) + '_' + Date.now();
+  };
 
   // Check anonymous conversion limit
   const checkAnonymousLimit = async (fingerprint) => {
