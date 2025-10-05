@@ -103,10 +103,10 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Complete comprehensive authentication and navigation system for PDF-to-Excel converter app.
-  Need to add Google OAuth integration alongside existing email/password auth, complete UI/UX 
-  for all authentication pages, implement credits system, documents library, settings page, 
-  pricing page with Stripe integration, and ensure mobile responsiveness.
+  Test the complete anonymous conversion flow for the free PDF conversion system with browser 
+  fingerprinting and tracking. Verify anonymous user experience, browser fingerprinting, 
+  anonymous PDF processing flow, limit enforcement after 1 conversion, and integration with 
+  authentication system.
 
 backend:
   - task: "Authentication endpoints (signup/login/logout)"
