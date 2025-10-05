@@ -10,6 +10,9 @@ import Converter from './pages/Converter';
 import Documents from './pages/Documents';
 import Settings from './pages/Settings';
 import Pricing from './pages/Pricing';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsConditions from './pages/TermsConditions';
+import CookiePolicy from './pages/CookiePolicy';
 import { Toaster } from './components/ui/sonner';
 import './App.css';
 
