@@ -226,9 +226,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Documents library page"
-    - "Settings page functionality" 
-    - "Pricing page with Stripe"
+    - "Anonymous user home page experience"
+    - "Browser fingerprinting implementation"
+    - "Anonymous conversion limit checking"
+    - "Anonymous PDF processing flow"
+    - "Limit enforcement after 1 conversion"
+    - "Integration with authentication system"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
