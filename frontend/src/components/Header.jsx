@@ -9,7 +9,6 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
