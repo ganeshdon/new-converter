@@ -286,6 +286,7 @@ const Converter = () => {
             filename={uploadedFile?.name}
             onReset={handleReset}
             pagesUsed={pagesUsed}
+            isAnonymous={isAnonymous}
           />
         );
       case 'error':
