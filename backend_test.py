@@ -839,8 +839,8 @@ def test_anonymous_database_tracking(results):
     return None
 
 def main():
-    """Run all authentication tests including OAuth"""
-    print("🚀 Starting Backend Authentication Tests (JWT + OAuth)")
+    """Run all backend tests including authentication and anonymous conversion"""
+    print("🚀 Starting Backend API Tests (Authentication + Anonymous Conversion)")
     print(f"Testing API at: {API_URL}")
     print("="*60)
     
@@ -902,14 +902,33 @@ def main():
     # Test 13: OAuth existing user linking (endpoint validation)
     test_oauth_existing_user_linking(results)
     
+    print("\n🆓 Anonymous Conversion System Tests")
+    print("-" * 40)
+    
+    # Clean up any existing anonymous test data first
+    cleanup_anonymous_test_data()
+    
+    # Test 14: Anonymous conversion limit check (initial state)
+    test_anonymous_conversion_check_initial(results)
+    
+    # Test 15: Anonymous PDF conversion processing
+    test_anonymous_conversion_processing(results)
+    
+    # Test 16: Anonymous conversion limit enforcement
+    test_anonymous_conversion_limit_enforcement(results)
+    
+    # Test 17: Anonymous database tracking verification
+    test_anonymous_database_tracking(results)
+    
     # Cleanup test data
     cleanup_test_oauth_data()
+    cleanup_anonymous_test_data()
     
     # Print summary
     success = results.summary()
     
     if success:
-        print("🎉 All authentication tests passed!")
+        print("🎉 All backend tests passed!")
     else:
         print("⚠️  Some tests failed. Check the details above.")
     
