@@ -485,8 +485,8 @@ async def get_documents(request: Request, current_user: dict = Depends(get_curre
         status=doc["status"]
     ) for doc in documents]
 
-@app.get("/api/documents/{doc_id}/download")
-async def download_document(doc_id: str, current_user: dict = Depends(verify_token)):
+@api_router.get("/documents/{doc_id}/download")
+async def download_document(doc_id: str, request: Request, current_user: dict = Depends(get_current_user)):
     """Download converted document (mock implementation)"""
     document = await documents_collection.find_one({
         "_id": doc_id,
