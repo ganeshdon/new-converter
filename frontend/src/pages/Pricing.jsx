@@ -213,4 +213,77 @@ const Pricing = () => {
               </span>
             )}
           </div>
-        </div>\n\n        {/* Pricing Cards */}\n        <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-16\">\n          {plans.map((plan) => (\n            <Card key={plan.id} className={`relative p-6 ${plan.popular ? 'ring-2 ring-blue-500 shadow-lg scale-105' : ''}`}>\n              {plan.popular && (\n                <div className=\"absolute -top-3 left-1/2 transform -translate-x-1/2\">\n                  <span className=\"bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center\">\n                    <Star className=\"h-3 w-3 mr-1\" />\n                    MOST POPULAR\n                  </span>\n                </div>\n              )}\n              \n              <div className=\"text-center\">\n                <h3 className=\"text-lg font-semibold text-gray-900 mb-2\">{plan.name}</h3>\n                <div className=\"mb-4\">\n                  <span className=\"text-3xl font-bold text-gray-900\">{formatPrice(plan)}</span>\n                  {typeof plan.price[billingInterval] === 'number' && plan.price[billingInterval] > 0 && (\n                    <span className=\"text-gray-600\">/{billingInterval === 'annual' ? 'month' : 'month'}</span>\n                  )}\n                  {billingInterval === 'annual' && typeof plan.price[billingInterval] === 'number' && plan.price[billingInterval] > 0 && (\n                    <div className=\"text-sm text-gray-600\">\n                      billed annually\n                    </div>\n                  )}\n                </div>\n                \n                {billingInterval === 'annual' && plan.savings && (\n                  <div className=\"text-sm text-green-600 font-medium mb-2\">\n                    {plan.savings}\n                  </div>\n                )}\n                \n                <p className=\"text-gray-600 text-sm mb-4\">{plan.description}</p>\n                \n                <div className=\"mb-6\">\n                  <div className=\"text-2xl font-bold text-blue-600 mb-1\">\n                    {typeof plan.pages === 'number' ? plan.pages.toLocaleString() : plan.pages}\n                  </div>\n                  <div className=\"text-sm text-gray-600\">\n                    pages {plan.billing}\n                  </div>\n                </div>\n              </div>\n              \n              <Button\n                onClick={() => handlePlanSelect(plan)}\n                className={`w-full mb-6 ${\n                  plan.buttonVariant === 'default'\n                    ? 'bg-blue-600 hover:bg-blue-700 text-white'\n                    : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'\n                } ${plan.popular ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}\n                disabled={user?.subscription_tier === plan.id}\n              >\n                {user?.subscription_tier === plan.id ? 'Current Plan' : plan.buttonText}\n              </Button>\n              \n              <ul className=\"space-y-3\">\n                {plan.features.map((feature, index) => (\n                  <li key={index} className=\"flex items-center text-sm text-gray-600\">\n                    <Check className=\"h-4 w-4 text-green-500 mr-2 flex-shrink-0\" />\n                    <span>{feature}</span>\n                  </li>\n                ))}\n              </ul>\n              \n              {plan.id !== 'daily_free' && plan.id !== 'enterprise' && (\n                <div className=\"mt-4 text-xs text-gray-500 text-center\">\n                  7-day free trial\n                </div>\n              )}\n            </Card>\n          ))}\n        </div>\n\n        {/* Trust Badges */}\n        <div className=\"bg-white rounded-lg p-8 mb-16\">\n          <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6\">\n            {trustBadges.map((badge, index) => (\n              <div key={index} className=\"text-center\">\n                <div className=\"text-2xl mb-2\">{badge.icon}</div>\n                <p className=\"text-sm text-gray-600 font-medium\">{badge.text}</p>\n              </div>\n            ))}\n          </div>\n        </div>\n\n        {/* Why Choose Us */}\n        <Card className=\"p-8 mb-16\">\n          <h2 className=\"text-2xl font-bold text-gray-900 mb-6 text-center\">Why Choose Our Platform?</h2>\n          <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6\">\n            <div className=\"text-center\">\n              <Zap className=\"h-8 w-8 text-blue-600 mx-auto mb-3\" />\n              <h3 className=\"font-semibold text-gray-900 mb-2\">Lightning Fast</h3>\n              <p className=\"text-sm text-gray-600\">Convert statements in under 30 seconds with AI-powered processing</p>\n            </div>\n            <div className=\"text-center\">\n              <Shield className=\"h-8 w-8 text-green-600 mx-auto mb-3\" />\n              <h3 className=\"font-semibold text-gray-900 mb-2\">100% Secure</h3>\n              <p className=\"text-sm text-gray-600\">Your data never leaves your browser. SOC 2 compliant security</p>\n            </div>\n            <div className=\"text-center\">\n              <Check className=\"h-8 w-8 text-purple-600 mx-auto mb-3\" />\n              <h3 className=\"font-semibold text-gray-900 mb-2\">High Accuracy</h3>\n              <p className=\"text-sm text-gray-600\">99%+ accuracy with advanced AI and machine learning</p>\n            </div>\n            <div className=\"text-center\">\n              <Users className=\"h-8 w-8 text-orange-600 mx-auto mb-3\" />\n              <h3 className=\"font-semibold text-gray-900 mb-2\">Trusted by Thousands</h3>\n              <p className=\"text-sm text-gray-600\">Join 10,000+ satisfied users worldwide</p>\n            </div>\n          </div>\n        </Card>\n\n        {/* FAQ Section */}\n        <Card className=\"p-8\">\n          <h2 className=\"text-2xl font-bold text-gray-900 mb-8 text-center\">Frequently Asked Questions</h2>\n          <div className=\"grid grid-cols-1 md:grid-cols-2 gap-6\">\n            {faqs.map((faq, index) => (\n              <div key={index} className=\"space-y-2\">\n                <h3 className=\"font-semibold text-gray-900\">{faq.question}</h3>\n                <p className=\"text-gray-600 text-sm\">{faq.answer}</p>\n              </div>\n            ))}\n          </div>\n        </Card>\n      </div>\n    </div>\n  );\n};\n\nexport default Pricing;
+        </div>\n\n        {/* Pricing Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-16">
+          {plans.map((plan) => (
+            <Card key={plan.id} className={`relative p-6 ${plan.popular ? 'ring-2 ring-blue-500 shadow-lg scale-105' : ''}`}>
+              {plan.popular && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center">
+                    <Star className="h-3 w-3 mr-1" />
+                    MOST POPULAR
+                  </span>
+                </div>
+              )}
+              
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{plan.name}</h3>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-gray-900">{formatPrice(plan)}</span>
+                  {typeof plan.price[billingInterval] === 'number' && plan.price[billingInterval] > 0 && (
+                    <span className="text-gray-600">/{billingInterval === 'annual' ? 'month' : 'month'}</span>
+                  )}
+                  {billingInterval === 'annual' && typeof plan.price[billingInterval] === 'number' && plan.price[billingInterval] > 0 && (
+                    <div className="text-sm text-gray-600">
+                      billed annually
+                    </div>
+                  )}
+                </div>
+                
+                {billingInterval === 'annual' && plan.savings && (
+                  <div className="text-sm text-green-600 font-medium mb-2">
+                    {plan.savings}
+                  </div>
+                )}
+                
+                <p className="text-gray-600 text-sm mb-4">{plan.description}</p>
+                
+                <div className="mb-6">
+                  <div className="text-2xl font-bold text-blue-600 mb-1">
+                    {typeof plan.pages === 'number' ? plan.pages.toLocaleString() : plan.pages}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    pages {plan.billing}
+                  </div>
+                </div>
+              </div>
+              
+              <Button
+                onClick={() => handlePlanSelect(plan)}
+                className={`w-full mb-6 ${
+                  plan.buttonVariant === 'default'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                } ${plan.popular ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}
+                disabled={user?.subscription_tier === plan.id}
+              >
+                {user?.subscription_tier === plan.id ? 'Current Plan' : plan.buttonText}
+              </Button>
+              
+              <ul className="space-y-3">
+                {plan.features.map((feature, index) => (
+                  <li key={index} className="flex items-center text-sm text-gray-600">
+                    <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              {plan.id !== 'daily_free' && plan.id !== 'enterprise' && (
+                <div className="mt-4 text-xs text-gray-500 text-center">
+                  7-day free trial
+                </div>
+              )}
+            </Card>
+          ))}
+        </div>\n\n        {/* Trust Badges */}\n        <div className=\"bg-white rounded-lg p-8 mb-16\">\n          <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6\">\n            {trustBadges.map((badge, index) => (\n              <div key={index} className=\"text-center\">\n                <div className=\"text-2xl mb-2\">{badge.icon}</div>\n                <p className=\"text-sm text-gray-600 font-medium\">{badge.text}</p>\n              </div>\n            ))}\n          </div>\n        </div>\n\n        {/* Why Choose Us */}\n        <Card className=\"p-8 mb-16\">\n          <h2 className=\"text-2xl font-bold text-gray-900 mb-6 text-center\">Why Choose Our Platform?</h2>\n          <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6\">\n            <div className=\"text-center\">\n              <Zap className=\"h-8 w-8 text-blue-600 mx-auto mb-3\" />\n              <h3 className=\"font-semibold text-gray-900 mb-2\">Lightning Fast</h3>\n              <p className=\"text-sm text-gray-600\">Convert statements in under 30 seconds with AI-powered processing</p>\n            </div>\n            <div className=\"text-center\">\n              <Shield className=\"h-8 w-8 text-green-600 mx-auto mb-3\" />\n              <h3 className=\"font-semibold text-gray-900 mb-2\">100% Secure</h3>\n              <p className=\"text-sm text-gray-600\">Your data never leaves your browser. SOC 2 compliant security</p>\n            </div>\n            <div className=\"text-center\">\n              <Check className=\"h-8 w-8 text-purple-600 mx-auto mb-3\" />\n              <h3 className=\"font-semibold text-gray-900 mb-2\">High Accuracy</h3>\n              <p className=\"text-sm text-gray-600\">99%+ accuracy with advanced AI and machine learning</p>\n            </div>\n            <div className=\"text-center\">\n              <Users className=\"h-8 w-8 text-orange-600 mx-auto mb-3\" />\n              <h3 className=\"font-semibold text-gray-900 mb-2\">Trusted by Thousands</h3>\n              <p className=\"text-sm text-gray-600\">Join 10,000+ satisfied users worldwide</p>\n            </div>\n          </div>\n        </Card>\n\n        {/* FAQ Section */}\n        <Card className=\"p-8\">\n          <h2 className=\"text-2xl font-bold text-gray-900 mb-8 text-center\">Frequently Asked Questions</h2>\n          <div className=\"grid grid-cols-1 md:grid-cols-2 gap-6\">\n            {faqs.map((faq, index) => (\n              <div key={index} className=\"space-y-2\">\n                <h3 className=\"font-semibold text-gray-900\">{faq.question}</h3>\n                <p className=\"text-gray-600 text-sm\">{faq.answer}</p>\n              </div>\n            ))}\n          </div>\n        </Card>\n      </div>\n    </div>\n  );\n};\n\nexport default Pricing;
