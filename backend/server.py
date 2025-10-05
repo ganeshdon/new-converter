@@ -518,7 +518,7 @@ Ending Balance,$10521.19,"""
     )
 
 @api_router.delete("/documents/{doc_id}")
-async def delete_document(doc_id: str, request: Request, current_user: dict = Depends(get_current_user)):
+async def delete_document(doc_id: str, current_user: dict = Depends(get_current_user)):
     """Delete a document"""
     result = await documents_collection.delete_one({
         "_id": doc_id,
