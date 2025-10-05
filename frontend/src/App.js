@@ -38,6 +38,7 @@ const App = () => {
               </ProtectedRoute>
             } />
           </Routes>
+          <Footer />
           <Toaster position="top-right" />
         </div>
       </Router>
