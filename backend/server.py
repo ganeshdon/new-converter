@@ -16,6 +16,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 import aiohttp
 import json
+from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
 
 # Import our modules
 from auth import get_password_hash, verify_password, create_access_token, verify_token, verify_jwt_token
