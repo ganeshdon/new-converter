@@ -22,7 +22,8 @@ from auth import get_password_hash, verify_password, create_access_token, verify
 from models import (
     UserSignup, UserLogin, UserResponse, TokenResponse, DocumentResponse,
     PagesCheckRequest, PagesCheckResponse, SubscriptionTier, SubscriptionPlan,
-    UserUpdate, PasswordReset, PasswordChange, BillingInterval, GoogleUserData, UserSession
+    UserUpdate, PasswordReset, PasswordChange, BillingInterval, GoogleUserData, UserSession,
+    AnonymousConversionCheck, AnonymousConversionResponse, AnonymousConversionRecord
 )
 
 
