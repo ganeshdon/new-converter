@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import FileUpload from '../components/FileUpload';
 import ProcessingState from '../components/ProcessingState';
 import Results from '../components/Results';
 import { toast } from 'sonner';
-import { AlertTriangle, CreditCard } from 'lucide-react';
+import { AlertTriangle, CreditCard, Gift, UserPlus } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { getBrowserFingerprint } from '../utils/fingerprint';
 
 const Converter = () => {
   const [currentStep, setCurrentStep] = useState('upload');
