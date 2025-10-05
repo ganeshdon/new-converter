@@ -39,6 +39,7 @@ db = client[os.environ['DB_NAME']]
 users_collection = db.users
 documents_collection = db.documents
 subscriptions_collection = db.subscriptions
+user_sessions_collection = db.user_sessions
 
 # Create the main app without a prefix
 app = FastAPI()
