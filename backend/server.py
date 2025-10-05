@@ -315,7 +315,7 @@ async def get_current_user(request: Request):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 @api_router.get("/user/profile", response_model=UserResponse)
-async def get_profile(current_user: dict = Depends(verify_token)):
+async def get_profile(request: Request, current_user: dict = Depends(get_current_user)):
     """Get current user profile"""
     user = await users_collection.find_one({"_id": current_user["user_id"]})
     if not user:
