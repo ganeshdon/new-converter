@@ -117,7 +117,6 @@ const Header = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             {isAuthenticated ? <AuthenticatedNav /> : <PublicNav />}
-            <LanguageDropdown />
           </div>
 
           {/* Mobile menu button */}
