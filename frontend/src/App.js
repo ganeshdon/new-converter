@@ -40,6 +40,10 @@ const App = () => {
                 <Settings />
               </ProtectedRoute>
             } />
+            
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-conditions" element={<TermsConditions />} />
+            <Route path="/cookie-policy" element={<CookiePolicy />} />
           </Routes>
           <Footer />
           <Toaster position="top-right" />
