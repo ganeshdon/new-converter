@@ -33,6 +33,11 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Collections
+users_collection = db.users
+documents_collection = db.documents
+subscriptions_collection = db.subscriptions
+
 # Create the main app without a prefix
 app = FastAPI()
 
