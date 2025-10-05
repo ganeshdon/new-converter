@@ -363,7 +363,7 @@ async def update_profile(request: Request, updates: UserUpdate, current_user: di
     )
 
 @api_router.post("/user/pages/check", response_model=PagesCheckResponse)
-async def check_pages(request: PagesCheckRequest, current_user: dict = Depends(verify_token)):
+async def check_pages(pages_request: PagesCheckRequest, request: Request, current_user: dict = Depends(get_current_user)):
     """Check if user has enough pages for conversion"""
     user = await users_collection.find_one({"_id": current_user["user_id"]})
     if not user:
