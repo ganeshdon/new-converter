@@ -540,6 +540,117 @@ async def delete_document(doc_id: str, current_user: dict = Depends(get_current_
     
     return {"message": "Document deleted successfully"}
 
+# Anonymous conversion tracking endpoints
+@api_router.post("/anonymous/check", response_model=AnonymousConversionResponse)
+async def check_anonymous_conversion(request: Request, conversion_check: AnonymousConversionCheck):
+    """Check if anonymous user can perform a free conversion"""
+    try:
+        # Get IP address from request
+        ip_address = request.client.host
+        
+        # Count existing conversions for this fingerprint + IP combo
+        existing_conversions = await anonymous_conversions_collection.count_documents({
+            "$or": [
+                {"browser_fingerprint": conversion_check.browser_fingerprint},
+                {"ip_address": ip_address}
+            ]
+        })
+        
+        can_convert = existing_conversions == 0
+        
+        if can_convert:
+            message = "You have 1 free conversion available!"
+        else:
+            message = "Free conversion limit reached. Please sign up for unlimited conversions."
+        
+        return AnonymousConversionResponse(
+            can_convert=can_convert,
+            conversions_used=existing_conversions,
+            conversions_limit=1,
+            message=message,
+            requires_signup=not can_convert
+        )
+        
+    except Exception as e:
+        logger.error(f"Anonymous conversion check error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to check conversion limit")
+
+@api_router.post("/anonymous/convert")
+async def anonymous_convert_pdf(request: Request, file: UploadFile = File(...)):
+    """Process PDF for anonymous users (1 free conversion)"""
+    
+    if not file.filename.lower().endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="Only PDF files are supported")
+    
+    if not GEMINI_API_KEY:
+        raise HTTPException(status_code=500, detail="AI processing service not available")
+    
+    try:
+        # Get client info
+        ip_address = request.client.host
+        user_agent = request.headers.get("user-agent", "")
+        browser_fingerprint = request.headers.get("X-Browser-Fingerprint")
+        
+        if not browser_fingerprint:
+            raise HTTPException(status_code=400, detail="Browser fingerprint required")
+        
+        # Check if user has already used free conversion
+        existing_conversion = await anonymous_conversions_collection.find_one({
+            "$or": [
+                {"browser_fingerprint": browser_fingerprint},
+                {"ip_address": ip_address}
+            ]
+        })
+        
+        if existing_conversion:
+            raise HTTPException(
+                status_code=403, 
+                detail="Free conversion limit reached. Please sign up for unlimited conversions."
+            )
+        
+        # Process PDF
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+            content = await file.read()
+            tmp_file.write(content)
+            tmp_file_path = tmp_file.name
+        
+        # Count pages
+        page_count = await count_pdf_pages(tmp_file_path)
+        
+        # Extract data with AI
+        extracted_data = await extract_with_ai(tmp_file_path)
+        
+        # Record the anonymous conversion
+        conversion_record = {
+            "browser_fingerprint": browser_fingerprint,
+            "ip_address": ip_address,
+            "filename": file.filename,
+            "file_size": len(content),
+            "page_count": page_count,
+            "conversion_date": datetime.now(timezone.utc),
+            "user_agent": user_agent
+        }
+        
+        await anonymous_conversions_collection.insert_one(conversion_record)
+        
+        # Clean up temp file
+        os.unlink(tmp_file_path)
+        
+        return {
+            "success": True, 
+            "data": extracted_data, 
+            "message": "Free conversion completed! Sign up for unlimited conversions.",
+            "pages_processed": page_count
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        if os.path.exists(tmp_file_path):
+            os.unlink(tmp_file_path)
+        logger.error(f"Anonymous PDF processing error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to process PDF: {str(e)}")
+
 @api_router.get("/pricing/plans")
 async def get_pricing_plans():
     """Get available pricing plans"""
