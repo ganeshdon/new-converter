@@ -339,7 +339,7 @@ async def get_profile(current_user: dict = Depends(get_current_user)):
     )
 
 @api_router.put("/user/profile", response_model=UserResponse)
-async def update_profile(request: Request, updates: UserUpdate, current_user: dict = Depends(get_current_user)):
+async def update_profile(updates: UserUpdate, current_user: dict = Depends(get_current_user)):
     """Update user profile"""
     update_data = {k: v for k, v in updates.dict().items() if v is not None}
     update_data["updated_at"] = datetime.now(timezone.utc)
