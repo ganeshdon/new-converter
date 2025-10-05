@@ -91,6 +91,7 @@ const FileUpload = ({ onFileUpload }) => {
           </div>
           
           <Button 
+            onClick={onButtonClick}
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg"
             data-testid="browse-button"
           >
