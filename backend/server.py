@@ -1,16 +1,27 @@
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo.errors import DuplicateKeyError
 import os
+from dotenv import load_dotenv
+import tempfile
+import asyncio
+from datetime import datetime, timedelta, timezone
+from typing import Optional, List
+import uuid
+from bson import ObjectId
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field
-from typing import List, Optional
-import uuid
-from datetime import datetime
-import tempfile
-import asyncio
+
+# Import our modules
+from auth import get_password_hash, verify_password, create_access_token, verify_token
+from models import (
+    UserSignup, UserLogin, UserResponse, TokenResponse, DocumentResponse,
+    PagesCheckRequest, PagesCheckResponse, SubscriptionTier, SubscriptionPlan,
+    UserUpdate, PasswordReset, PasswordChange, BillingInterval
+)
 
 
 ROOT_DIR = Path(__file__).parent
