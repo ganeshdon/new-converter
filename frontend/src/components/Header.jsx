@@ -196,9 +196,6 @@ const Header = () => {
                 </Link>
               </>
             )}
-            <div className="px-3 py-2">
-              <span className="text-gray-700 font-medium">English</span>
-            </div>
           </div>
         </div>
       )}
