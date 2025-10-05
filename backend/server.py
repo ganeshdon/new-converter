@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -14,6 +14,8 @@ from bson import ObjectId
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field
+import aiohttp
+import json
 
 # Import our modules
 from auth import get_password_hash, verify_password, create_access_token, verify_token
