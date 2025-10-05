@@ -164,6 +164,156 @@ async def logout(current_user: dict = Depends(verify_token)):
     """Logout user (client should delete token)"""
     return {"message": "Logged out successfully"}
 
+# Google OAuth Authentication using Emergent Auth
+@api_router.get("/auth/oauth/session-data", response_model=UserResponse)
+async def get_session_data(request: Request):
+    """Process session_id from Emergent Auth and return user data"""
+    session_id = request.headers.get("X-Session-ID")
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="X-Session-ID header is required")
+    
+    try:
+        # Call Emergent Auth API to get user data
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": session_id}
+            ) as response:
+                if response.status != 200:
+                    raise HTTPException(status_code=400, detail="Invalid session ID")
+                
+                oauth_data = await response.json()
+        
+        # Check if user exists by email
+        existing_user = await users_collection.find_one({"email": oauth_data["email"]})
+        
+        if existing_user:
+            user_id = existing_user["_id"]
+            # Update user data if needed (but don't overwrite existing data)
+            if not existing_user.get("picture"):
+                await users_collection.update_one(
+                    {"_id": user_id},
+                    {"$set": {"picture": oauth_data.get("picture")}}
+                )
+        else:
+            # Create new user from OAuth data
+            user_id = str(uuid.uuid4())
+            now = datetime.now(timezone.utc)
+            user_doc = {
+                "_id": user_id,
+                "email": oauth_data["email"],
+                "full_name": oauth_data["name"],
+                "picture": oauth_data.get("picture"),
+                "subscription_tier": SubscriptionTier.DAILY_FREE,
+                "pages_remaining": 7,  # Daily free tier starts with 7 pages
+                "pages_limit": 7,
+                "billing_cycle_start": now,
+                "daily_reset_time": now,
+                "language_preference": "en",
+                "created_at": now,
+                "updated_at": now,
+                "oauth_provider": "google"
+            }
+            await users_collection.insert_one(user_doc)
+        
+        # Create or update session token
+        session_token = oauth_data["session_token"]
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+        
+        session_doc = {
+            "user_id": user_id,
+            "session_token": session_token,
+            "expires_at": expires_at,
+            "created_at": datetime.now(timezone.utc)
+        }
+        
+        # Upsert session (replace existing or create new)
+        await user_sessions_collection.replace_one(
+            {"user_id": user_id},
+            session_doc,
+            upsert=True
+        )
+        
+        # Get updated user data
+        user = await users_collection.find_one({"_id": user_id})
+        
+        return UserResponse(
+            id=user["_id"],
+            email=user["email"],
+            full_name=user["full_name"],
+            subscription_tier=user["subscription_tier"],
+            pages_remaining=user["pages_remaining"],
+            pages_limit=user["pages_limit"],
+            billing_cycle_start=user.get("billing_cycle_start"),
+            daily_reset_time=user.get("daily_reset_time"),
+            language_preference=user.get("language_preference", "en")
+        )
+        
+    except Exception as e:
+        logger.error(f"OAuth session error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to process OAuth session")
+
+@api_router.post("/auth/oauth/logout")
+async def oauth_logout(request: Request, response: Response):
+    """Logout user - delete session and clear cookie"""
+    # Try to get session token from cookie first, then from Authorization header
+    session_token = request.cookies.get("session_token")
+    
+    if not session_token:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            session_token = auth_header.split(" ")[1]
+    
+    if session_token:
+        # Delete session from database
+        await user_sessions_collection.delete_one({"session_token": session_token})
+        
+        # Clear cookie
+        response.delete_cookie("session_token", path="/", secure=True, samesite="none")
+    
+    return {"message": "Logged out successfully"}
+
+# Helper function to get current user from session token (for OAuth users)
+async def get_current_user_from_session(session_token: str) -> Optional[dict]:
+    """Get user from session token"""
+    session = await user_sessions_collection.find_one({"session_token": session_token})
+    if not session or session["expires_at"] < datetime.now(timezone.utc):
+        return None
+    
+    user = await users_collection.find_one({"_id": session["user_id"]})
+    if user:
+        return {"user_id": user["_id"], "email": user["email"]}
+    return None
+
+# Updated auth dependency to support both JWT and OAuth session tokens
+async def get_current_user(request: Request):
+    """Get current user from JWT token or OAuth session token"""
+    # First try to get session token from cookie
+    session_token = request.cookies.get("session_token")
+    if session_token:
+        user = await get_current_user_from_session(session_token)
+        if user:
+            return user
+    
+    # Fallback to Authorization header (for both JWT and session tokens)
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    token = auth_header.split(" ")[1]
+    
+    # Try as session token first
+    user = await get_current_user_from_session(token)
+    if user:
+        return user
+    
+    # Try as JWT token
+    try:
+        return verify_token(token)
+    except HTTPException:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
 @api_router.get("/user/profile", response_model=UserResponse)
 async def get_profile(current_user: dict = Depends(verify_token)):
     """Get current user profile"""
