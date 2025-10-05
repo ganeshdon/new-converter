@@ -530,7 +530,7 @@ async def delete_document(doc_id: str, request: Request, current_user: dict = De
     
     return {"message": "Document deleted successfully"}
 
-@app.get("/api/pricing/plans")
+@api_router.get("/pricing/plans")
 async def get_pricing_plans():
     """Get available pricing plans"""
     plans = [
