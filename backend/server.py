@@ -207,6 +207,38 @@ async def extract_with_ai(pdf_path: str):
         logger.error(f"AI extraction error: {str(e)}")
         raise Exception(f"AI extraction failed: {str(e)}")
 
+async def count_pdf_pages(pdf_path: str) -> int:
+    """Count pages in a PDF file"""
+    try:
+        import PyPDF2
+        with open(pdf_path, 'rb') as file:
+            pdf_reader = PyPDF2.PdfReader(file)
+            return len(pdf_reader.pages)
+    except Exception as e:
+        logger.warning(f"Could not count PDF pages: {e}")
+        return 1  # Default to 1 page if counting fails
+
+async def check_and_reset_daily_pages(user_id: str):
+    """Check if daily free user needs page reset"""
+    user = await users_collection.find_one({"_id": user_id})
+    if not user or user["subscription_tier"] != SubscriptionTier.DAILY_FREE:
+        return
+    
+    now = datetime.now(timezone.utc)
+    last_reset = user.get("daily_reset_time", user.get("created_at", now))
+    
+    # Check if 24 hours have passed since last reset
+    if now - last_reset >= timedelta(days=1):
+        await users_collection.update_one(
+            {"_id": user_id},
+            {
+                "$set": {
+                    "pages_remaining": 7,  # Reset to daily limit
+                    "daily_reset_time": now
+                }
+            }
+        )
+
 # Include the router in the main app
 app.include_router(api_router)
 
