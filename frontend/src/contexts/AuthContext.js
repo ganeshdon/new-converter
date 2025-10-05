@@ -203,12 +203,19 @@ export const AuthProvider = ({ children }) => {
     if (!token) return null;
     
     try {
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Only add Authorization header for JWT tokens, not OAuth sessions
+      if (token !== 'oauth_session') {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetch(`${API_URL}/api/user/pages/check`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers,
+        credentials: 'include', // Include cookies for OAuth sessions
         body: JSON.stringify({ page_count: pageCount })
       });
       
