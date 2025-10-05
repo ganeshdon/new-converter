@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Company Info Section */}
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
@@ -47,37 +47,15 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Product Section */}
+          {/* Quick Links Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Product</h3>
+            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-3 text-gray-400">
               <li>
                 <Link to="/pricing" className="hover:text-white transition-colors">
                   Pricing
                 </Link>
               </li>
-              <li>
-                <Link to="/converter" className="hover:text-white transition-colors">
-                  PDF Converter
-                </Link>
-              </li>
-              <li>
-                <Link to="/documents" className="hover:text-white transition-colors">
-                  My Documents
-                </Link>
-              </li>
-              <li>
-                <a href="#features" className="hover:text-white transition-colors">
-                  Features
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Resources Section */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Resources</h3>
-            <ul className="space-y-3 text-gray-400">
               <li>
                 <a 
                   href="https://blog.bankstatementconverter.com" 
@@ -88,47 +66,27 @@ const Footer = () => {
                   Blog
                 </a>
               </li>
-              <li>
-                <a href="#help" className="hover:text-white transition-colors">
-                  Help Center
-                </a>
-              </li>
-              <li>
-                <a href="#tutorials" className="hover:text-white transition-colors">
-                  Tutorials
-                </a>
-              </li>
-              <li>
-                <a href="#api" className="hover:text-white transition-colors">
-                  API Documentation
-                </a>
-              </li>
             </ul>
           </div>
 
-          {/* Company Section */}
+          {/* Legal Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Company</h3>
+            <h3 className="text-lg font-semibold mb-4">Legal</h3>
             <ul className="space-y-3 text-gray-400">
               <li>
-                <a href="#about" className="hover:text-white transition-colors">
-                  About Us
-                </a>
+                <Link to="/privacy-policy" className="hover:text-white transition-colors">
+                  Privacy Policy
+                </Link>
               </li>
               <li>
-                <a href="#contact" className="hover:text-white transition-colors">
-                  Contact
-                </a>
+                <Link to="/terms-conditions" className="hover:text-white transition-colors">
+                  Terms & Conditions
+                </Link>
               </li>
               <li>
-                <a href="#careers" className="hover:text-white transition-colors">
-                  Careers
-                </a>
-              </li>
-              <li>
-                <a href="#partners" className="hover:text-white transition-colors">
-                  Partners
-                </a>
+                <Link to="/cookie-policy" className="hover:text-white transition-colors">
+                  Cookie Policy
+                </Link>
               </li>
             </ul>
           </div>
