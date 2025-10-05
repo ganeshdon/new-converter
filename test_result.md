@@ -316,12 +316,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Anonymous user home page experience"
-    - "Browser fingerprinting implementation"
-    - "Anonymous conversion limit checking"
-    - "Anonymous PDF processing flow"
-    - "Limit enforcement after 1 conversion"
-    - "Integration with authentication system"
+    - "Stripe payment session creation"
+    - "Stripe payment status checking"
+    - "Stripe webhook processing"
+    - "Subscription package validation"
+    - "Payment database integration"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
