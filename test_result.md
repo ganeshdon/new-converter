@@ -167,131 +167,77 @@ backend:
         comment: "Not implemented, will use test keys as requested"
 
 frontend:
-  - task: "Login page with validation"
+  - task: "Anonymous user home page experience"
     implemented: true
-    working: true
-    file: "pages/Login.jsx"
+    working: "NA"
+    file: "pages/Converter.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Login page with modern UI implemented, includes password visibility toggle, validation"
-      - working: true
-        agent: "testing"
-        comment: "Login page fully functional. All UI elements present: email/password inputs, remember me checkbox, login button, Google OAuth button, forgot password link, signup navigation. Password visibility toggle working. Email/password authentication working correctly - successfully tested user registration and login flow. Minor: Form validation messages not consistently showing via toast notifications, but core functionality works."
+        comment: "Home page now serves as converter for anonymous users. Shows 'You have 1 free conversion available!' message and Sign Up Free button. Browse Files button functional."
         
-  - task: "Signup page with validation" 
+  - task: "Browser fingerprinting implementation"
     implemented: true
-    working: true
-    file: "pages/Signup.jsx"
+    working: "NA"
+    file: "utils/fingerprint.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Signup page with password strength meter, validation implemented"
-      - working: true
-        agent: "testing"
-        comment: "Signup page working correctly. Successfully tested complete user registration flow with unique email/password. All essential form elements present: email, password, confirm password, terms checkbox, signup button, Google OAuth button. Password confirmation validation working. User registration successfully creates account and redirects to converter page. Navigation to/from login page working."
+        comment: "Browser fingerprinting using canvas, WebGL, audio context, screen params implemented. Creates unique fingerprint for anonymous user tracking."
         
-  - task: "AuthContext and session management"
+  - task: "Anonymous conversion limit checking"
     implemented: true
-    working: true
-    file: "contexts/AuthContext.js"
+    working: "NA"
+    file: "pages/Converter.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "JWT token management, localStorage, API calls implemented"
-      - working: true
-        agent: "testing"
-        comment: "AuthContext working perfectly. Session management fully functional: user registration stores JWT token, login/logout working correctly, session persistence across page refreshes working. Authentication state properly managed - isAuthenticated correctly reflects user state. API integration working with proper token handling."
+        comment: "Anonymous conversion limit checking implemented. Checks fingerprint + IP combo for existing conversions. Allows 1 free conversion per anonymous user."
         
-  - task: "Dynamic navigation header"
+  - task: "Anonymous PDF processing flow"
     implemented: true
-    working: true
-    file: "components/Header.jsx"
+    working: "NA"
+    file: "pages/Converter.jsx, components/Results.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Header with public/authenticated views, mobile responsive"
-      - working: true
-        agent: "testing"
-        comment: "Dynamic navigation header working correctly. Shows appropriate elements based on authentication state: public view (Login/Register buttons) for unauthenticated users, authenticated view (Documents, Settings, Pages info, Sign out) for logged-in users. Mobile responsiveness working with mobile menu button present. Navigation links functional."
+        comment: "Anonymous PDF processing flow implemented. Uses /api/anonymous/convert endpoint with X-Browser-Fingerprint header. Shows signup prompts in results for anonymous users."
         
-  - task: "Google OAuth frontend integration"
+  - task: "Limit enforcement after 1 conversion"
     implemented: true
-    working: true
-    file: "pages/Login.jsx, pages/Signup.jsx"
+    working: "NA"
+    file: "pages/Converter.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: false
-        agent: "main"
-        comment: "Not implemented, need to add Google OAuth buttons and handling"
-      - working: true
-        agent: "testing"
-        comment: "Google OAuth frontend integration working. OAuth buttons present and clickable on both login and signup pages. Buttons properly redirect to Emergent Auth service. AuthContext handles OAuth session processing via URL fragments and X-Session-ID headers. OAuth session management integrated with existing JWT authentication system."
-        
-  - task: "Documents library page"
-    implemented: false
-    working: false
-    file: "pages/Documents.jsx"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
-    status_history:
-      - working: false
-        agent: "main"
-        comment: "Empty placeholder, need to implement document listing with download/delete"
-        
-  - task: "Settings page functionality"
-    implemented: false
-    working: false
-    file: "pages/Settings.jsx"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
-    status_history:
-      - working: false
-        agent: "main"
-        comment: "Empty placeholder, need account info, preferences, subscription management"
-        
-  - task: "Pricing page with Stripe"
-    implemented: false
-    working: false
-    file: "pages/Pricing.jsx"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
-    status_history:
-      - working: false
-        agent: "main"
-        comment: "Empty placeholder, need 5-tier pricing layout with monthly/annual toggle"
-        
-  - task: "Browse Files button fix in FileUpload component"
-    implemented: true
-    working: true
-    file: "components/FileUpload.jsx"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Fixed Browse Files button by adding missing onClick={onButtonClick} handler to connect button to file input trigger function"
-      - working: true
-        agent: "testing"
-        comment: "Browse Files button fix tested successfully! Button is enabled, clickable, and properly connected to hidden file input. No JavaScript errors when clicking. All file upload UI elements working correctly: drag-and-drop zone, 'or' text, supported formats, sample format sections. File input correctly hidden and accepts .pdf files. Authentication flow working perfectly. Fix is production-ready."
+        comment: "Limit enforcement implemented. After successful conversion, shows 'Free conversion limit reached' message and prompts to sign up for unlimited access."
+        
+  - task: "Integration with authentication system"
+    implemented: true
+    working: "NA"
+    file: "contexts/AuthContext.js, pages/Converter.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Integration with authentication system implemented. Authenticated users work normally, protected routes require login, conversion counter works for both anonymous and authenticated users."
 
 metadata:
   created_by: "main_agent"
