@@ -286,11 +286,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Authentication endpoints (signup/login/logout)"
-    - "Login page with validation" 
-    - "Signup page with validation"
-    - "AuthContext and session management"
-    - "Dynamic navigation header"
+    - "Documents library page"
+    - "Settings page functionality" 
+    - "Pricing page with Stripe"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
