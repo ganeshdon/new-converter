@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
-import '@/App.css';
-import FileUpload from './components/FileUpload';
-import ProcessingState from './components/ProcessingState';
-import Results from './components/Results';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Header from './components/Header';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Converter from './pages/Converter';
+import Documents from './pages/Documents';
+import Settings from './pages/Settings';
+import Pricing from './pages/Pricing';
 import { Toaster } from './components/ui/sonner';
-import { toast } from 'sonner';
+import './App.css';
 
 const App = () => {
   const [currentStep, setCurrentStep] = useState('upload'); // 'upload', 'processing', 'results', 'error'
