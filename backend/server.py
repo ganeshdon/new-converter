@@ -78,8 +78,174 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+# Authentication endpoints
+@api_router.post("/auth/signup", response_model=TokenResponse)
+async def signup(user_data: UserSignup):
+    """Register a new user"""
+    # Check if user already exists
+    existing_user = await users_collection.find_one({"email": user_data.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Create new user
+    user_id = str(uuid.uuid4())
+    hashed_password = get_password_hash(user_data.password)
+    
+    now = datetime.now(timezone.utc)
+    user_doc = {
+        "_id": user_id,
+        "email": user_data.email,
+        "full_name": user_data.full_name,
+        "password_hash": hashed_password,
+        "subscription_tier": SubscriptionTier.DAILY_FREE,
+        "pages_remaining": 7,  # Daily free tier starts with 7 pages
+        "pages_limit": 7,
+        "billing_cycle_start": now,
+        "daily_reset_time": now,
+        "language_preference": "en",
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await users_collection.insert_one(user_doc)
+    
+    # Create access token
+    access_token = create_access_token(data={"sub": user_id, "email": user_data.email})
+    
+    # Return user data
+    user_response = UserResponse(
+        id=user_id,
+        email=user_data.email,
+        full_name=user_data.full_name,
+        subscription_tier=SubscriptionTier.DAILY_FREE,
+        pages_remaining=7,
+        pages_limit=7,
+        billing_cycle_start=now,
+        daily_reset_time=now,
+        language_preference="en"
+    )
+    
+    return TokenResponse(access_token=access_token, token_type="bearer", user=user_response)
+
+@api_router.post("/auth/login", response_model=TokenResponse)
+async def login(credentials: UserLogin):
+    """Login user"""
+    user = await users_collection.find_one({"email": credentials.email})
+    if not user or not verify_password(credentials.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    # Check if daily free user needs reset
+    if user["subscription_tier"] == SubscriptionTier.DAILY_FREE:
+        await check_and_reset_daily_pages(user["_id"])
+        user = await users_collection.find_one({"_id": user["_id"]})  # Refresh user data
+    
+    # Create access token
+    access_token = create_access_token(data={"sub": user["_id"], "email": user["email"]})
+    
+    user_response = UserResponse(
+        id=user["_id"],
+        email=user["email"],
+        full_name=user["full_name"],
+        subscription_tier=user["subscription_tier"],
+        pages_remaining=user["pages_remaining"],
+        pages_limit=user["pages_limit"],
+        billing_cycle_start=user.get("billing_cycle_start"),
+        daily_reset_time=user.get("daily_reset_time"),
+        language_preference=user.get("language_preference", "en")
+    )
+    
+    return TokenResponse(access_token=access_token, token_type="bearer", user=user_response)
+
+@api_router.post("/auth/logout")
+async def logout(current_user: dict = Depends(verify_token)):
+    """Logout user (client should delete token)"""
+    return {"message": "Logged out successfully"}
+
+@api_router.get("/user/profile", response_model=UserResponse)
+async def get_profile(current_user: dict = Depends(verify_token)):
+    """Get current user profile"""
+    user = await users_collection.find_one({"_id": current_user["user_id"]})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if daily free user needs reset
+    if user["subscription_tier"] == SubscriptionTier.DAILY_FREE:
+        await check_and_reset_daily_pages(user["_id"])
+        user = await users_collection.find_one({"_id": user["_id"]})
+    
+    return UserResponse(
+        id=user["_id"],
+        email=user["email"],
+        full_name=user["full_name"],
+        subscription_tier=user["subscription_tier"],
+        pages_remaining=user["pages_remaining"],
+        pages_limit=user["pages_limit"],
+        billing_cycle_start=user.get("billing_cycle_start"),
+        daily_reset_time=user.get("daily_reset_time"),
+        language_preference=user.get("language_preference", "en")
+    )
+
+@api_router.put("/user/profile", response_model=UserResponse)
+async def update_profile(updates: UserUpdate, current_user: dict = Depends(verify_token)):
+    """Update user profile"""
+    update_data = {k: v for k, v in updates.dict().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc)
+    
+    await users_collection.update_one(
+        {"_id": current_user["user_id"]},
+        {"$set": update_data}
+    )
+    
+    user = await users_collection.find_one({"_id": current_user["user_id"]})
+    return UserResponse(
+        id=user["_id"],
+        email=user["email"],
+        full_name=user["full_name"],
+        subscription_tier=user["subscription_tier"],
+        pages_remaining=user["pages_remaining"],
+        pages_limit=user["pages_limit"],
+        billing_cycle_start=user.get("billing_cycle_start"),
+        daily_reset_time=user.get("daily_reset_time"),
+        language_preference=user.get("language_preference", "en")
+    )
+
+@api_router.post("/user/pages/check", response_model=PagesCheckResponse)
+async def check_pages(request: PagesCheckRequest, current_user: dict = Depends(verify_token)):
+    """Check if user has enough pages for conversion"""
+    user = await users_collection.find_one({"_id": current_user["user_id"]})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if daily free user needs reset
+    if user["subscription_tier"] == SubscriptionTier.DAILY_FREE:
+        await check_and_reset_daily_pages(user["_id"])
+        user = await users_collection.find_one({"_id": user["_id"]})
+    
+    can_convert = user["pages_remaining"] >= request.page_count
+    
+    if user["subscription_tier"] == SubscriptionTier.DAILY_FREE:
+        next_reset = user["daily_reset_time"] + timedelta(days=1)
+        message = f"You have {user['pages_remaining']} pages remaining today. Resets in {(next_reset - datetime.now(timezone.utc)).seconds // 3600} hours."
+    else:
+        next_reset = user.get("billing_cycle_start", datetime.now(timezone.utc)) + timedelta(days=30)
+        message = f"You have {user['pages_remaining']} pages remaining this month."
+    
+    if not can_convert:
+        if user["subscription_tier"] == SubscriptionTier.DAILY_FREE:
+            message = "You've used all your daily pages. Upgrade to continue or wait for reset."
+        else:
+            message = "You've used all your monthly pages. Upgrade your plan to continue."
+    
+    return PagesCheckResponse(
+        can_convert=can_convert,
+        pages_remaining=user["pages_remaining"],
+        pages_limit=user["pages_limit"],
+        reset_date=next_reset,
+        message=message
+    )
+
 @api_router.post("/process-pdf")
-async def process_pdf_with_ai(file: UploadFile = File(...)):
+async def process_pdf_with_ai(file: UploadFile = File(...), current_user: dict = Depends(verify_token)):
     """Process PDF bank statement using AI for enhanced accuracy"""
     
     if not file.filename.lower().endswith('.pdf'):
@@ -89,21 +255,56 @@ async def process_pdf_with_ai(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail="Gemini API key not configured")
     
     try:
-        # Save uploaded file temporarily
+        # First count pages in the PDF
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
             content = await file.read()
             tmp_file.write(content)
             tmp_file_path = tmp_file.name
         
+        # Count pages (simple implementation - you can enhance this)
+        page_count = await count_pdf_pages(tmp_file_path)
+        
+        # Check if user has enough pages
+        user = await users_collection.find_one({"_id": current_user["user_id"]})
+        if user["pages_remaining"] < page_count:
+            os.unlink(tmp_file_path)
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Insufficient pages. You need {page_count} pages but only have {user['pages_remaining']} remaining."
+            )
+        
         # Process with AI
         extracted_data = await extract_with_ai(tmp_file_path)
+        
+        # Deduct pages after successful conversion
+        await users_collection.update_one(
+            {"_id": current_user["user_id"]},
+            {"$inc": {"pages_remaining": -page_count}}
+        )
+        
+        # Save document record
+        doc_id = str(uuid.uuid4())
+        document_doc = {
+            "_id": doc_id,
+            "user_id": current_user["user_id"],
+            "original_filename": file.filename,
+            "file_size": len(content),
+            "page_count": page_count,
+            "pages_deducted": page_count,
+            "conversion_date": datetime.now(timezone.utc),
+            "download_count": 0,
+            "status": "completed"
+        }
+        await documents_collection.insert_one(document_doc)
         
         # Clean up temp file
         os.unlink(tmp_file_path)
         
-        return {"success": True, "data": extracted_data}
+        return {"success": True, "data": extracted_data, "pages_used": page_count}
         
     except Exception as e:
+        if os.path.exists(tmp_file_path):
+            os.unlink(tmp_file_path)
         logger.error(f"PDF processing error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to process PDF: {str(e)}")
 
