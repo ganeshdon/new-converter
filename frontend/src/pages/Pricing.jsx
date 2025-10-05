@@ -13,100 +13,49 @@ const Pricing = () => {
 
   const plans = [
     {
-      id: 'daily_free',
-      name: 'Daily Free',
-      price: { monthly: 0, annual: 0 },
-      pages: 7,
-      billing: 'per day',
-      description: 'Perfect for occasional use',
+      id: 'starter',
+      name: 'Starter',
+      price: { monthly: 15, annual: 12 },
+      pages: 400,
       features: [
-        '7 pages per day',
-        'Resets every 24 hours',
-        'Basic support',
-        'Standard processing speed'
+        '400 pages / month'
       ],
-      buttonText: 'Current Plan',
-      buttonVariant: 'outline',
+      buttonText: 'Buy',
+      buttonVariant: 'default',
       popular: false
     },
     {
-      id: 'basic',
-      name: 'Basic Plan',
-      price: { monthly: 13.99, annual: 11.19 },
-      pages: 500,
-      billing: 'per month',
-      description: 'Great for small businesses',
+      id: 'professional', 
+      name: 'Professional',
+      price: { monthly: 30, annual: 24 },
+      pages: 1000,
       features: [
-        '500 pages per month',
-        '~17 pages per day',
-        'Email support',
-        'Standard processing speed',
-        '30-day history'
+        '1000 pages / month'
       ],
-      buttonText: 'Start Free Trial',
+      buttonText: 'Buy',
       buttonVariant: 'default',
-      popular: true,
-      savings: 'Save $33.60!'
+      popular: false
     },
     {
-      id: 'premium',
-      name: 'Premium Plan', 
-      price: { monthly: 27.99, annual: 22.39 },
-      pages: 1100,
-      billing: 'per month',
-      description: 'Perfect for growing businesses',
+      id: 'business',
+      name: 'Business',
+      price: { monthly: 50, annual: 40 },
+      pages: 4000,
       features: [
-        '1,100 pages per month',
-        '~37 pages per day',
-        'Priority support',
-        'Fast processing speed',
-        '90-day history',
-        'Bulk upload'
+        '4000 pages / month'
       ],
-      buttonText: 'Start Free Trial',
+      buttonText: 'Buy',
       buttonVariant: 'default',
-      popular: false,
-      savings: 'Save $67.20!'
-    },
-    {
-      id: 'platinum',
-      name: 'Platinum Plan',
-      price: { monthly: 49.99, annual: 39.99 },
-      pages: 4500,
-      billing: 'per month', 
-      description: 'For high-volume users',
-      features: [
-        '4,500 pages per month',
-        '~150 pages per day',
-        'Priority support',
-        'Fastest processing',
-        'Unlimited history',
-        'Bulk upload',
-        'API access'
-      ],
-      buttonText: 'Start Free Trial',
-      buttonVariant: 'default',
-      popular: false,
-      savings: 'Save $120!'
+      popular: false
     },
     {
       id: 'enterprise',
-      name: 'Enterprise Plan',
-      price: { monthly: 'Custom', annual: 'Custom' },
-      pages: 'Unlimited',
-      billing: 'custom pricing',
-      description: 'For large organizations',
-      features: [
-        'Unlimited pages',
-        'Custom integrations',
-        'Dedicated support',
-        'SLA guarantees',
-        'Custom workflows',
-        'On-premise option',
-        'Team management'
-      ],
-      buttonText: 'Contact Sales',
-      buttonVariant: 'outline',
+      name: 'Enterprise',
+      price: { monthly: 'Need More?', annual: 'Need More?' },
+      pages: 'Custom',
+      features: [],
+      buttonText: 'Contact',
+      buttonVariant: 'default',
       popular: false
     }
   ];
