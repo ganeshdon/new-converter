@@ -443,6 +443,10 @@ async def check_and_reset_daily_pages(user_id: str):
     now = datetime.now(timezone.utc)
     last_reset = user.get("daily_reset_time", now)
     
+    # Ensure last_reset has timezone info
+    if last_reset and last_reset.tzinfo is None:
+        last_reset = last_reset.replace(tzinfo=timezone.utc)
+    
     # Check if 24 hours have passed
     if (now - last_reset).total_seconds() >= 24 * 3600:  # 24 hours
         await users_collection.update_one(
