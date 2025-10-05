@@ -107,7 +107,21 @@ const Converter = () => {
       return;
     }
 
-    // Check pages before processing
+    // Check limits before processing
+    if (isAnonymous) {
+      if (!anonymousData?.can_convert) {
+        toast.error('Free conversion limit reached. Please sign up for unlimited conversions.');
+        return;
+      }
+    } else if (user) {
+      // Check authenticated user limits
+      const pageCheck = await checkPages(1);
+      if (!pageCheck?.can_convert) {
+        toast.error('Insufficient pages remaining. Please upgrade your plan.');
+        return;
+      }
+    }
+
     setUploadedFile(file);
     setCurrentStep('processing');
     processFile(file);
