@@ -278,7 +278,15 @@ async def oauth_logout(request: Request, response: Response):
 async def get_current_user_from_session(session_token: str) -> Optional[dict]:
     """Get user from session token"""
     session = await user_sessions_collection.find_one({"session_token": session_token})
-    if not session or session["expires_at"] < datetime.now(timezone.utc):
+    if not session:
+        return None
+    
+    # Handle timezone-aware comparison
+    expires_at = session["expires_at"]
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    
+    if expires_at < datetime.now(timezone.utc):
         return None
     
     user = await users_collection.find_one({"_id": session["user_id"]})
