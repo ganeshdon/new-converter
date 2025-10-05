@@ -20,31 +20,33 @@ const App = () => {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 flex flex-col">
           <Header />
-          <Routes>
-            <Route path="/" element={<Converter />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/converter" element={<Converter />} />
-            
-            <Route path="/documents" element={
-              <ProtectedRoute>
-                <Documents />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/settings" element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-conditions" element={<TermsConditions />} />
-            <Route path="/cookie-policy" element={<CookiePolicy />} />
-          </Routes>
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Converter />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/converter" element={<Converter />} />
+              
+              <Route path="/documents" element={
+                <ProtectedRoute>
+                  <Documents />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-conditions" element={<TermsConditions />} />
+              <Route path="/cookie-policy" element={<CookiePolicy />} />
+            </Routes>
+          </main>
           <Footer />
           <Toaster position="top-right" />
         </div>
