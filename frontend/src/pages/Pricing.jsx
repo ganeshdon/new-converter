@@ -183,6 +183,16 @@ const Pricing = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Payment Status Check */}
+        {checkingStatus && (
+          <Card className="max-w-md mx-auto p-4 mb-6 bg-blue-50 border-blue-200">
+            <div className="flex items-center space-x-2">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+              <span className="text-blue-800 font-medium">Checking payment status...</span>
+            </div>
+          </Card>
+        )}
+
         {/* Billing Toggle */}
         <div className="flex items-center justify-center space-x-4 mb-12">
           <button
@@ -192,6 +202,7 @@ const Pricing = () => {
                 ? 'bg-blue-600 text-white border-2 border-blue-600'
                 : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300'
             }`}
+            disabled={checkingStatus}
           >
             Monthly Plan
           </button>
@@ -202,6 +213,7 @@ const Pricing = () => {
                 ? 'bg-blue-600 text-white border-2 border-blue-600'
                 : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300'
             }`}
+            disabled={checkingStatus}
           >
             Annual Plan
           </button>
