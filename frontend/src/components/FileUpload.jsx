@@ -125,27 +125,7 @@ const FileUpload = ({ onFileUpload }) => {
         </div>
       </div>
 
-      {/* Sample Format */}
-      <div className="border border-gray-200 rounded-lg p-6" data-testid="sample-format">
-        <h3 className="font-semibold text-gray-900 mb-3" data-testid="sample-format-title">
-          Currently Supported Format
-        </h3>
-        <div className="bg-white border rounded-md p-4 text-sm font-mono text-gray-600">
-          <div className="space-y-1">
-            <div>Account Summary - Account # 000009752</div>
-            <div>Statement Date: June 5, 2003</div>
-            <div>Beginning Balance: $7,126.11</div>
-            <div>Ending Balance: $10,521.19</div>
-            <div className="mt-2">Deposits & Other Credits</div>
-            <div>05-15 Deposit Ref Nbr: 130012345 $3,615.08</div>
-            <div className="mt-2">ATM Withdrawals & Debits</div>
-            <div>05-18 05-19 ATM Withdrawal... -$20.00</div>
-          </div>
-        </div>
-        <p className="text-xs text-gray-500 mt-2">
-          More bank formats will be supported in future updates
-        </p>
-      </div>
+      {/* Sample format section removed */}
     </div>
   );
 };
