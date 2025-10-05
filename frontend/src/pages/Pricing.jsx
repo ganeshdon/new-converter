@@ -85,11 +85,7 @@ const Pricing = () => {
       return plan.price[billingInterval];
     }
     
-    if (plan.price[billingInterval] === 0) {
-      return '$0';
-    }
-    
-    return `$${plan.price[billingInterval].toFixed(2)}`;
+    return `$${plan.price[billingInterval]}`;
   };
 
   const trustBadges = [
