@@ -517,8 +517,8 @@ Ending Balance,$10521.19,"""
         headers={"Content-Disposition": f"attachment; filename={document['original_filename'].replace('.pdf', '-converted.csv')}"}
     )
 
-@app.delete("/api/documents/{doc_id}")
-async def delete_document(doc_id: str, current_user: dict = Depends(verify_token)):
+@api_router.delete("/documents/{doc_id}")
+async def delete_document(doc_id: str, request: Request, current_user: dict = Depends(get_current_user)):
     """Delete a document"""
     result = await documents_collection.delete_one({
         "_id": doc_id,
