@@ -98,3 +98,17 @@ class PasswordChange(BaseModel):
         if 'new_password' in values and v != values['new_password']:
             raise ValueError('Passwords do not match')
         return v
+
+# Google OAuth Models
+class GoogleUserData(BaseModel):
+    id: str
+    email: str
+    name: str
+    picture: Optional[str] = None
+    session_token: str
+
+class UserSession(BaseModel):
+    user_id: str
+    session_token: str
+    expires_at: datetime
+    created_at: datetime
