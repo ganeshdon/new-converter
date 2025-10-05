@@ -112,3 +112,24 @@ class UserSession(BaseModel):
     session_token: str
     expires_at: datetime
     created_at: datetime
+
+# Anonymous Conversion Tracking Models
+class AnonymousConversionCheck(BaseModel):
+    browser_fingerprint: str
+    ip_address: Optional[str] = None
+
+class AnonymousConversionResponse(BaseModel):
+    can_convert: bool
+    conversions_used: int
+    conversions_limit: int = 1
+    message: str
+    requires_signup: bool = False
+
+class AnonymousConversionRecord(BaseModel):
+    browser_fingerprint: str
+    ip_address: Optional[str] = None
+    filename: str
+    file_size: int
+    page_count: int
+    conversion_date: datetime
+    user_agent: Optional[str] = None
