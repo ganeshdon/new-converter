@@ -20,6 +20,43 @@ export const AuthProvider = ({ children }) => {
   // Initialize auth state on mount
   useEffect(() => {
     const initAuth = async () => {
+      // Check for OAuth session_id in URL fragment first
+      const fragment = window.location.hash.substring(1);
+      const params = new URLSearchParams(fragment);
+      const sessionId = params.get('session_id');
+      
+      if (sessionId) {
+        setLoading(true);
+        try {
+          // Process OAuth session
+          const response = await fetch(`${API_URL}/api/auth/oauth/session-data`, {
+            headers: {
+              'X-Session-ID': sessionId
+            }
+          });
+          
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+            // Don't set JWT token for OAuth users - they use session cookies
+            setToken('oauth_session');
+            
+            // Clean up URL fragment
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            return;
+          } else {
+            console.error('OAuth session processing failed');
+          }
+        } catch (error) {
+          console.error('OAuth session error:', error);
+        }
+        
+        // Clean up URL fragment even on error
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      
+      // Check for existing JWT token
       const savedToken = localStorage.getItem('auth_token');
       if (savedToken) {
         try {
@@ -44,6 +81,7 @@ export const AuthProvider = ({ children }) => {
           setToken(null);
         }
       }
+      
       setLoading(false);
     };
 
