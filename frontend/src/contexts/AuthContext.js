@@ -154,12 +154,21 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       if (token) {
-        await fetch(`${API_URL}/api/auth/logout`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        if (token === 'oauth_session') {
+          // OAuth session logout
+          await fetch(`${API_URL}/api/auth/oauth/logout`, {
+            method: 'POST',
+            credentials: 'include' // Include cookies
+          });
+        } else {
+          // JWT token logout
+          await fetch(`${API_URL}/api/auth/logout`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+        }
       }
     } catch (error) {
       console.error('Logout error:', error);
