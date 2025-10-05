@@ -129,18 +129,26 @@ const Converter = () => {
 
   const processFile = async (file) => {
     try {
-      console.log('Processing PDF with AI:', file.name);
+      console.log('Processing PDF:', file.name, isAnonymous ? '(Anonymous)' : '(Authenticated)');
       
       const formData = new FormData();
       formData.append('file', file);
       
       const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
       
-      const response = await fetch(`${backendUrl}/api/process-pdf`, {
+      let endpoint = '/api/process-pdf';
+      let headers = {};
+      
+      if (isAnonymous) {
+        endpoint = '/api/anonymous/convert';
+        headers['X-Browser-Fingerprint'] = browserFingerprint;
+      } else {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`${backendUrl}${endpoint}`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        headers,
         body: formData
       });
       
@@ -158,19 +166,28 @@ const Converter = () => {
       
       const extractedData = result.data;
       setExtractedData(extractedData);
-      setPagesUsed(result.pages_used || 1);
+      setPagesUsed(result.pages_processed || result.pages_used || 1);
 
       // Generate CSV with AI-extracted data
       const csvContent = generateComprehensiveCSV(extractedData);
       setExcelFile(new Blob([csvContent], { type: 'text/csv' }));
 
-      // Refresh user data to get updated page count
-      await refreshUser();
+      // Update limits
+      if (isAnonymous) {
+        setAnonymousData(prev => ({ ...prev, can_convert: false, conversions_used: 1 }));
+      } else {
+        await refreshUser();
+      }
 
       setCurrentStep('results');
-      toast.success(`PDF processed successfully! Used ${result.pages_used || 1} pages.`);
+      
+      const message = isAnonymous 
+        ? 'Free conversion completed! Sign up for unlimited conversions.'
+        : `PDF processed successfully! Used ${result.pages_processed || result.pages_used || 1} pages.`;
+      
+      toast.success(message);
     } catch (error) {
-      console.error('AI Processing error:', error);
+      console.error('Processing error:', error);
       setError(error.message);
       setCurrentStep('error');
       toast.error(error.message || 'Failed to process the bank statement.');
