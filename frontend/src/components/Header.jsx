@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/button';
-import { ChevronDown, FileText, Settings, LogOut, CreditCard, FileX, Menu, X } from 'lucide-react';
+import { FileText, Settings, LogOut, CreditCard, FileX, Menu, X } from 'lucide-react';
 
 const Header = () => {
   const { isAuthenticated, user, logout } = useAuth();
