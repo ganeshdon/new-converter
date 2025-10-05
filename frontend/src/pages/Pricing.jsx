@@ -8,8 +8,72 @@ import { toast } from 'sonner';
 
 const Pricing = () => {
   const [billingInterval, setBillingInterval] = useState('monthly');
-  const { isAuthenticated, user } = useAuth();
+  const [loadingPlan, setLoadingPlan] = useState(null);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const { user, token, refreshUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  // Check for payment session result on page load
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    
+    if (sessionId && isAuthenticated) {
+      checkPaymentStatus(sessionId);
+    }
+  }, [isAuthenticated]);
+
+  const checkPaymentStatus = async (sessionId, attempts = 0) => {
+    const maxAttempts = 5;
+    const pollInterval = 2000; // 2 seconds
+    
+    if (attempts >= maxAttempts) {
+      toast.error('Payment status check timed out. Please contact support if your payment was processed.');
+      setCheckingStatus(false);
+      return;
+    }
+    
+    setCheckingStatus(true);
+    
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
+      
+      const response = await fetch(`${backendUrl}/api/payments/status/${sessionId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to check payment status');
+      }
+      
+      const data = await response.json();
+      
+      if (data.payment_status === 'paid') {
+        toast.success('Payment successful! Your subscription has been activated.');
+        await refreshUser(); // Refresh user data to show new subscription
+        
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setCheckingStatus(false);
+        return;
+      } else if (data.status === 'expired') {
+        toast.error('Payment session expired. Please try again.');
+        setCheckingStatus(false);
+        return;
+      }
+      
+      // If payment is still pending, continue polling
+      toast.info('Payment is being processed...');
+      setTimeout(() => checkPaymentStatus(sessionId, attempts + 1), pollInterval);
+      
+    } catch (error) {
+      console.error('Error checking payment status:', error);
+      toast.error('Error checking payment status. Please try again.');
+      setCheckingStatus(false);
+    }
+  };
 
   const plans = [
     {
