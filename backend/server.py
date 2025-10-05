@@ -404,7 +404,7 @@ async def check_pages(pages_request: PagesCheckRequest, request: Request, curren
     )
 
 @api_router.post("/process-pdf")
-async def process_pdf_with_ai(file: UploadFile = File(...), current_user: dict = Depends(verify_token)):
+async def process_pdf_with_ai(request: Request, file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
     """Process PDF bank statement using AI for enhanced accuracy"""
     
     if not file.filename.lower().endswith('.pdf'):
