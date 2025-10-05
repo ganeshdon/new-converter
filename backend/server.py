@@ -18,7 +18,7 @@ import aiohttp
 import json
 
 # Import our modules
-from auth import get_password_hash, verify_password, create_access_token, verify_token
+from auth import get_password_hash, verify_password, create_access_token, verify_token, verify_jwt_token
 from models import (
     UserSignup, UserLogin, UserResponse, TokenResponse, DocumentResponse,
     PagesCheckRequest, PagesCheckResponse, SubscriptionTier, SubscriptionPlan,
