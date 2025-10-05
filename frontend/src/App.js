@@ -19,16 +19,11 @@ const App = () => {
         <div className="min-h-screen bg-gray-50">
           <Header />
           <Routes>
+            <Route path="/" element={<Converter />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/pricing" element={<Pricing />} />
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            
-            <Route path="/converter" element={
-              <ProtectedRoute>
-                <Converter />
-              </ProtectedRoute>
-            } />
+            <Route path="/converter" element={<Converter />} />
             
             <Route path="/documents" element={
               <ProtectedRoute>
