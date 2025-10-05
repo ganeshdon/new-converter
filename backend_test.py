@@ -562,8 +562,8 @@ def cleanup_test_oauth_data():
         print(f"Failed to cleanup OAuth test data: {e}")
 
 def main():
-    """Run all authentication tests"""
-    print("🚀 Starting Backend Authentication Tests")
+    """Run all authentication tests including OAuth"""
+    print("🚀 Starting Backend Authentication Tests (JWT + OAuth)")
     print(f"Testing API at: {API_URL}")
     print("="*60)
     
@@ -573,6 +573,9 @@ def main():
     if not test_health_check(results):
         print("❌ API is not accessible. Stopping tests.")
         return False
+    
+    print("\n📋 JWT Authentication Tests")
+    print("-" * 40)
     
     # Test 2: User signup
     signup_data = test_user_signup(results)
@@ -602,6 +605,28 @@ def main():
     
     # Test 8: Missing token handling
     test_missing_token(results)
+    
+    print("\n🔐 Google OAuth Integration Tests")
+    print("-" * 40)
+    
+    # Test 9: OAuth session endpoint validation
+    test_oauth_session_missing_header(results)
+    
+    # Test 10: OAuth session endpoint with mock session ID
+    test_oauth_session_new_user(results)
+    
+    # Test 11: OAuth session token authentication
+    oauth_session_token = test_oauth_session_token_auth(results)
+    
+    # Test 12: OAuth logout
+    if oauth_session_token:
+        test_oauth_logout(results, oauth_session_token)
+    
+    # Test 13: OAuth existing user linking (endpoint validation)
+    test_oauth_existing_user_linking(results)
+    
+    # Cleanup test data
+    cleanup_test_oauth_data()
     
     # Print summary
     success = results.summary()
