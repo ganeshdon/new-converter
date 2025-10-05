@@ -17,9 +17,27 @@ const Converter = () => {
   const [excelFile, setExcelFile] = useState(null);
   const [error, setError] = useState(null);
   const [pagesUsed, setPagesUsed] = useState(0);
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [anonymousData, setAnonymousData] = useState(null);
+  const [browserFingerprint, setBrowserFingerprint] = useState(null);
   
-  const { user, token, refreshUser, checkPages } = useAuth();
+  const { user, token, refreshUser, checkPages, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  // Initialize browser fingerprint for anonymous users
+  useEffect(() => {
+    const initFingerprint = async () => {
+      const fingerprint = await getBrowserFingerprint();
+      setBrowserFingerprint(fingerprint);
+      
+      if (!isAuthenticated) {
+        setIsAnonymous(true);
+        await checkAnonymousLimit(fingerprint);
+      }
+    };
+    
+    initFingerprint();
+  }, [isAuthenticated]);
 
   const formatPagesDisplay = () => {
     if (!user) return '';
