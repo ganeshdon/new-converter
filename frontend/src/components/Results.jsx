@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { saveAs } from 'file-saver';
 
-const Results = ({ extractedData, excelFile, filename, onReset }) => {
+const Results = ({ extractedData, excelFile, filename, onReset, pagesUsed = 0 }) => {
   const handleDownload = () => {
     console.log('Download button clicked - generating comprehensive CSV');
     
