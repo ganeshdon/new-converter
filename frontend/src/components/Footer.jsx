@@ -99,24 +99,24 @@ const Footer = () => {
           </div>
           
           <div className="flex flex-wrap gap-6 text-sm text-gray-400">
-            <a 
-              href="/privacy-policy" 
+            <Link 
+              to="/privacy-policy" 
               className="hover:text-white transition-colors"
             >
               Privacy Policy
-            </a>
-            <a 
-              href="/terms-conditions" 
+            </Link>
+            <Link 
+              to="/terms-conditions" 
               className="hover:text-white transition-colors"
             >
               Terms & Conditions
-            </a>
-            <a 
-              href="/cookie-policy" 
+            </Link>
+            <Link 
+              to="/cookie-policy" 
               className="hover:text-white transition-colors"
             >
               Cookie Policy
-            </a>
+            </Link>
           </div>
         </div>
       </div>
