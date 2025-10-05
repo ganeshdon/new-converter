@@ -155,8 +155,32 @@ const Results = ({ extractedData, excelFile, filename, onReset, pagesUsed = 0, i
           Conversion Complete!
         </h2>
         <p className="text-gray-600" data-testid="success-message">
-          Your bank statement has been successfully converted to Excel format
+          {isAnonymous 
+            ? 'Your free bank statement conversion is complete!' 
+            : 'Your bank statement has been successfully converted to Excel format'
+          }
         </p>
+        
+        {isAnonymous && (
+          <Card className="mt-4 p-4 bg-blue-50 border-blue-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <UserPlus className="h-5 w-5 text-blue-600" />
+                <span className="text-blue-800 font-medium">Want unlimited conversions?</span>
+              </div>
+              <Button
+                onClick={() => navigate('/signup')}
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Sign Up Free
+              </Button>
+            </div>
+            <p className="text-sm text-blue-700 mt-2">
+              Sign up to get 7 free conversions daily plus advanced features!
+            </p>
+          </Card>
+        )}
       </div>
 
       {/* Data Summary */}
