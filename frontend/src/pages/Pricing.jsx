@@ -341,4 +341,7 @@ const Pricing = () => {
         </Card>
       </div>
     </div>
-  );\n};\n\nexport default Pricing;
+  );
+};
+
+export default Pricing;
