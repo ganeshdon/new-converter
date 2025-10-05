@@ -124,24 +124,50 @@ const Pricing = () => {
     }
   ];
 
-  const handlePlanSelect = (plan) => {
+  const handlePlanSelect = async (plan) => {
     if (!isAuthenticated) {
+      toast.info('Please sign up or login to upgrade your plan');
       navigate('/signup');
       return;
     }
-
-    if (plan.id === 'daily_free') {
-      toast.info('You are already on the Daily Free plan');
-      return;
-    }
-
+    
     if (plan.id === 'enterprise') {
-      toast.info('Contact our sales team for enterprise pricing');
+      toast.info('Please contact sales for enterprise pricing');
       return;
     }
-
-    // Handle subscription logic here
-    toast.info('Subscription management coming soon!');
+    
+    setLoadingPlan(plan.id);
+    
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
+      
+      const response = await fetch(`${backendUrl}/api/payments/create-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          package_id: plan.id,
+          billing_interval: billingInterval
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to create payment session');
+      }
+      
+      const data = await response.json();
+      
+      // Redirect to Stripe Checkout
+      window.location.href = data.checkout_url;
+      
+    } catch (error) {
+      console.error('Payment session error:', error);
+      toast.error(error.message || 'Failed to start payment process');
+      setLoadingPlan(null);
+    }
   };
 
   const formatPrice = (plan) => {
