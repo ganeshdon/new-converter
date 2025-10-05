@@ -341,24 +341,51 @@ const Converter = () => {
             Convert your PDF bank statements into organized spreadsheets
           </p>
           
-          {/* Pages Counter */}
-          <Card className="max-w-md mx-auto p-4 mb-6">
+          {/* Usage Status */}
+          <Card className="max-w-lg mx-auto p-4 mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <CreditCard className="h-5 w-5 text-blue-600" />
+                {isAnonymous ? (
+                  <Gift className="h-5 w-5 text-green-600" />
+                ) : (
+                  <CreditCard className="h-5 w-5 text-blue-600" />
+                )}
                 <span className="font-medium text-gray-900">{formatPagesDisplay()}</span>
               </div>
-              {user.pages_remaining <= 2 && user.subscription_tier === 'daily_free' && (
-                <Button
-                  onClick={() => navigate('/pricing')}
-                  size="sm"
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  Upgrade
-                </Button>
+              
+              {isAnonymous ? (
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={() => navigate('/signup')}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <UserPlus className="h-4 w-4 mr-1" />
+                    Sign Up Free
+                  </Button>
+                </div>
+              ) : (
+                user?.pages_remaining <= 2 && user?.subscription_tier === 'daily_free' && (
+                  <Button
+                    onClick={() => navigate('/pricing')}
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    Upgrade
+                  </Button>
+                )
               )}
             </div>
+            
             <p className="text-sm text-gray-500 mt-1">{getResetMessage()}</p>
+            
+            {isAnonymous && !anonymousData?.can_convert && (
+              <div className="mt-2 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+                <p className="text-sm text-yellow-800">
+                  Free conversion used. Sign up to get 7 more conversions daily!
+                </p>
+              </div>
+            )}
           </Card>
         </div>
 
