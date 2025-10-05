@@ -133,3 +133,43 @@ class AnonymousConversionRecord(BaseModel):
     page_count: int
     conversion_date: datetime
     user_agent: Optional[str] = None
+
+# Stripe Payment Models
+class SubscriptionPackage(BaseModel):
+    package_id: str
+    name: str
+    price: float
+    pages_limit: int
+    billing_interval: str  # monthly or annual
+    features: List[str] = []
+
+class PaymentSessionRequest(BaseModel):
+    package_id: str
+    billing_interval: str = "monthly"  # monthly or annual
+
+class PaymentSessionResponse(BaseModel):
+    checkout_url: str
+    session_id: str
+
+class PaymentTransaction(BaseModel):
+    transaction_id: str
+    session_id: str
+    user_id: Optional[str] = None
+    email: Optional[str] = None
+    package_id: str
+    amount: float
+    currency: str = "usd"
+    payment_status: str  # pending, completed, failed, cancelled
+    subscription_status: str  # active, inactive, cancelled
+    billing_interval: str
+    created_at: datetime
+    updated_at: datetime
+    stripe_customer_id: Optional[str] = None
+    metadata: Optional[dict] = None
+
+class WebhookEventResponse(BaseModel):
+    event_type: str
+    event_id: str
+    session_id: str
+    payment_status: str
+    metadata: Optional[dict] = None
