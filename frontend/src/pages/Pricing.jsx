@@ -286,4 +286,59 @@ const Pricing = () => {
               )}
             </Card>
           ))}
-        </div>\n\n        {/* Trust Badges */}\n        <div className=\"bg-white rounded-lg p-8 mb-16\">\n          <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6\">\n            {trustBadges.map((badge, index) => (\n              <div key={index} className=\"text-center\">\n                <div className=\"text-2xl mb-2\">{badge.icon}</div>\n                <p className=\"text-sm text-gray-600 font-medium\">{badge.text}</p>\n              </div>\n            ))}\n          </div>\n        </div>\n\n        {/* Why Choose Us */}\n        <Card className=\"p-8 mb-16\">\n          <h2 className=\"text-2xl font-bold text-gray-900 mb-6 text-center\">Why Choose Our Platform?</h2>\n          <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6\">\n            <div className=\"text-center\">\n              <Zap className=\"h-8 w-8 text-blue-600 mx-auto mb-3\" />\n              <h3 className=\"font-semibold text-gray-900 mb-2\">Lightning Fast</h3>\n              <p className=\"text-sm text-gray-600\">Convert statements in under 30 seconds with AI-powered processing</p>\n            </div>\n            <div className=\"text-center\">\n              <Shield className=\"h-8 w-8 text-green-600 mx-auto mb-3\" />\n              <h3 className=\"font-semibold text-gray-900 mb-2\">100% Secure</h3>\n              <p className=\"text-sm text-gray-600\">Your data never leaves your browser. SOC 2 compliant security</p>\n            </div>\n            <div className=\"text-center\">\n              <Check className=\"h-8 w-8 text-purple-600 mx-auto mb-3\" />\n              <h3 className=\"font-semibold text-gray-900 mb-2\">High Accuracy</h3>\n              <p className=\"text-sm text-gray-600\">99%+ accuracy with advanced AI and machine learning</p>\n            </div>\n            <div className=\"text-center\">\n              <Users className=\"h-8 w-8 text-orange-600 mx-auto mb-3\" />\n              <h3 className=\"font-semibold text-gray-900 mb-2\">Trusted by Thousands</h3>\n              <p className=\"text-sm text-gray-600\">Join 10,000+ satisfied users worldwide</p>\n            </div>\n          </div>\n        </Card>\n\n        {/* FAQ Section */}\n        <Card className=\"p-8\">\n          <h2 className=\"text-2xl font-bold text-gray-900 mb-8 text-center\">Frequently Asked Questions</h2>\n          <div className=\"grid grid-cols-1 md:grid-cols-2 gap-6\">\n            {faqs.map((faq, index) => (\n              <div key={index} className=\"space-y-2\">\n                <h3 className=\"font-semibold text-gray-900\">{faq.question}</h3>\n                <p className=\"text-gray-600 text-sm\">{faq.answer}</p>\n              </div>\n            ))}\n          </div>\n        </Card>\n      </div>\n    </div>\n  );\n};\n\nexport default Pricing;
+        </div>
+
+        {/* Trust Badges */}
+        <div className="bg-white rounded-lg p-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {trustBadges.map((badge, index) => (
+              <div key={index} className="text-center">
+                <div className="text-2xl mb-2">{badge.icon}</div>
+                <p className="text-sm text-gray-600 font-medium">{badge.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Why Choose Us */}
+        <Card className="p-8 mb-16">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Why Choose Our Platform?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="text-center">
+              <Zap className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+              <h3 className="font-semibold text-gray-900 mb-2">Lightning Fast</h3>
+              <p className="text-sm text-gray-600">Convert statements in under 30 seconds with AI-powered processing</p>
+            </div>
+            <div className="text-center">
+              <Shield className="h-8 w-8 text-green-600 mx-auto mb-3" />
+              <h3 className="font-semibold text-gray-900 mb-2">100% Secure</h3>
+              <p className="text-sm text-gray-600">Your data never leaves your browser. SOC 2 compliant security</p>
+            </div>
+            <div className="text-center">
+              <Check className="h-8 w-8 text-purple-600 mx-auto mb-3" />
+              <h3 className="font-semibold text-gray-900 mb-2">High Accuracy</h3>
+              <p className="text-sm text-gray-600">99%+ accuracy with advanced AI and machine learning</p>
+            </div>
+            <div className="text-center">
+              <Users className="h-8 w-8 text-orange-600 mx-auto mb-3" />
+              <h3 className="font-semibold text-gray-900 mb-2">Trusted by Thousands</h3>
+              <p className="text-sm text-gray-600">Join 10,000+ satisfied users worldwide</p>
+            </div>
+          </div>
+        </Card>
+
+        {/* FAQ Section */}
+        <Card className="p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {faqs.map((faq, index) => (
+              <div key={index} className="space-y-2">
+                <h3 className="font-semibold text-gray-900">{faq.question}</h3>
+                <p className="text-gray-600 text-sm">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+    </div>
+  );\n};\n\nexport default Pricing;
