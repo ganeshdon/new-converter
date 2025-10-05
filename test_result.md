@@ -103,10 +103,10 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Test the complete anonymous conversion flow for the free PDF conversion system with browser 
-  fingerprinting and tracking. Verify anonymous user experience, browser fingerprinting, 
-  anonymous PDF processing flow, limit enforcement after 1 conversion, and integration with 
-  authentication system.
+  Test the complete Stripe payment integration for the subscription system. Verify payment session 
+  creation for different packages and billing intervals, payment status checking, webhook processing, 
+  subscription package validation with server-side pricing security, and database integration for 
+  payment transactions. Ensure authentication requirements and proper error handling.
 
 backend:
   - task: "Anonymous conversion tracking endpoints"
