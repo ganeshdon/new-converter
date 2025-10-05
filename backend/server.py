@@ -35,6 +35,48 @@ load_dotenv(ROOT_DIR / '.env')
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
+
+if not JWT_SECRET_KEY:
+    raise ValueError("JWT_SECRET_KEY environment variable is required")
+
+if not STRIPE_API_KEY:
+    raise ValueError("STRIPE_API_KEY environment variable is required")
+
+# Define subscription packages - SECURITY: Server-side only pricing
+SUBSCRIPTION_PACKAGES = {
+    "starter": {
+        "name": "Starter",
+        "monthly_price": 15.0,
+        "annual_price": 12.0,  # 20% discount
+        "pages_limit": 400,
+        "features": ["400 pages/month", "Email support", "PDF conversion"]
+    },
+    "professional": {
+        "name": "Professional", 
+        "monthly_price": 30.0,
+        "annual_price": 24.0,  # 20% discount
+        "pages_limit": 1000,
+        "features": ["1000 pages/month", "Priority support", "Advanced features"]
+    },
+    "business": {
+        "name": "Business",
+        "monthly_price": 50.0,
+        "annual_price": 40.0,  # 20% discount
+        "pages_limit": 4000,
+        "features": ["4000 pages/month", "Priority support", "Team features"]
+    },
+    "enterprise": {
+        "name": "Enterprise",
+        "monthly_price": 100.0,  # Custom pricing starts here
+        "annual_price": 80.0,
+        "pages_limit": -1,  # Unlimited
+        "features": ["Unlimited pages", "Dedicated support", "Custom integration"]
+    }
+}
+
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
