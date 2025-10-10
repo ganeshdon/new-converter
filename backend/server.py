@@ -987,23 +987,18 @@ async def proxy_blog_request(request: Request, path: str = ""):
             verify=False  # For development, set to True in production
         ) as client:
             
-            # Prepare headers (exclude problematic ones)
+            # Prepare headers (exclude problematic ones including Accept-Encoding)
+            # Important: Strip Accept-Encoding to prevent intermediate proxies from re-compressing
             headers = {
                 key: value for key, value in request.headers.items() 
                 if key.lower() not in [
                     'host', 'content-length', 'content-encoding', 
-                    'transfer-encoding', 'connection'
+                    'transfer-encoding', 'connection', 'accept-encoding'
                 ]
             }
             
             # Add proper headers for WordPress
-            # Note: Don't request compression - let httpx handle it automatically
-            headers.update({
-                'User-Agent': 'BankStatementConverter-Proxy/1.0',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Cache-Control': 'no-cache',
-            })
+            # Explicitly request no compression with Accept-Encoding:
             
             # Handle request body for POST/PUT/PATCH
             content = None
