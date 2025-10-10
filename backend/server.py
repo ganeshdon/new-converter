@@ -1055,59 +1055,59 @@ async def proxy_blog_request(request: Request, path: str = ""):
             status_code=502
         )
 
-# Blog Routes - Add to main app (not api_router) for direct /blog access
-@app.get("/blog/{path:path}")
+# Blog Routes - Must be under /api/ for Emergent ingress routing
+@api_router.get("/blog/{path:path}")
 async def blog_proxy_get(request: Request, path: str):
     """Proxy GET requests to WordPress blog"""
     return await proxy_blog_request(request, path)
 
-@app.post("/blog/{path:path}")
+@api_router.post("/blog/{path:path}")
 async def blog_proxy_post(request: Request, path: str):
     """Proxy POST requests to WordPress blog (for admin, forms, etc.)"""
     return await proxy_blog_request(request, path)
 
-@app.get("/blog")
+@api_router.get("/blog")
 async def blog_root_get(request: Request):
     """Proxy GET requests to WordPress blog root"""
     return await proxy_blog_request(request, "")
 
-@app.post("/blog")
+@api_router.post("/blog")
 async def blog_root_post(request: Request):
     """Proxy POST requests to WordPress blog root"""
     return await proxy_blog_request(request, "")
 
 # Handle WordPress admin redirect
-@app.get("/blog/admin")
+@api_router.get("/blog/admin")
 async def blog_admin_redirect():
     """Redirect /blog/admin to /blog/wp-admin"""
     return Response(
         status_code=301,
-        headers={"Location": "/blog/wp-admin"}
+        headers={"Location": "/api/blog/wp-admin"}
     )
 
-# Handle WordPress admin routes
-@app.get("/blog/wp-admin/{path:path}")
+# Handle WordPress admin routes  
+@api_router.get("/blog/wp-admin/{path:path}")
 async def blog_wp_admin_get(request: Request, path: str):
     """Proxy WordPress admin GET requests"""
     return await proxy_blog_request(request, f"wp-admin/{path}")
 
-@app.post("/blog/wp-admin/{path:path}")
+@api_router.post("/blog/wp-admin/{path:path}")
 async def blog_wp_admin_post(request: Request, path: str):
     """Proxy WordPress admin POST requests"""
     return await proxy_blog_request(request, f"wp-admin/{path}")
 
-@app.get("/blog/wp-admin")
+@api_router.get("/blog/wp-admin")
 async def blog_wp_admin_root(request: Request):
     """Proxy WordPress admin root"""
     return await proxy_blog_request(request, "wp-admin/")
 
 # Handle WordPress content (images, CSS, JS)
-@app.get("/blog/wp-content/{path:path}")
+@api_router.get("/blog/wp-content/{path:path}")
 async def blog_wp_content(request: Request, path: str):
     """Proxy WordPress content files"""
     return await proxy_blog_request(request, f"wp-content/{path}")
 
-@app.get("/blog/wp-includes/{path:path}")
+@api_router.get("/blog/wp-includes/{path:path}")
 async def blog_wp_includes(request: Request, path: str):
     """Proxy WordPress includes files"""
     return await proxy_blog_request(request, f"wp-includes/{path}")
