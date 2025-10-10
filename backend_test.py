@@ -1926,18 +1926,16 @@ def main():
         print("❌ API is not accessible. Stopping tests.")
         return False
     
-    print("\n📝 WordPress Blog Proxy Tests - PRIORITY")
+    print("\n📝 WordPress Proxy Tests - NEW /api/wordpress Path - PRIORITY")
     print("-" * 40)
     
-    # WordPress tests first as per review request
+    # WordPress proxy tests with NEW /api/wordpress path as per review request
     test_wordpress_environment_config(results)
-    test_direct_wordpress_connectivity(results)
-    test_wordpress_blog_proxy_comprehensive(results)
-    test_blog_route_accessibility(results)
-    test_blog_proxy_headers(results)
-    test_blog_admin_routes(results)
-    test_blog_static_assets(results)
-    test_blog_route_priority(results)
+    test_wordpress_direct_connectivity(results)
+    test_wordpress_proxy_routes(results)
+    test_wordpress_proxy_headers(results)
+    test_wordpress_admin_routes(results)
+    test_wordpress_static_assets(results)
     
     print("\n📋 JWT Authentication Tests")
     print("-" * 40)
