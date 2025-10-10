@@ -47,6 +47,9 @@ if not STRIPE_API_KEY:
     raise ValueError("STRIPE_API_KEY environment variable is required")
 
 # Define subscription packages - SECURITY: Server-side only pricing
+# WordPress Hostinger Configuration
+WORDPRESS_BASE_URL = os.getenv("WORDPRESS_BASE_URL", "https://yourbankstatementconverter.com")
+
 SUBSCRIPTION_PACKAGES = {
     "starter": {
         "name": "Starter",
