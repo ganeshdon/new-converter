@@ -966,6 +966,152 @@ async def get_pricing_plans():
     
     return plans
 
+# Blog Proxy Functionality
+async def proxy_blog_request(request: Request, path: str = ""):
+    """Proxy blog requests to WordPress on Hostinger"""
+    
+    # Construct the target URL for your Hostinger WordPress
+    if path:
+        target_url = f"{WORDPRESS_BASE_URL}/blog/{path}"
+    else:
+        target_url = f"{WORDPRESS_BASE_URL}/blog/"
+    
+    # Forward query parameters
+    if request.url.query:
+        target_url += f"?{request.url.query}"
+    
+    try:
+        async with httpx.AsyncClient(
+            timeout=30.0,
+            follow_redirects=True,
+            verify=False  # For development, set to True in production
+        ) as client:
+            
+            # Prepare headers (exclude problematic ones)
+            headers = {
+                key: value for key, value in request.headers.items() 
+                if key.lower() not in [
+                    'host', 'content-length', 'content-encoding', 
+                    'transfer-encoding', 'connection'
+                ]
+            }
+            
+            # Add proper headers for WordPress
+            headers.update({
+                'User-Agent': 'BankStatementConverter-Proxy/1.0',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate',
+                'Cache-Control': 'no-cache',
+            })
+            
+            # Handle request body for POST/PUT/PATCH
+            content = None
+            if request.method in ['POST', 'PUT', 'PATCH']:
+                content = await request.body()
+            
+            # Make request to WordPress
+            response = await client.request(
+                method=request.method,
+                url=target_url,
+                headers=headers,
+                content=content
+            )
+            
+            # Prepare response headers
+            response_headers = {
+                key: value for key, value in response.headers.items()
+                if key.lower() not in [
+                    'content-encoding', 'transfer-encoding', 'connection',
+                    'server', 'date', 'content-length'
+                ]
+            }
+            
+            # Add CORS headers if needed
+            response_headers.update({
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            })
+            
+            # Return the WordPress response
+            return Response(
+                content=response.content,
+                status_code=response.status_code,
+                headers=response_headers,
+                media_type=response.headers.get('content-type', 'text/html')
+            )
+            
+    except httpx.TimeoutException:
+        logger.error(f"Timeout while proxying to WordPress: {target_url}")
+        return HTMLResponse(
+            content="<h1>Blog Temporarily Unavailable</h1><p>Please try again later.</p>",
+            status_code=504
+        )
+    except Exception as e:
+        logger.error(f"Blog proxy error for {target_url}: {str(e)}")
+        return HTMLResponse(
+            content=f"<h1>Blog Error</h1><p>Unable to load blog content. Error: {str(e)}</p>",
+            status_code=502
+        )
+
+# Blog Routes - Add before the main app routes
+@api_router.get("/blog/{path:path}")
+async def blog_proxy_get(request: Request, path: str):
+    """Proxy GET requests to WordPress blog"""
+    return await proxy_blog_request(request, path)
+
+@api_router.post("/blog/{path:path}")
+async def blog_proxy_post(request: Request, path: str):
+    """Proxy POST requests to WordPress blog (for admin, forms, etc.)"""
+    return await proxy_blog_request(request, path)
+
+@api_router.get("/blog")
+async def blog_root_get(request: Request):
+    """Proxy GET requests to WordPress blog root"""
+    return await proxy_blog_request(request, "")
+
+@api_router.post("/blog")
+async def blog_root_post(request: Request):
+    """Proxy POST requests to WordPress blog root"""
+    return await proxy_blog_request(request, "")
+
+# Handle WordPress admin redirect
+@api_router.get("/blog/admin")
+async def blog_admin_redirect():
+    """Redirect /blog/admin to /blog/wp-admin"""
+    return Response(
+        status_code=301,
+        headers={"Location": "/blog/wp-admin"}
+    )
+
+# Handle WordPress admin routes
+@api_router.get("/blog/wp-admin/{path:path}")
+async def blog_wp_admin_get(request: Request, path: str):
+    """Proxy WordPress admin GET requests"""
+    return await proxy_blog_request(request, f"wp-admin/{path}")
+
+@api_router.post("/blog/wp-admin/{path:path}")
+async def blog_wp_admin_post(request: Request, path: str):
+    """Proxy WordPress admin POST requests"""
+    return await proxy_blog_request(request, f"wp-admin/{path}")
+
+@api_router.get("/blog/wp-admin")
+async def blog_wp_admin_root(request: Request):
+    """Proxy WordPress admin root"""
+    return await proxy_blog_request(request, "wp-admin/")
+
+# Handle WordPress content (images, CSS, JS)
+@api_router.get("/blog/wp-content/{path:path}")
+async def blog_wp_content(request: Request, path: str):
+    """Proxy WordPress content files"""
+    return await proxy_blog_request(request, f"wp-content/{path}")
+
+@api_router.get("/blog/wp-includes/{path:path}")
+async def blog_wp_includes(request: Request, path: str):
+    """Proxy WordPress includes files"""
+    return await proxy_blog_request(request, f"wp-includes/{path}")
+
 async def count_pdf_pages(pdf_path: str) -> int:
     """Count pages in PDF file"""
     try:
