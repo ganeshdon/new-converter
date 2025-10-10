@@ -1825,35 +1825,32 @@ def main():
     # Test 23: Payment database integration
     test_payment_database_integration(results, token)
     
-    print("\n📝 WordPress Blog Proxy Tests")
+    print("\n📝 WordPress Blog Proxy Tests - PRIORITY")
     print("-" * 40)
     
     # Test 24: WordPress environment configuration
     test_wordpress_environment_config(results)
     
-    # Test 25: Blog route accessibility
+    # Test 25: Direct WordPress connectivity
+    test_direct_wordpress_connectivity(results)
+    
+    # Test 26: Comprehensive WordPress blog proxy functionality
+    test_wordpress_blog_proxy_comprehensive(results)
+    
+    # Test 27: Blog route accessibility (legacy test)
     test_blog_route_accessibility(results)
     
-    # Test 26: Blog proxy headers and response handling
+    # Test 28: Blog proxy headers and response handling
     test_blog_proxy_headers(results)
     
-    # Test 27: WordPress admin routes
+    # Test 29: WordPress admin routes
     test_blog_admin_routes(results)
     
-    # Test 28: WordPress static assets proxying
+    # Test 30: WordPress static assets proxying
     test_blog_static_assets(results)
     
-    # Test 29: Blog route priority (no conflicts with API)
+    # Test 31: Blog route priority (no conflicts with API)
     test_blog_route_priority(results)
-    
-    # Test 30: WordPress connectivity (direct backend test)
-    test_wordpress_connectivity(results)
-    
-    # Test 31: Blog proxy error handling
-    test_blog_proxy_error_handling(results)
-    
-    # Test 32: Blog proxy HTTP methods
-    test_blog_proxy_methods(results)
     
     # Cleanup test data
     cleanup_test_oauth_data()
