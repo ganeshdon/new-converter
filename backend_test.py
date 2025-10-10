@@ -1422,6 +1422,169 @@ def test_blog_static_assets(results):
     except Exception as e:
         results.log_fail("Blog Static Assets", f"Exception: {str(e)}")
 
+def test_wordpress_blog_proxy_comprehensive(results):
+    """Comprehensive test of WordPress blog proxy functionality as per review request"""
+    try:
+        print("\n" + "="*60)
+        print("COMPREHENSIVE WORDPRESS BLOG PROXY TESTING")
+        print("="*60)
+        
+        # Test cases as specified in the review request
+        test_cases = [
+            {
+                "route": "/api/blog",
+                "description": "WordPress homepage proxy",
+                "expected": "Should proxy to WordPress homepage"
+            },
+            {
+                "route": "/api/blog/",
+                "description": "WordPress homepage proxy (with trailing slash)",
+                "expected": "Should also proxy to WordPress homepage"
+            },
+            {
+                "route": "/api/blog/sample-post",
+                "description": "WordPress post/page proxy",
+                "expected": "Should proxy to a WordPress post/page"
+            }
+        ]
+        
+        wordpress_working = 0
+        total_tests = len(test_cases)
+        
+        for test_case in test_cases:
+            route = test_case["route"]
+            description = test_case["description"]
+            
+            print(f"\nTesting: {route} - {description}")
+            
+            try:
+                response = requests.get(f"{BASE_URL}{route}", timeout=30, allow_redirects=True)
+                
+                print(f"Status Code: {response.status_code}")
+                print(f"Content-Type: {response.headers.get('content-type', 'Not specified')}")
+                print(f"Content Length: {len(response.text)} characters")
+                
+                if response.status_code == 200:
+                    content = response.text.lower()
+                    
+                    # WordPress content indicators
+                    wordpress_indicators = [
+                        'wordpress', 'wp-content', 'wp-includes', 'wp-admin', 'wp-json',
+                        'wp-emoji', 'wp-block', 'hostinger', 'powderblue-stingray'
+                    ]
+                    
+                    # React frontend indicators (indicates routing issue)
+                    react_indicators = [
+                        'react', 'root', 'app.js', 'bundle.js', 'static/js', 'static/css',
+                        'bank statement converter', 'converter.jsx'
+                    ]
+                    
+                    wordpress_found = sum(1 for indicator in wordpress_indicators if indicator in content)
+                    react_found = sum(1 for indicator in react_indicators if indicator in content)
+                    
+                    print(f"WordPress indicators found: {wordpress_found}")
+                    print(f"React indicators found: {react_found}")
+                    
+                    if react_found > wordpress_found:
+                        results.log_fail("WordPress Blog Proxy", f"{route} - CRITICAL: Returns React frontend content instead of WordPress. Kubernetes ingress routing issue.")
+                        print("❌ CRITICAL ISSUE: Kubernetes ingress routes /blog requests to frontend instead of backend")
+                    elif wordpress_found > 0:
+                        results.log_pass(f"WordPress Blog Proxy - {route} successfully returns WordPress content")
+                        wordpress_working += 1
+                        print("✅ WordPress content detected")
+                    else:
+                        # Check for proxy error messages
+                        if any(error in content for error in ['blog error', 'temporarily unavailable', 'unable to load']):
+                            results.log_pass(f"WordPress Blog Proxy - {route} proxy working (WordPress service issue)")
+                            wordpress_working += 1
+                            print("✅ Proxy working, WordPress service unavailable")
+                        else:
+                            results.log_fail("WordPress Blog Proxy", f"{route} - Returns unexpected content (neither WordPress nor known error)")
+                            print("❌ Unexpected content type")
+                            print(f"Content preview: {content[:200]}...")
+                
+                elif response.status_code == 404:
+                    content = response.text.lower()
+                    if any(wp_indicator in content for wp_indicator in ['wordpress', 'wp-']):
+                        results.log_pass(f"WordPress Blog Proxy - {route} proxy working (WordPress 404)")
+                        wordpress_working += 1
+                        print("✅ WordPress 404 (proxy working)")
+                    else:
+                        results.log_fail("WordPress Blog Proxy", f"{route} - App 404 (proxy not working)")
+                        print("❌ App-level 404 (proxy not accessible)")
+                
+                elif response.status_code in [502, 504]:
+                    results.log_pass(f"WordPress Blog Proxy - {route} proxy working (WordPress server error)")
+                    wordpress_working += 1
+                    print("✅ Proxy working, WordPress server error")
+                
+                else:
+                    results.log_fail("WordPress Blog Proxy", f"{route} - Unexpected status code: {response.status_code}")
+                    print(f"❌ Unexpected status code: {response.status_code}")
+                    
+            except requests.exceptions.Timeout:
+                results.log_pass(f"WordPress Blog Proxy - {route} proxy working (timeout from WordPress)")
+                wordpress_working += 1
+                print("✅ Proxy working, WordPress timeout")
+            except Exception as e:
+                results.log_fail("WordPress Blog Proxy", f"{route} - Exception: {str(e)}")
+                print(f"❌ Exception: {str(e)}")
+        
+        # Summary
+        print(f"\n" + "="*60)
+        print(f"WORDPRESS PROXY TEST SUMMARY: {wordpress_working}/{total_tests} routes working")
+        print("="*60)
+        
+        if wordpress_working == total_tests:
+            results.log_pass("WordPress Blog Proxy - All proxy routes working correctly")
+        elif wordpress_working > 0:
+            results.log_pass(f"WordPress Blog Proxy - {wordpress_working}/{total_tests} routes working")
+        else:
+            results.log_fail("WordPress Blog Proxy", "No proxy routes working - critical infrastructure issue")
+            
+    except Exception as e:
+        results.log_fail("WordPress Blog Proxy", f"Comprehensive test exception: {str(e)}")
+
+def test_direct_wordpress_connectivity(results):
+    """Test direct connectivity to WordPress site"""
+    try:
+        # Test direct access to the WordPress site
+        wordpress_url = "https://powderblue-stingray-662228.hostingersite.com"
+        
+        print(f"\nTesting direct WordPress connectivity: {wordpress_url}")
+        
+        response = requests.get(wordpress_url, timeout=30, allow_redirects=True)
+        
+        print(f"Direct WordPress Status: {response.status_code}")
+        print(f"Direct WordPress Content-Type: {response.headers.get('content-type', 'Not specified')}")
+        
+        if response.status_code == 200:
+            content = response.text.lower()
+            
+            wordpress_indicators = [
+                'wordpress', 'wp-content', 'wp-includes', 'wp-admin', 'wp-json',
+                'hostinger', 'powderblue-stingray'
+            ]
+            
+            wordpress_found = sum(1 for indicator in wordpress_indicators if indicator in content)
+            
+            if wordpress_found > 0:
+                results.log_pass("Direct WordPress Connectivity - WordPress site is accessible and returning content")
+                print("✅ Direct WordPress access working")
+                return True
+            else:
+                results.log_fail("Direct WordPress Connectivity", "WordPress site accessible but content unexpected")
+                print("❌ WordPress site returns unexpected content")
+        else:
+            results.log_fail("Direct WordPress Connectivity", f"WordPress site returned status {response.status_code}")
+            print(f"❌ WordPress site error: {response.status_code}")
+            
+    except Exception as e:
+        results.log_fail("Direct WordPress Connectivity", f"Exception: {str(e)}")
+        print(f"❌ Direct WordPress test exception: {str(e)}")
+    
+    return False
+
 def test_blog_route_priority(results):
     """Test that blog routes don't conflict with API routes"""
     try:
