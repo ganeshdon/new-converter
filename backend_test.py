@@ -1239,8 +1239,8 @@ def test_wordpress_environment_config(results):
             results.log_fail("WordPress Environment Config", f"Invalid WORDPRESS_BASE_URL format: {wordpress_url}")
             return None
             
-        # Validate the expected URL
-        expected_url = "https://yourbankstatementconverter.com"
+        # Validate the expected URL (updated to new Hostinger URL)
+        expected_url = "https://powderblue-stingray-662228.hostingersite.com"
         if wordpress_url != expected_url:
             results.log_fail("WordPress Environment Config", f"WORDPRESS_BASE_URL mismatch: expected {expected_url}, got {wordpress_url}")
             return None
