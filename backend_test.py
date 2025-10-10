@@ -1256,14 +1256,19 @@ def test_wordpress_environment_config(results):
 def test_blog_route_accessibility(results):
     """Test blog route accessibility and proxy functionality"""
     try:
-        # Test main blog route
+        # Test main blog routes as specified in the review request
         blog_routes = [
-            "/blog",
-            "/blog/",
+            "/api/blog",      # Should proxy to WordPress homepage
+            "/api/blog/",     # Should also proxy to WordPress homepage
+            "/api/blog/sample-post"  # Should proxy to a WordPress post/page
         ]
         
         for route in blog_routes:
+            print(f"Testing route: {route}")
             response = requests.get(f"{BASE_URL}{route}", timeout=30, allow_redirects=True)
+            
+            print(f"Response status: {response.status_code}")
+            print(f"Response headers: {dict(response.headers)}")
             
             if response.status_code == 200:
                 # Check if we got WordPress content or proxy response
@@ -1272,20 +1277,35 @@ def test_blog_route_accessibility(results):
                 # Look for WordPress indicators
                 wordpress_indicators = [
                     'wordpress', 'wp-content', 'wp-includes', 'wp-admin',
-                    'blog', 'post', 'article', 'content'
+                    'hostinger', 'powderblue-stingray', 'blog', 'post', 'article', 'content',
+                    'wp-json', 'wp-emoji', 'wp-block'
                 ]
                 
                 has_wordpress_content = any(indicator in content for indicator in wordpress_indicators)
                 
-                if has_wordpress_content:
+                # Check if it's React frontend content (indicates routing issue)
+                react_indicators = ['react', 'root', 'app.js', 'bundle.js', 'static/js', 'static/css']
+                has_react_content = any(indicator in content for indicator in react_indicators)
+                
+                if has_react_content:
+                    results.log_fail("Blog Route Accessibility", f"{route} returns React frontend content - Kubernetes ingress routing issue")
+                elif has_wordpress_content:
                     results.log_pass(f"Blog Route Accessibility - {route} returns WordPress content")
                 else:
                     # Check if it's a proxy error or different content
                     if 'blog error' in content or 'temporarily unavailable' in content:
                         results.log_pass(f"Blog Route Accessibility - {route} proxy working (WordPress unavailable)")
                     else:
+                        print(f"Content preview: {content[:500]}...")
                         results.log_fail("Blog Route Accessibility", f"{route} returns unexpected content (not WordPress)")
                         
+            elif response.status_code == 404:
+                # Check if 404 is from WordPress or from our app
+                content = response.text.lower()
+                if 'wordpress' in content or 'wp-' in content:
+                    results.log_pass(f"Blog Route Accessibility - {route} proxy working (WordPress 404)")
+                else:
+                    results.log_fail("Blog Route Accessibility", f"{route} returns 404 from app (not WordPress)")
             elif response.status_code == 502:
                 results.log_pass(f"Blog Route Accessibility - {route} proxy working (502 Bad Gateway from WordPress)")
             elif response.status_code == 504:
