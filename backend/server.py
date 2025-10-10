@@ -1047,6 +1047,10 @@ async def proxy_blog_request(request: Request, path: str = ""):
                 text_content = response.text
                 logger.info(f"Text content length: {len(text_content)}, First 100 chars: {text_content[:100]}")
                 
+                # Ensure charset is set in headers
+                if 'content-type' not in {k.lower() for k in response_headers.keys()}:
+                    response_headers['Content-Type'] = 'text/html; charset=UTF-8'
+                
                 return HTMLResponse(
                     content=text_content,
                     status_code=response.status_code,
