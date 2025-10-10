@@ -1,0 +1,13 @@
+# Add this to your WordPress .htaccess file
+# Located in your WordPress root directory (/blog/.htaccess)
+
+# WordPress Admin Redirect
+RewriteEngine On
+RewriteRule ^admin/?$ wp-admin/ [R=301,L]
+RewriteRule ^admin/(.*)$ wp-admin/$1 [R=301,L]
+
+# Standard WordPress rules below
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /blog/index.php [L]
