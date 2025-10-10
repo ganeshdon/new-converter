@@ -5,10 +5,12 @@ const BlogRedirect = () => {
   const location = useLocation();
   
   useEffect(() => {
-    // Force a complete page reload to bypass React Router
-    // This will make the browser send a fresh request to the server
-    // which should then be handled by the backend proxy
-    window.location.replace(location.pathname + location.search + location.hash);
+    // Convert /blog path to /api/blog for backend proxy
+    const blogPath = location.pathname.replace('/blog', '/api/blog');
+    const fullUrl = blogPath + location.search + location.hash;
+    
+    // Redirect to the API blog endpoint which will proxy to WordPress
+    window.location.replace(fullUrl);
   }, [location]);
 
   return (
