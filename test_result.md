@@ -391,8 +391,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Footer simplification testing completed successfully"
-  stuck_tasks: []
+    - "WordPress blog proxy functionality"
+  stuck_tasks:
+    - "WordPress blog proxy functionality"
   test_all: false
   test_priority: "high_first"
 
