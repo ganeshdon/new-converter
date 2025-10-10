@@ -1035,12 +1035,24 @@ async def proxy_blog_request(request: Request, path: str = ""):
             })
             
             # Return the WordPress response
-            return Response(
-                content=response.content,
-                status_code=response.status_code,
-                headers=response_headers,
-                media_type=response.headers.get('content-type', 'text/html')
-            )
+            # Use response.text for HTML content to ensure proper encoding
+            content_type = response.headers.get('content-type', 'text/html')
+            
+            # For text/html content, use .text to ensure proper decoding
+            if 'text/html' in content_type or 'text/' in content_type:
+                return HTMLResponse(
+                    content=response.text,
+                    status_code=response.status_code,
+                    headers=response_headers
+                )
+            else:
+                # For binary content (images, css, js), use .content
+                return Response(
+                    content=response.content,
+                    status_code=response.status_code,
+                    headers=response_headers,
+                    media_type=content_type
+                )
             
     except httpx.TimeoutException:
         logger.error(f"Timeout while proxying to WordPress: {target_url}")
