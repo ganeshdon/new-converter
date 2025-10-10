@@ -1266,6 +1266,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Startup and shutdown events
+@app.on_event("startup")
+async def startup_db_client():
+    global client, db
+    try:
+        client = AsyncIOMotorClient(MONGO_URL)
+        db = client.get_database(DB_NAME)
+        logger.info("Connected to MongoDB successfully")
+    except Exception as e:
+        logger.error(f"Failed to connect to MongoDB: {e}")
+        raise
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
