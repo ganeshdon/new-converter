@@ -1042,31 +1042,21 @@ async def proxy_blog_request(request: Request, path: str = ""):
             # Log for debugging
             logger.info(f"WordPress response - Status: {response.status_code}, Content-Type: {content_type}, Original encoding: {response.headers.get('content-encoding', 'none')}")
             
-            # For text/html content, use .text to ensure proper decoding
-            if 'text/html' in content_type or 'text/' in content_type:
-                # Get the text content (httpx auto-decompresses)
-                text_content = response.text
-                logger.info(f"Text content length: {len(text_content)}, First 100 chars: {text_content[:100]}")
-                
-                # Ensure charset is set in headers and explicitly disable compression
-                response_headers['Content-Type'] = 'text/html; charset=UTF-8'
-                response_headers['Cache-Control'] = 'no-transform'  # Prevent intermediate proxies from modifying
-                
-                # Use plain Response with explicit UTF-8 encoding
-                return Response(
-                    content=text_content.encode('utf-8'),
-                    status_code=response.status_code,
-                    headers=response_headers,
-                    media_type='text/html; charset=UTF-8'
-                )
-            else:
-                # For binary content (images, css, js), use .content
-                return Response(
-                    content=response.content,
-                    status_code=response.status_code,
-                    headers=response_headers,
-                    media_type=content_type
-                )
+            # Return response using iter_bytes() for proper streaming
+            # This ensures content is properly handled without re-compression
+            response_headers['Content-Type'] = response.headers.get('content-type', 'text/html; charset=UTF-8')
+            response_headers['Cache-Control'] = 'no-cache, no-store, no-transform, must-revalidate'
+            
+            async def generate():
+                async for chunk in response.aiter_bytes():
+                    yield chunk
+            
+            return StreamingResponse(
+                generate(),
+                status_code=response.status_code,
+                headers=response_headers,
+                media_type=response.headers.get('content-type', 'text/html')
+            )
             
     except httpx.TimeoutException:
         logger.error(f"Timeout while proxying to WordPress: {target_url}")
