@@ -1048,6 +1048,7 @@ async def proxy_blog_request(request: Request, path: str = ""):
             # This ensures content is properly handled without re-compression
             response_headers['Content-Type'] = response.headers.get('content-type', 'text/html; charset=UTF-8')
             response_headers['Cache-Control'] = 'no-cache, no-store, no-transform, must-revalidate'
+            response_headers['Content-Encoding'] = 'identity'  # Explicitly signal no compression to prevent intermediate proxy re-compression
             
             async def generate():
                 async for chunk in response.aiter_bytes():
