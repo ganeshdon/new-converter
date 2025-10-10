@@ -13,6 +13,7 @@ import Pricing from './pages/Pricing';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
 import CookiePolicy from './pages/CookiePolicy';
+import BlogRedirect from './components/BlogRedirect';
 import { Toaster } from './components/ui/sonner';
 import './App.css';
 
