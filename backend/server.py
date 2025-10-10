@@ -1271,8 +1271,8 @@ logger = logging.getLogger(__name__)
 async def startup_db_client():
     global client, db
     try:
-        client = AsyncIOMotorClient(MONGO_URL)
-        db = client.get_database(DB_NAME)
+        client = AsyncIOMotorClient(mongo_url)
+        db = client[os.environ['DB_NAME']]
         logger.info("Connected to MongoDB successfully")
     except Exception as e:
         logger.error(f"Failed to connect to MongoDB: {e}")
