@@ -5,11 +5,11 @@ const BlogRedirect = () => {
   const location = useLocation();
   
   useEffect(() => {
-    // Convert /blog path to /api/blog for backend proxy
-    const blogPath = location.pathname.replace('/blog', '/api/blog');
+    // Convert /blog path to /api/wordpress for backend proxy
+    const blogPath = location.pathname.replace('/blog', '/api/wordpress');
     const fullUrl = blogPath + location.search + location.hash;
     
-    // Redirect to the API blog endpoint which will proxy to WordPress
+    // Redirect to the API wordpress endpoint which will proxy to WordPress
     window.location.replace(fullUrl);
   }, [location]);
 
