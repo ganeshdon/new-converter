@@ -971,10 +971,11 @@ async def proxy_blog_request(request: Request, path: str = ""):
     """Proxy blog requests to WordPress on Hostinger"""
     
     # Construct the target URL for your Hostinger WordPress
+    # Since WordPress is already configured at the domain, we access it directly
     if path:
-        target_url = f"{WORDPRESS_BASE_URL}/blog/{path}"
+        target_url = f"https://yourbankstatementconverter.com/blog/{path}"
     else:
-        target_url = f"{WORDPRESS_BASE_URL}/blog/"
+        target_url = f"https://yourbankstatementconverter.com/blog/"
     
     # Forward query parameters
     if request.url.query:
