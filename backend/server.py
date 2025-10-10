@@ -1048,14 +1048,16 @@ async def proxy_blog_request(request: Request, path: str = ""):
                 text_content = response.text
                 logger.info(f"Text content length: {len(text_content)}, First 100 chars: {text_content[:100]}")
                 
-                # Ensure charset is set in headers
-                if 'content-type' not in {k.lower() for k in response_headers.keys()}:
-                    response_headers['Content-Type'] = 'text/html; charset=UTF-8'
+                # Ensure charset is set in headers and explicitly disable compression
+                response_headers['Content-Type'] = 'text/html; charset=UTF-8'
+                response_headers['Cache-Control'] = 'no-transform'  # Prevent intermediate proxies from modifying
                 
-                return HTMLResponse(
-                    content=text_content,
+                # Use plain Response with explicit UTF-8 encoding
+                return Response(
+                    content=text_content.encode('utf-8'),
                     status_code=response.status_code,
-                    headers=response_headers
+                    headers=response_headers,
+                    media_type='text/html; charset=UTF-8'
                 )
             else:
                 # For binary content (images, css, js), use .content
