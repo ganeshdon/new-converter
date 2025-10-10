@@ -1035,13 +1035,20 @@ async def proxy_blog_request(request: Request, path: str = ""):
             })
             
             # Return the WordPress response
-            # Use response.text for HTML content to ensure proper encoding
+            # httpx automatically handles decompression, so response.text should be decoded
             content_type = response.headers.get('content-type', 'text/html')
+            
+            # Log for debugging
+            logger.info(f"WordPress response - Status: {response.status_code}, Content-Type: {content_type}, Original encoding: {response.headers.get('content-encoding', 'none')}")
             
             # For text/html content, use .text to ensure proper decoding
             if 'text/html' in content_type or 'text/' in content_type:
+                # Get the text content (httpx auto-decompresses)
+                text_content = response.text
+                logger.info(f"Text content length: {len(text_content)}, First 100 chars: {text_content[:100]}")
+                
                 return HTMLResponse(
-                    content=response.text,
+                    content=text_content,
                     status_code=response.status_code,
                     headers=response_headers
                 )
