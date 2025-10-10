@@ -1019,11 +1019,12 @@ async def proxy_blog_request(request: Request, path: str = ""):
             )
             
             # Prepare response headers
+            # Strip headers that could cause compression issues with intermediate proxies
             response_headers = {
                 key: value for key, value in response.headers.items()
                 if key.lower() not in [
                     'content-encoding', 'transfer-encoding', 'connection',
-                    'server', 'date', 'content-length'
+                    'server', 'date', 'content-length', 'vary'
                 ]
             }
             
