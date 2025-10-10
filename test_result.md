@@ -109,6 +109,21 @@ user_problem_statement: |
   payment transactions. Ensure authentication requirements and proper error handling.
 
 backend:
+  - task: "WordPress blog proxy functionality"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "WordPress blog proxy implemented with routes /blog, /blog/{path:path}, /blog/wp-admin/{path:path}, etc. Uses httpx to proxy requests to WORDPRESS_BASE_URL (https://yourbankstatementconverter.com). Includes proxy_blog_request function with proper headers, CORS, and error handling."
+      - working: false
+        agent: "testing"
+        comment: "WordPress blog proxy implementation is correct but NOT ACCESSIBLE due to Kubernetes ingress routing issue. ✅ Backend Implementation - All proxy routes properly implemented in server.py, WORDPRESS_BASE_URL correctly configured, proxy_blog_request function working. ✅ WordPress Connectivity - Direct WordPress site (https://yourbankstatementconverter.com) is accessible and returns proper content. ❌ CRITICAL ISSUE: Kubernetes ingress routes /blog requests to frontend instead of backend. Blog routes return React frontend HTML instead of WordPress content. The proxy routes are unreachable because frontend catch-all routing takes precedence. SOLUTION NEEDED: Update Kubernetes ingress configuration to route /blog/* requests to backend service before frontend catch-all."
+
   - task: "Anonymous conversion tracking endpoints"
     implemented: true
     working: true
