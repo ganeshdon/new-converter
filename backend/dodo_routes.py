@@ -91,6 +91,7 @@ async def create_dodo_subscription(
         user_id = current_user.get("user_id")
         
         logger.info(f"Creating Dodo subscription for user {user_email}, plan: {request.package_id}, interval: {request.billing_interval}")
+        logger.info(f"Using return URL: {FRONTEND_URL}/dashboard?payment=success")
         
         # Create subscription with payment link
         subscription_response = await dodo_client.subscriptions.create(
