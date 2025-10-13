@@ -14,7 +14,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 from dodo_payments import get_dodo_client, get_product_id
-from auth import get_current_user
 from models import PaymentSessionRequest, PaymentSessionResponse
 
 # Setup logging
