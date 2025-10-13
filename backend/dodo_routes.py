@@ -103,7 +103,8 @@ async def create_dodo_subscription(
             },
             billing={
                 "name": user_name,
-                "email": user_email
+                "email": user_email,
+                "country": "US"  # Default to US, can be made configurable later
             },
             metadata={
                 "user_id": user_id,
