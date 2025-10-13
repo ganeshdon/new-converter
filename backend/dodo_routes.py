@@ -15,9 +15,47 @@ from email.mime.multipart import MIMEMultipart
 
 from dodo_payments import get_dodo_client, get_product_id
 from models import PaymentSessionRequest, PaymentSessionResponse
+from auth import verify_jwt_token
 
 # Setup logging
 logger = logging.getLogger(__name__)
+
+# Helper function to get current user (duplicated from server.py to avoid circular import)
+async def get_current_user(request: Request):
+    """Get current user from JWT token or OAuth session token"""
+    # MongoDB client for session lookup
+    client = AsyncIOMotorClient(os.getenv("MONGO_URL", "mongodb://localhost:27017"))
+    db_name = os.getenv("DB_NAME", "test_database")
+    db = client[db_name]
+    
+    # First try to get session token from cookie
+    session_token = request.cookies.get("session_token")
+    if session_token:
+        session = await db.user_sessions.find_one({"session_token": session_token})
+        if session and session.get("expires_at") > datetime.utcnow():
+            user = await db.users.find_one({"_id": session["user_id"]})
+            if user:
+                return {"user_id": user["_id"], "email": user["email"], "name": user.get("name", "")}
+    
+    # Fallback to Authorization header
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    token = auth_header.split(" ")[1]
+    
+    # Try as session token first
+    session = await db.user_sessions.find_one({"session_token": token})
+    if session and session.get("expires_at") > datetime.utcnow():
+        user = await db.users.find_one({"_id": session["user_id"]})
+        if user:
+            return {"user_id": user["_id"], "email": user["email"], "name": user.get("name", "")}
+    
+    # Try as JWT token
+    try:
+        return verify_jwt_token(token)
+    except:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 # Create router
 router = APIRouter(prefix="/api", tags=["dodo-payments"])
