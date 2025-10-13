@@ -88,7 +88,7 @@ const Pricing = () => {
     }
     
     if (plan.id === 'enterprise') {
-      toast.info('Please contact sales for enterprise pricing');
+      setShowEnterpriseModal(true);
       return;
     }
     
@@ -97,7 +97,7 @@ const Pricing = () => {
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
       
-      const response = await fetch(`${backendUrl}/api/payments/create-session`, {
+      const response = await fetch(`${backendUrl}/api/dodo/create-subscription`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,17 +111,17 @@ const Pricing = () => {
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to create payment session');
+        throw new Error(errorData.detail || 'Failed to create subscription');
       }
       
       const data = await response.json();
       
-      // Redirect to Stripe Checkout
+      // Redirect to Dodo Payments Checkout
       window.location.href = data.checkout_url;
       
     } catch (error) {
-      console.error('Payment session error:', error);
-      toast.error(error.message || 'Failed to start payment process');
+      console.error('Subscription error:', error);
+      toast.error(error.message || 'Failed to start subscription process');
       setLoadingPlan(null);
     }
   };
