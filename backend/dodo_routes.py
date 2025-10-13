@@ -4,6 +4,8 @@ Handles subscription creation, customer portal, and webhooks
 """
 import os
 import logging
+from pathlib import Path
+from dotenv import load_dotenv
 from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from datetime import datetime
@@ -16,6 +18,10 @@ from email.mime.multipart import MIMEMultipart
 from dodo_payments import get_dodo_client, get_product_id
 from models import PaymentSessionRequest, PaymentSessionResponse
 from auth import verify_jwt_token
+
+# Load environment variables
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
 
 # Setup logging
 logger = logging.getLogger(__name__)
