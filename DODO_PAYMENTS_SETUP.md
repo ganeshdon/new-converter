@@ -10,7 +10,10 @@ This application now uses Dodo Payments for subscription management, replacing t
 DODO_PAYMENTS_API_KEY=NzvS5IynL725XWCv.zbxPW5uYg7SotKCOtrQHTydRlbklYn4D-9n5Am4xYd0BmAT-
 DODO_PAYMENTS_ENVIRONMENT=test_mode
 DODO_PAYMENTS_WEBHOOK_SECRET=(to be configured after webhook creation)
+FRONTEND_URL=https://yourbankstatementconverter.com
 ```
+
+**Important:** The `FRONTEND_URL` variable is used for redirect URLs after payment. Make sure it's set to your production domain.
 
 ### Product IDs
 **Monthly Plans:**
