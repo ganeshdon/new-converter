@@ -2209,35 +2209,28 @@ def main():
     # Test 17: Anonymous database tracking verification
     test_anonymous_database_tracking(results)
     
-    print("\n💳 Stripe Payment Integration Tests")
+    print("\n💳 Dodo Payments Integration Tests")
     print("-" * 40)
     
     # Clean up any existing payment test data first
-    cleanup_payment_test_data()
+    cleanup_dodo_test_data()
     
     # Test 18: Subscription packages security (server-side pricing)
     test_subscription_packages_security(results)
     
-    # Test 19: Stripe payment session creation
-    session_ids = test_stripe_payment_session_creation(results, token)
+    # Test 19: Dodo subscription creation
+    session_ids = test_dodo_subscription_creation(results, token)
     
-    # Test 20: Payment session validation (invalid inputs)
-    test_stripe_payment_session_validation(results, token)
+    # Test 20: Dodo subscription validation (invalid inputs)
+    test_dodo_subscription_validation(results, token)
     
-    # Test 21: Payment status checking
-    if session_ids:
-        test_stripe_payment_status_check(results, token, session_ids)
-    
-    # Test 22: Stripe webhook endpoint
-    test_stripe_webhook_endpoint(results)
-    
-    # Test 23: Payment database integration
-    test_payment_database_integration(results, token)
+    # Test 21: Dodo webhook endpoint
+    test_dodo_webhook_endpoint(results)
     
     # Cleanup test data
     cleanup_test_oauth_data()
     cleanup_anonymous_test_data()
-    cleanup_payment_test_data()
+    cleanup_dodo_test_data()
     
     # Print summary
     success = results.summary()
