@@ -66,8 +66,9 @@ DB_NAME = os.getenv("DB_NAME", "test_database")
 client = AsyncIOMotorClient(MONGO_URL)
 db = client[DB_NAME]
 
-# Get frontend URL from environment
-FRONTEND_URL = os.getenv("REACT_APP_BACKEND_URL", "http://localhost:3000").replace("/api", "")
+# Get frontend URL from environment variable
+# For production, this should be set to your actual domain (e.g., https://yourbankstatementconverter.com)
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 @router.post("/dodo/create-subscription")
 async def create_dodo_subscription(
