@@ -1261,7 +1261,7 @@ def test_dodo_subscription_creation(results, token):
                     continue
                 
                 # Validate checkout_url format (should be Dodo payment link)
-                if not data["checkout_url"] or "pay.dodopayments.com" not in data["checkout_url"]:
+                if not data["checkout_url"] or ("pay.dodopayments.com" not in data["checkout_url"] and "test.checkout.dodopayments.com" not in data["checkout_url"]):
                     results.log_fail("Dodo Subscription Creation", 
                                    f"Invalid checkout_url format for {test_case['package_id']}: {data['checkout_url']}")
                     continue
