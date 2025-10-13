@@ -2117,8 +2117,8 @@ def test_blog_proxy_methods(results):
         results.log_fail("Blog Proxy Methods", f"Exception: {str(e)}")
 
 def main():
-    """Run all backend tests including authentication, anonymous conversion, and Stripe payments"""
-    print("🚀 Starting Backend API Tests (Authentication + Anonymous Conversion + Stripe Payments)")
+    """Run all backend tests including authentication, anonymous conversion, and Dodo Payments"""
+    print("🚀 Starting Backend API Tests (Authentication + Anonymous Conversion + Dodo Payments)")
     print(f"Testing API at: {API_URL}")
     print("="*60)
     
