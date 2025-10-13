@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 import aiohttp
 import json
 import httpx
-from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
+# Removed Stripe integration - now using Dodo Payments
 
 # Import our modules
 from auth import get_password_hash, verify_password, create_access_token, verify_token, verify_jwt_token
