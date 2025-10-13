@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { AlertTriangle, CreditCard, Gift, UserPlus } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getBrowserFingerprint } from '../utils/fingerprint';
 
 const Converter = () => {
@@ -23,6 +23,20 @@ const Converter = () => {
   
   const { user, token, refreshUser, checkPages, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Check for successful payment on page load
+  useEffect(() => {
+    const paymentSuccess = searchParams.get('payment');
+    
+    if (paymentSuccess === 'success' && isAuthenticated) {
+      toast.success('🎉 Payment successful! Your subscription has been activated. You can now convert unlimited pages!');
+      // Refresh user data to get updated subscription
+      refreshUser();
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [isAuthenticated, searchParams, refreshUser]);
 
   // Initialize browser fingerprint for anonymous users
   useEffect(() => {
