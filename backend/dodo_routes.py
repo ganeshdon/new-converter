@@ -92,7 +92,7 @@ async def create_dodo_subscription(
         logger.info(f"Creating Dodo subscription for user {user_email}, plan: {request.package_id}, interval: {request.billing_interval}")
         
         # Create subscription with payment link
-        subscription_response = await dodo_client.subscriptions.create_async(
+        subscription_response = await dodo_client.subscriptions.create(
             product_id=product_id,
             quantity=1,
             payment_link=True,
@@ -100,6 +100,10 @@ async def create_dodo_subscription(
             customer={
                 "email": user_email,
                 "name": user_name
+            },
+            billing={
+                "name": user_name,
+                "email": user_email
             },
             metadata={
                 "user_id": user_id,
