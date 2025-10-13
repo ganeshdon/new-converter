@@ -2313,6 +2313,11 @@ def main():
     # Test 21: Dodo webhook endpoint
     test_dodo_webhook_endpoint(results)
     
+    # SPECIFIC TEST FOR RETURN URL VERIFICATION (as per review request)
+    print("\n🎯 Testing Dodo Payments Return URL Configuration...")
+    print("-" * 40)
+    test_dodo_return_url_verification(results, token)
+    
     # Cleanup test data
     cleanup_test_oauth_data()
     cleanup_anonymous_test_data()
