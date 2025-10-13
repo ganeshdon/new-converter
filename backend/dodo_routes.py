@@ -108,7 +108,7 @@ async def create_dodo_subscription(
                 "state": "CA",          # Default to California, can be made configurable later
                 "city": "San Francisco", # Default city, can be made configurable later
                 "street": "123 Main St", # Default street, can be made configurable later
-                "zip": "94102"          # Default zip, can be made configurable later
+                "zipcode": "94102"      # Default zipcode, can be made configurable later
             },
             metadata={
                 "user_id": user_id,
