@@ -158,10 +158,13 @@ async def create_dodo_portal_session(current_user: dict = Depends(get_current_us
         if not subscription:
             raise HTTPException(status_code=404, detail="No active subscription found")
         
+        customer_id = subscription.get("customer_id")
+        if not customer_id:
+            raise HTTPException(status_code=404, detail="Customer ID not found in subscription")
+        
         # Create customer portal session
-        portal_response = await dodo_client.customer_portal.create_async(
-            customer_id=subscription.get("customer_id"),
-            return_url=f"{FRONTEND_URL}/dashboard"
+        portal_response = await dodo_client.customers.customer_portal.create(
+            customer_id=customer_id
         )
         
         return {"portal_url": portal_response.url}
