@@ -1,6 +1,5 @@
 import os
 from dodopayments import DodoPayments
-from dodopayments.types import Environment
 
 # Product IDs for subscription tiers
 PRODUCT_IDS = {
@@ -20,12 +19,10 @@ def get_dodo_client():
     if not api_key:
         raise ValueError("DODO_PAYMENTS_API_KEY environment variable is required")
     
-    # Convert environment string to Environment enum
-    env = Environment.TEST_MODE if environment == "test_mode" else Environment.LIVE_MODE
-    
+    # Environment must be either 'test_mode' or 'live_mode'
     return DodoPayments(
         bearer_token=api_key,
-        environment=env
+        environment=environment
     )
 
 def get_product_id(plan: str, billing_cycle: str) -> str:
