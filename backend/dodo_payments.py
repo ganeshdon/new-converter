@@ -1,5 +1,5 @@
 import os
-from dodopayments import DodoPayments
+from dodopayments import AsyncDodoPayments
 
 # Product IDs for subscription tiers
 PRODUCT_IDS = {
@@ -12,7 +12,7 @@ PRODUCT_IDS = {
 }
 
 def get_dodo_client():
-    """Initialize and return Dodo Payments client"""
+    """Initialize and return Async Dodo Payments client"""
     api_key = os.getenv("DODO_PAYMENTS_API_KEY")
     environment = os.getenv("DODO_PAYMENTS_ENVIRONMENT", "test_mode")
     
@@ -20,7 +20,7 @@ def get_dodo_client():
         raise ValueError("DODO_PAYMENTS_API_KEY environment variable is required")
     
     # Environment must be either 'test_mode' or 'live_mode'
-    return DodoPayments(
+    return AsyncDodoPayments(
         bearer_token=api_key,
         environment=environment
     )
