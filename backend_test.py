@@ -2116,6 +2116,92 @@ def test_blog_proxy_methods(results):
     except Exception as e:
         results.log_fail("Blog Proxy Methods", f"Exception: {str(e)}")
 
+def test_dodo_return_url_verification(results, token):
+    """Test that Dodo Payments subscription creation uses the correct return URL"""
+    if not token:
+        results.log_fail("Dodo Return URL Verification", "No token available")
+        return None
+        
+    try:
+        # Create a new subscription to test the return URL
+        headers = {"Authorization": f"Bearer {token}"}
+        test_data = {"package_id": "professional", "billing_interval": "annual"}
+        
+        print(f"Creating NEW Dodo subscription to verify return URL...")
+        response = requests.post(f"{API_URL}/dodo/create-subscription", 
+                               json=test_data, headers=headers, timeout=30)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Validate response structure
+            if "checkout_url" not in data or "session_id" not in data:
+                results.log_fail("Dodo Return URL Verification", "Missing checkout_url or session_id in response")
+                return None
+            
+            session_id = data["session_id"]
+            checkout_url = data["checkout_url"]
+            
+            # Check that it's a NEW subscription (session_id should start with 'sub_')
+            if not session_id.startswith("sub_"):
+                results.log_fail("Dodo Return URL Verification", f"Invalid session_id format: {session_id}")
+                return None
+            
+            # Check that checkout_url is from Dodo Payments
+            if "dodopayments.com" not in checkout_url:
+                results.log_fail("Dodo Return URL Verification", f"Invalid checkout_url domain: {checkout_url}")
+                return None
+            
+            # Now check the backend logs for the correct return URL message
+            import time
+            time.sleep(2)  # Wait for logs to be written
+            
+            try:
+                # Check recent backend logs for the return URL message
+                log_result = os.popen("tail -n 20 /var/log/supervisor/backend.err.log | grep 'Using return URL'").read()
+                
+                expected_return_url = "https://yourbankstatementconverter.com/dashboard?payment=success"
+                
+                if expected_return_url in log_result:
+                    results.log_pass("Dodo Return URL Verification - Correct production return URL found in logs")
+                    
+                    # Also verify no localhost URLs are being used
+                    if "localhost" in log_result:
+                        results.log_fail("Dodo Return URL Verification", "Found localhost URL in logs - should use production domain")
+                        return None
+                    
+                    return {
+                        "session_id": session_id,
+                        "checkout_url": checkout_url,
+                        "return_url_verified": True
+                    }
+                else:
+                    # Check if there's any return URL message at all
+                    if "Using return URL" in log_result:
+                        results.log_fail("Dodo Return URL Verification", f"Found return URL in logs but not the expected production URL. Log content: {log_result}")
+                    else:
+                        results.log_fail("Dodo Return URL Verification", "No 'Using return URL' message found in recent backend logs")
+                    return None
+                    
+            except Exception as log_error:
+                results.log_fail("Dodo Return URL Verification", f"Failed to check backend logs: {str(log_error)}")
+                return None
+            
+        else:
+            error_detail = ""
+            try:
+                error_data = response.json()
+                error_detail = error_data.get("detail", "")
+            except:
+                error_detail = response.text
+                
+            results.log_fail("Dodo Return URL Verification", f"Failed to create subscription: {response.status_code} - {error_detail}")
+            
+    except Exception as e:
+        results.log_fail("Dodo Return URL Verification", f"Exception: {str(e)}")
+    
+    return None
+
 def main():
     """Run all backend tests including authentication, anonymous conversion, and Dodo Payments"""
     print("🚀 Starting Backend API Tests (Authentication + Anonymous Conversion + Dodo Payments)")
