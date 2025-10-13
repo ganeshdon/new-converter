@@ -38,13 +38,8 @@ mongo_url = os.environ['MONGO_URL']
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
-
 if not JWT_SECRET_KEY:
     raise ValueError("JWT_SECRET_KEY environment variable is required")
-
-if not STRIPE_API_KEY:
-    raise ValueError("STRIPE_API_KEY environment variable is required")
 
 # Define subscription packages - SECURITY: Server-side only pricing
 # WordPress Hostinger Configuration
