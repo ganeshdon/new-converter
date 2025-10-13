@@ -28,6 +28,7 @@ from models import (
     AnonymousConversionCheck, AnonymousConversionResponse, AnonymousConversionRecord,
     SubscriptionPackage, PaymentSessionRequest, PaymentSessionResponse, PaymentTransaction, WebhookEventResponse
 )
+import dodo_routes
 
 
 ROOT_DIR = Path(__file__).parent
