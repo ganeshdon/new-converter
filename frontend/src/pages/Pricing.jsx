@@ -11,18 +11,23 @@ const Pricing = () => {
   const [billingInterval, setBillingInterval] = useState('monthly');
   const [loadingPlan, setLoadingPlan] = useState(null);
   const [checkingStatus, setCheckingStatus] = useState(false);
+  const [showEnterpriseModal, setShowEnterpriseModal] = useState(false);
   const { user, token, refreshUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  // Check for payment session result on page load
+  // Check for successful payment on page load
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get('session_id');
+    const paymentSuccess = searchParams.get('payment');
     
-    if (sessionId && isAuthenticated) {
-      checkPaymentStatus(sessionId);
+    if (paymentSuccess === 'success' && isAuthenticated) {
+      toast.success('Payment successful! Your subscription has been activated.');
+      // Refresh user data to get updated subscription
+      refreshUser();
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, searchParams, refreshUser]);
 
   const checkPaymentStatus = async (sessionId, attempts = 0) => {
     const maxAttempts = 5;
