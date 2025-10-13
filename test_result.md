@@ -238,6 +238,21 @@ backend:
         agent: "testing"
         comment: "Payment database integration working correctly! payment_transactions collection properly stores transaction records with all required fields: transaction_id, session_id, user_id, package_id, amount, currency, payment_status, subscription_status, billing_interval, created_at, updated_at, metadata. Transaction records created during payment session creation with pending status. Database structure validated and all fields properly populated."
 
+  - task: "Dodo Payments subscription creation"
+    implemented: true
+    working: true
+    file: "dodo_routes.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Fixed AsyncDodoPayments import and updated method from create_async() to create(). Added required billing parameter with product ID: pdt_tfooh1hgdtu28iMdXSRl3 for starter monthly."
+      - working: true
+        agent: "testing"
+        comment: "✅ DODO PAYMENTS SUBSCRIPTION CREATION NOW WORKING! Comprehensive testing completed successfully: ✅ API Method Fix - Updated from create_async() to create() method working correctly. ✅ Billing Parameter Fix - Added complete billing information with all required fields (name, email, country, state, city, street, zipcode). ✅ Subscription Creation - All packages tested successfully: starter monthly/annual, professional monthly, business monthly. ✅ Response Format - Returns valid checkout_url (https://test.checkout.dodopayments.com/) and session_id (sub_...) in test mode. ✅ Authentication - Properly requires JWT token for access. ✅ Validation - Invalid package_id and billing_interval properly rejected. ✅ Database Integration - Subscription records properly stored in subscriptions collection. ✅ Test Environment - Using test_mode environment correctly with test checkout URLs. The Dodo Payments subscription creation endpoint is fully functional and ready for production use."
+
 frontend:
   - task: "Anonymous user home page experience"
     implemented: true
