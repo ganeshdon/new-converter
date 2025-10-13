@@ -223,6 +223,12 @@ const Pricing = () => {
           ))}
         </div>
       </div>
+
+      {/* Enterprise Contact Modal */}
+      <EnterpriseContactModal 
+        isOpen={showEnterpriseModal}
+        onClose={() => setShowEnterpriseModal(false)}
+      />
     </div>
   );
 };
