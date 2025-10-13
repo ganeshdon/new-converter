@@ -1032,6 +1032,9 @@ async def extract_with_ai(pdf_path: str):
 # Include the router in the main app
 app.include_router(api_router)
 
+# Include Dodo Payments routes
+app.include_router(dodo_routes.router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
