@@ -806,18 +806,52 @@ async def proxy_blog_request(request: Request, path: str = ""):
             # Log for debugging
             logger.info(f"WordPress response - Status: {response.status_code}, Content-Type: {content_type}, Original encoding: {response.headers.get('content-encoding', 'none')}")
             
-            # Return response using iter_bytes() for proper streaming
-            # This ensures content is properly handled without re-compression
+            # Rewrite URLs in HTML/CSS/JS content to use production domain
             response_headers['Content-Type'] = response.headers.get('content-type', 'text/html; charset=UTF-8')
             response_headers['Cache-Control'] = 'no-cache, no-store, no-transform, must-revalidate'
-            response_headers['Content-Encoding'] = 'identity'  # Explicitly signal no compression to prevent intermediate proxy re-compression
+            response_headers['Content-Encoding'] = 'identity'
             
-            async def generate():
-                async for chunk in response.aiter_bytes():
-                    yield chunk
+            # Get the content
+            content = response.content
             
-            return StreamingResponse(
-                generate(),
+            # For HTML, CSS, and JS files, rewrite URLs
+            if 'text/html' in content_type or 'text/css' in content_type or 'javascript' in content_type:
+                try:
+                    text_content = response.text
+                    
+                    # Replace Hostinger URLs with production URLs
+                    # Replace absolute URLs
+                    text_content = text_content.replace(
+                        'https://powderblue-stingray-662228.hostingersite.com',
+                        'https://yourbankstatementconverter.com/blog'
+                    )
+                    text_content = text_content.replace(
+                        'http://powderblue-stingray-662228.hostingersite.com',
+                        'https://yourbankstatementconverter.com/blog'
+                    )
+                    
+                    # Replace protocol-relative URLs
+                    text_content = text_content.replace(
+                        '//powderblue-stingray-662228.hostingersite.com',
+                        '//yourbankstatementconverter.com/blog'
+                    )
+                    
+                    # For HTML, also update wp-content and wp-includes paths to go through proxy
+                    if 'text/html' in content_type:
+                        # Fix relative paths for assets
+                        text_content = text_content.replace('src="/wp-', 'src="/api/blog/wp-')
+                        text_content = text_content.replace('href="/wp-', 'href="/api/blog/wp-')
+                        text_content = text_content.replace('src=\"/wp-', 'src=\"/api/blog/wp-')
+                        text_content = text_content.replace('href=\"/wp-', 'href=\"/api/blog/wp-')
+                    
+                    content = text_content.encode('utf-8')
+                except Exception as e:
+                    logger.warning(f"Failed to rewrite URLs in content: {str(e)}")
+                    # Use original content if rewriting fails
+                    content = response.content
+            
+            return Response(
+                content=content,
                 status_code=response.status_code,
                 headers=response_headers,
                 media_type=response.headers.get('content-type', 'text/html')
