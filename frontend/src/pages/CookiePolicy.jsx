@@ -133,7 +133,7 @@ const CookiePolicy = () => {
               <p>
                 If you have questions about our use of cookies, please contact us at:
                 <br />
-                <strong>Email:</strong> privacy@bankstatementconverter.com
+                <strong>Email:</strong> info@yourbankstatementconverter.com
               </p>
             </section>
           </div>
