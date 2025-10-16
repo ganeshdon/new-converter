@@ -63,7 +63,7 @@ const Footer = () => {
               </li>
               <li>
                 <a 
-                  href="https://blog.bankstatementconverter.com" 
+                  href="https://yourbankstatementconverter.com/blog" 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-white transition-colors"
