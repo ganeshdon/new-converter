@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /wp-admin/
+Disallow: /wp-login.php
+Disallow: /cgi-bin/
+Disallow: /privacy
+Disallow: /terms
+Disallow: /404
+Disallow: /about
+Allow: /wp-admin/admin-ajax.php
+
+Sitemap: https://yourbankstatementconverter.com/sitemap.xml
+Sitemap: https://yourbankstatementconverter.com/sitemap0.xml
+Sitemap: https://yourbankstatementconverter.com/blog/sitemap.xml
