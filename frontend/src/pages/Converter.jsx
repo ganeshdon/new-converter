@@ -388,7 +388,7 @@ const Converter = () => {
         {/* Header with user info */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Bank Statement Converter
+            Your Bank Statement Converter
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
             Convert your PDF bank statements into organized spreadsheets
