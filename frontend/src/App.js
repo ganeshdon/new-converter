@@ -29,7 +29,6 @@ const App = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/pricing" element={<Pricing />} />
-              <Route path="/converter" element={<Converter />} />
               
               <Route path="/documents" element={
                 <ProtectedRoute>
