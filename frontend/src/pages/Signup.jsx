@@ -87,7 +87,7 @@ const Signup = () => {
       
       if (result.success) {
         toast.success(`Welcome to Bank Statement Converter, ${result.user.full_name}!`);
-        navigate('/converter', { replace: true });
+        navigate('/', { replace: true });
       } else {
         toast.error(result.error || 'Signup failed');
       }
