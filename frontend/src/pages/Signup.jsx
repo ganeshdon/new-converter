@@ -23,7 +23,7 @@ const Signup = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/converter', { replace: true });
+      navigate('/', { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
