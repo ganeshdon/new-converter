@@ -305,7 +305,7 @@ const Signup = () => {
             <div className="mt-6">
               <Button
                 type="button"
-                onClick={() => window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(window.location.origin + '/converter')}`}
+                onClick={() => window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(window.location.origin + '/')}`}
                 className="w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center"
                 disabled={loading}
               >
