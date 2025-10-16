@@ -103,14 +103,16 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <FileX className="h-5 w-5 text-white" />
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="Your Bank Statement Converter" 
+              className="h-10 w-10 object-contain"
+            />
             <span className="text-xl font-bold text-gray-900 hidden sm:block">
-              BANK STATEMENT CONVERTER
+              Your Bank Statement Converter
             </span>
             <span className="text-lg font-bold text-gray-900 sm:hidden">
-              BSC
+              YBSC
             </span>
           </Link>
 
