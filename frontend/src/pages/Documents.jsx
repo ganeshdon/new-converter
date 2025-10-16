@@ -202,7 +202,7 @@ const Documents = () => {
                 : 'Try adjusting your search terms'}
             </p>
             {documents.length === 0 && (
-              <Link to="/converter">
+              <Link to="/">
                 <Button className="bg-blue-600 hover:bg-blue-700">
                   Convert First Document
                 </Button>
