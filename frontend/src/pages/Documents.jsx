@@ -180,7 +180,7 @@ const Documents = () => {
                 </select>
               </div>
               
-              <Link to="/converter">
+              <Link to="/">
                 <Button className="bg-blue-600 hover:bg-blue-700">
                   Convert New Document
                 </Button>
