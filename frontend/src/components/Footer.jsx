@@ -9,11 +9,13 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Company Info Section */}
           <div className="lg:col-span-1">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <FileText className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-bold">Bank Statement Converter</span>
+            <div className="flex items-center space-x-3 mb-4">
+              <img 
+                src="/logo.png" 
+                alt="Your Bank Statement Converter" 
+                className="h-10 w-10 object-contain"
+              />
+              <span className="text-xl font-bold">Your Bank Statement Converter</span>
             </div>
             <p className="text-gray-400 text-sm mb-6 max-w-xs">
               Convert your PDF bank statements into organized spreadsheets with AI-powered 
