@@ -18,7 +18,7 @@ class BrowserFingerprint {
       ctx.fillStyle = '#f60';
       ctx.fillRect(125, 1, 62, 20);
       ctx.fillStyle = '#069';
-      ctx.fillText('Bank Statement Converter 🏦', 2, 15);
+      ctx.fillText('Your Bank Statement Converter 🏦', 2, 15);
       ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
       ctx.fillText('Fingerprint Test 123', 4, 45);
       
