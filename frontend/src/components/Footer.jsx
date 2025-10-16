@@ -23,24 +23,27 @@ const Footer = () => {
             {/* Social Media Icons */}
             <div className="flex space-x-3">
               <a 
-                href="https://twitter.com" 
+                href="https://www.linkedin.com/company/your-bank-statement-converter/" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-2 border border-gray-700 rounded-lg hover:border-blue-500 hover:bg-blue-500/10 transition-colors"
-              >
-                <Twitter className="h-4 w-4" />
-              </a>
-              <a 
-                href="https://linkedin.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="p-2 border border-gray-700 rounded-lg hover:border-blue-500 hover:bg-blue-500/10 transition-colors"
+                aria-label="LinkedIn"
               >
                 <Linkedin className="h-4 w-4" />
               </a>
               <a 
-                href="mailto:support@bankstatementconverter.com"
+                href="https://www.facebook.com/profile.php?id=61582147329394" 
+                target="_blank" 
+                rel="noopener noreferrer"
                 className="p-2 border border-gray-700 rounded-lg hover:border-blue-500 hover:bg-blue-500/10 transition-colors"
+                aria-label="Facebook"
+              >
+                <Facebook className="h-4 w-4" />
+              </a>
+              <a 
+                href="mailto:info@yourbankstatementconverter.com"
+                className="p-2 border border-gray-700 rounded-lg hover:border-blue-500 hover:bg-blue-500/10 transition-colors"
+                aria-label="Email"
               >
                 <Mail className="h-4 w-4" />
               </a>
