@@ -45,9 +45,7 @@ const App = () => {
               <Route path="/terms-conditions" element={<TermsConditions />} />
               <Route path="/cookie-policy" element={<CookiePolicy />} />
               
-              {/* Blog Routes - Redirect to Backend Proxy */}
-              <Route path="/blog" element={<BlogRedirect />} />
-              <Route path="/blog/*" element={<BlogRedirect />} />
+              {/* Blog Routes - Handled by backend proxy at /api/blog */}
             </Routes>
           </main>
           <Footer />
