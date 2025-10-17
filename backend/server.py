@@ -866,10 +866,13 @@ async def proxy_blog_request(request: Request, path: str = ""):
     except Exception as e:
         import traceback
         error_details = traceback.format_exc()
-        logger.error(f"Blog proxy error for {target_url}: {str(e)}")
+        error_type = type(e).__name__
+        error_msg = str(e) if str(e) else f"{error_type} with no message"
+        logger.error(f"Blog proxy error for {target_url}: {error_msg}")
+        logger.error(f"Error type: {error_type}")
         logger.error(f"Full traceback: {error_details}")
         return HTMLResponse(
-            content=f"<h1>Blog Error</h1><p>Unable to load blog content. Error: {str(e)}</p><pre>{error_details if os.getenv('DEBUG') else ''}</pre>",
+            content=f"<h1>Blog Error</h1><p>Unable to load blog content.</p><p>Error: {error_msg}</p><p>Type: {error_type}</p><pre style='background: #f5f5f5; padding: 10px; overflow: auto;'>{error_details}</pre>",
             status_code=502
         )
 
