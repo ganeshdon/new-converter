@@ -887,6 +887,29 @@ async def blog_proxy_post(request: Request, path: str):
     """Proxy POST requests to WordPress blog (for admin, forms, etc.)"""
     return await proxy_blog_request(request, path)
 
+@api_router.get("/blog/health")
+async def blog_health_check():
+    """Health check for WordPress proxy"""
+    try:
+        wordpress_url = os.getenv("WORDPRESS_BASE_URL", "https://mediumblue-shrew-791406.hostingersite.com")
+        async with httpx.AsyncClient(verify=False, timeout=10.0) as client:
+            response = await client.get(wordpress_url)
+            return {
+                "status": "ok",
+                "wordpress_url": wordpress_url,
+                "wordpress_status": response.status_code,
+                "can_connect": True
+            }
+    except Exception as e:
+        import traceback
+        return {
+            "status": "error",
+            "wordpress_url": os.getenv("WORDPRESS_BASE_URL", "not set"),
+            "error": str(e),
+            "error_type": type(e).__name__,
+            "traceback": traceback.format_exc()
+        }
+
 @api_router.get("/blog")
 async def blog_root_get(request: Request):
     """Proxy GET requests to WordPress blog root"""
