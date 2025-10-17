@@ -822,17 +822,17 @@ async def proxy_blog_request(request: Request, path: str = ""):
                     # Replace Hostinger URLs with production URLs
                     # Replace absolute URLs
                     text_content = text_content.replace(
-                        'https://powderblue-stingray-662228.hostingersite.com',
+                        'https://mediumblue-shrew-791406.hostingersite.com',
                         'https://yourbankstatementconverter.com/blog'
                     )
                     text_content = text_content.replace(
-                        'http://powderblue-stingray-662228.hostingersite.com',
+                        'http://mediumblue-shrew-791406.hostingersite.com',
                         'https://yourbankstatementconverter.com/blog'
                     )
                     
                     # Replace protocol-relative URLs
                     text_content = text_content.replace(
-                        '//powderblue-stingray-662228.hostingersite.com',
+                        '//mediumblue-shrew-791406.hostingersite.com',
                         '//yourbankstatementconverter.com/blog'
                     )
                     
