@@ -1,0 +1,17 @@
+# Next.js Frontend
+
+## Setup
+
+```bash
+yarn install
+yarn dev
+```
+
+## Build
+
+```bash
+yarn build
+yarn start
+```
+
+See /app/frontend/README.md for complete documentation.
