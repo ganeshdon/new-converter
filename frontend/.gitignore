@@ -1,17 +1,33 @@
-# Next.js Frontend
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
 
-## Setup
+# testing
+/coverage
 
-```bash
-yarn install
-yarn dev
-```
+# next.js
+/.next/
+/out/
 
-## Build
+# production
+/build
 
-```bash
-yarn build
-yarn start
-```
+# misc
+.DS_Store
+*.pem
 
-See /app/frontend/README.md for complete documentation.
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
