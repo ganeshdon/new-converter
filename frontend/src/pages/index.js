@@ -66,6 +66,15 @@ export default function Home() {
       return;
     }
 
+    // Check if user needs to upgrade
+    if (isAuthenticated && user) {
+      if (user.pages_remaining <= 0) {
+        setError('You have used all your free conversions. Please upgrade to continue.');
+        router.push('/pricing');
+        return;
+      }
+    }
+
     setLoading(true);
     setError('');
 
@@ -84,7 +93,7 @@ export default function Home() {
         });
       } else {
         if (!anonymousData?.can_convert) {
-          setError('Free conversion limit reached. Please sign up for unlimited access.');
+          setError('Free conversion limit reached. Please sign up to get 7 more free conversions!');
           setLoading(false);
           return;
         }
@@ -101,7 +110,15 @@ export default function Home() {
 
       setResult(response.data);
     } catch (error) {
-      setError(error.response?.data?.detail || 'Conversion failed. Please try again.');
+      const errorMsg = error.response?.data?.detail || 'Conversion failed. Please try again.';
+      
+      // Check if error is due to page limit
+      if (errorMsg.includes('page limit') || errorMsg.includes('insufficient pages')) {
+        setError('You have used all your free conversions. Please upgrade to continue.');
+        router.push('/pricing');
+      } else {
+        setError(errorMsg);
+      }
     } finally {
       setLoading(false);
     }
