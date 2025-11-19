@@ -1011,10 +1011,11 @@ async def extract_with_ai(pdf_path: str):
         # Create the model - try multiple models with fallback
         model = None
         models_to_try = [
-            'gemini-1.5-flash-latest',
-            'gemini-1.5-flash',
-            'gemini-1.5-pro-latest',
-            'gemini-1.5-pro'
+            'gemini-2.5-flash',           # Newest, fastest
+            'gemini-2.5-flash-latest',    # Latest 2.5
+            'gemini-1.5-flash-latest',    # Fallback to 1.5
+            'gemini-1.5-flash',           # Stable 1.5
+            'gemini-1.5-pro'              # Last resort
         ]
         
         for model_name in models_to_try:
