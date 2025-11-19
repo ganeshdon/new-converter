@@ -52,15 +52,19 @@ uvicorn server:app --reload --host 0.0.0.0 --port 8001
 
 ## 📊 Gemini API Free Tier Limits (as of 2024)
 
-### gemini-1.5-flash (Recommended for this app)
-- ✅ **15 requests per minute (RPM)**
-- ✅ **1 million tokens per minute**
-- ✅ **1,500 requests per day**
-- Best for: Fast processing, bank statement conversion
+### gemini-pro (Currently used - RECOMMENDED)
+- ✅ **60 requests per minute (RPM)**
+- ✅ **Unlimited daily requests**
+- ✅ **Most stable and reliable**
+- Best for: Production use, bank statement conversion
 
-### gemini-1.5-pro
+### gemini-1.5-flash-latest (Local development)
+- ✅ **15 requests per minute (RPM)**
+- ✅ **1,500 requests per day**
+- Best for: Fast processing, local testing
+
+### gemini-1.5-pro (Fallback)
 - ✅ **2 requests per minute (RPM)**
-- ✅ **32,000 tokens per minute**
 - ✅ **50 requests per day**
 - Best for: Complex documents, higher accuracy
 
