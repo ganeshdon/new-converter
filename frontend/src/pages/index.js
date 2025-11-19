@@ -85,7 +85,7 @@ export default function Home() {
       let response;
       
       if (isAuthenticated) {
-        response = await axios.post(`${API_URL}/api/convert`, formData, {
+        response = await axios.post(`${API_URL}/api/process-pdf`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
