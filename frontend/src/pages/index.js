@@ -159,14 +159,55 @@ export default function Home() {
             AI-powered conversion • Fast & Accurate • Secure Processing
           </p>
           
+          {/* Show conversion limit status */}
           {!isAuthenticated && anonymousData && (
             <div className="mt-6 inline-block bg-blue-50 border border-blue-200 rounded-lg px-6 py-3">
-              <p className="text-blue-800 font-medium">
-                {anonymousData.message}
-              </p>
-              <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-medium">
-                Sign up for unlimited conversions →
-              </Link>
+              {anonymousData.can_convert ? (
+                <>
+                  <p className="text-blue-800 font-medium">
+                    🎉 You have <strong>1 free conversion</strong> available
+                  </p>
+                  <p className="text-blue-600 text-sm mt-1">
+                    Sign up to get <strong>7 free conversions daily!</strong>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-blue-800 font-medium mb-2">
+                    ✅ Free conversion used
+                  </p>
+                  <Link href="/signup" className="inline-block btn-primary text-sm">
+                    Sign up for 7 free conversions daily →
+                  </Link>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Show authenticated user's remaining conversions */}
+          {isAuthenticated && user && (
+            <div className="mt-6 inline-block bg-green-50 border border-green-200 rounded-lg px-6 py-3">
+              {user.pages_remaining > 0 ? (
+                <>
+                  <p className="text-green-800 font-medium">
+                    You have <strong>{user.pages_remaining} pages</strong> remaining
+                  </p>
+                  <p className="text-green-600 text-sm mt-1">
+                    {user.subscription_tier === 'daily_free' 
+                      ? 'Daily free tier • Resets every 24 hours' 
+                      : `${user.subscription_tier} plan`}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-orange-800 font-medium mb-2">
+                    ⚠️ You have used all your free conversions
+                  </p>
+                  <Link href="/pricing" className="inline-block btn-primary text-sm">
+                    Upgrade to continue →
+                  </Link>
+                </>
+              )}
             </div>
           )}
         </div>
