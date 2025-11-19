@@ -993,16 +993,102 @@ async def check_and_reset_daily_pages(user_id: str):
         )
 
 async def extract_with_ai(pdf_path: str):
-    """Use OpenAI to extract bank statement data from PDF"""
+    """Use AI to extract bank statement data from PDF - works with or without emergentintegrations"""
     
     try:
-        from emergentintegrations.llm.chat import LlmChat, UserMessage, FileContentWithMimeType
-        
-        # Initialize AI chat with your Gemini API key
-        chat = LlmChat(
-            api_key=GEMINI_API_KEY,
-            session_id=f"pdf-extraction-{os.urandom(8).hex()}",
-            system_message="""You are a specialized bank statement data extraction expert. 
+        # Try using emergentintegrations if available (Emergent platform)
+        try:
+            from emergentintegrations.llm.chat import LlmChat, UserMessage, FileContentWithMimeType
+            
+            logger.info("Using emergentintegrations for PDF extraction")
+            
+            # Initialize AI chat with your Gemini API key
+            chat = LlmChat(
+                api_key=GEMINI_API_KEY,
+                session_id=f"pdf-extraction-{os.urandom(8).hex()}",
+                system_message="""You are a specialized bank statement data extraction expert. 
+                Your task is to extract ALL transaction data from PDF bank statements with 100% accuracy.
+                
+                Extract and return data in this exact JSON structure:
+                {
+                  "accountInfo": {
+                    "accountNumber": "string",
+                    "statementDate": "string", 
+                    "beginningBalance": number,
+                    "endingBalance": number
+                  },
+                  "deposits": [
+                    {
+                      "dateCredited": "MM-DD format",
+                      "description": "full description",
+                      "amount": number
+                    }
+                  ],
+                  "atmWithdrawals": [
+                    {
+                      "tranDate": "MM-DD format",
+                      "datePosted": "MM-DD format", 
+                      "description": "full description",
+                      "amount": negative_number
+                    }
+                  ],
+                  "checksPaid": [
+                    {
+                      "datePaid": "MM-DD format",
+                      "checkNumber": "string",
+                      "amount": number,
+                      "referenceNumber": "string"
+                    }
+                  ],
+                  "visaPurchases": [
+                    {
+                      "tranDate": "MM-DD format",
+                      "datePosted": "MM-DD format",
+                      "description": "full description", 
+                      "amount": negative_number
+                    }
+                  ]
+                }
+                
+                CRITICAL REQUIREMENTS:
+                - Extract ALL transactions with exact amounts, dates, and descriptions
+                - Use exact date formats (MM-DD like "05-15")
+                - Negative amounts for withdrawals/debits
+                - Include complete descriptions and reference numbers
+                - Return ONLY valid JSON, no additional text"""
+            ).with_model("gemini", "gemini-2.0-flash")
+            
+            # Prepare PDF file for processing
+            pdf_file = FileContentWithMimeType(
+                file_path=pdf_path,
+                mime_type="application/pdf"
+            )
+            
+            # Create message with PDF attachment
+            user_message = UserMessage(
+                text="Extract ALL bank statement transaction data from this PDF with complete accuracy. Return only the JSON structure specified in the system message.",
+                file_contents=[pdf_file]
+            )
+            
+            # Get AI response
+            response = await chat.send_message(user_message)
+            logger.info(f"AI Response: {response}")
+            
+        except ImportError:
+            # Fallback to direct Google Generative AI for local development
+            logger.info("emergentintegrations not available, using google-generativeai directly")
+            import google.generativeai as genai
+            
+            genai.configure(api_key=GEMINI_API_KEY)
+            
+            # Upload the PDF file
+            uploaded_file = genai.upload_file(pdf_path)
+            
+            # Create the model
+            model = genai.GenerativeModel('gemini-2.0-flash-exp')
+            
+            # Create the prompt
+            prompt = """You are a specialized bank statement data extraction expert. 
             Your task is to extract ALL transaction data from PDF bank statements with 100% accuracy.
             
             Extract and return data in this exact JSON structure:
@@ -1051,26 +1137,16 @@ async def extract_with_ai(pdf_path: str):
             - Use exact date formats (MM-DD like "05-15")
             - Negative amounts for withdrawals/debits
             - Include complete descriptions and reference numbers
-            - Return ONLY valid JSON, no additional text"""
-        ).with_model("gemini", "gemini-2.0-flash")
+            - Return ONLY valid JSON, no additional text
+            
+            Extract ALL bank statement transaction data from this PDF with complete accuracy."""
+            
+            # Generate content
+            result = model.generate_content([prompt, uploaded_file])
+            response = result.text
+            logger.info(f"AI Response: {response}")
         
-        # Prepare PDF file for processing
-        pdf_file = FileContentWithMimeType(
-            file_path=pdf_path,
-            mime_type="application/pdf"
-        )
-        
-        # Create message with PDF attachment
-        user_message = UserMessage(
-            text="Extract ALL bank statement transaction data from this PDF with complete accuracy. Return only the JSON structure specified in the system message.",
-            file_contents=[pdf_file]
-        )
-        
-        # Get AI response
-        response = await chat.send_message(user_message)
-        logger.info(f"AI Response: {response}")
-        
-        # Parse JSON response
+        # Parse JSON response (common for both methods)
         import json
         try:
             # Clean response and extract JSON
