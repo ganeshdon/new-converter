@@ -152,14 +152,17 @@ pydantic==2.11.9
 
 The code automatically tries these models in order:
 
-| Order | Model Name | Speed | When Used |
-|-------|-----------|-------|-----------|
-| 1st | `gemini-1.5-flash-latest` | Fastest | Default |
-| 2nd | `gemini-1.5-flash` | Fast | Fallback 1 |
-| 3rd | `gemini-1.5-pro-latest` | Medium | Fallback 2 |
-| 4th | `gemini-1.5-pro` | Slower | Last resort |
+| Order | Model Name | Version | Speed | When Used |
+|-------|-----------|---------|-------|-----------|
+| 1st | `gemini-2.5-flash` | **2.5 Latest** | **Fastest** | **Primary** ✨ |
+| 2nd | `gemini-2.5-flash-latest` | 2.5 | Fastest | Alt 2.5 |
+| 3rd | `gemini-1.5-flash-latest` | 1.5 | Fast | Fallback 1 |
+| 4th | `gemini-1.5-flash` | 1.5 | Fast | Fallback 2 |
+| 5th | `gemini-1.5-pro` | 1.5 Pro | Slower | Last resort |
 
 **Whichever model is available will be used automatically!**
+
+**New:** Now using **Gemini 2.5 Flash** (2025 release) as the primary model - faster and more accurate!
 
 ---
 
