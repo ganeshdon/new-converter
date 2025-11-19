@@ -74,19 +74,24 @@ uvicorn server:app --reload --host 0.0.0.0 --port 8001
 
 ## 🔧 What I Fixed in the Code
 
-### 1. Changed Model from Experimental to Stable
+### 1. Changed Model to Most Stable
 **Before:**
 ```python
 model = genai.GenerativeModel('gemini-2.0-flash-exp')  # ❌ Experimental, strict limits
 ```
 
-**After:**
+**After (Production/Emergent):**
 ```python
-model = genai.GenerativeModel('gemini-1.5-flash')  # ✅ Stable, better limits
+.with_model("gemini", "gemini-pro")  # ✅ Most stable, 60 RPM
 ```
 
-### 2. Added Fallback Model
-If `gemini-1.5-flash` is not available, it automatically tries `gemini-1.5-pro`.
+**After (Local):**
+```python
+model = genai.GenerativeModel('gemini-1.5-flash-latest')  # ✅ Fast, 15 RPM
+```
+
+### 2. Added Fallback Chain
+Local development now tries: `gemini-1.5-flash-latest` → `gemini-pro` → `gemini-1.5-pro`
 
 ---
 
