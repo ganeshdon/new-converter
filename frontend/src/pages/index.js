@@ -304,13 +304,27 @@ export default function Home() {
               {!isAuthenticated && (
                 <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
                   <h4 className="font-semibold text-gray-900 mb-2">
-                    Want unlimited conversions?
+                    Get 7 Free Conversions Daily!
                   </h4>
                   <p className="text-gray-600 mb-4">
-                    Sign up now to convert unlimited bank statements
+                    Sign up now to unlock 7 free conversions every day
                   </p>
                   <Link href="/signup" className="btn-primary inline-block">
-                    Sign Up Free
+                    Sign Up for Free
+                  </Link>
+                </div>
+              )}
+
+              {isAuthenticated && user && user.pages_remaining <= 3 && user.subscription_tier === 'daily_free' && (
+                <div className="mt-8 bg-orange-50 border border-orange-200 rounded-lg p-6">
+                  <h4 className="font-semibold text-gray-900 mb-2">
+                    ⚠️ Running Low on Free Conversions
+                  </h4>
+                  <p className="text-gray-600 mb-4">
+                    You have {user.pages_remaining} pages remaining. Upgrade to get unlimited conversions!
+                  </p>
+                  <Link href="/pricing" className="btn-primary inline-block">
+                    View Plans
                   </Link>
                 </div>
               )}
