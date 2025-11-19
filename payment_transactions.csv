@@ -1,0 +1,9 @@
+transaction_id,user_id,email,package_id,amount,currency,payment_status,subscription_status,billing_interval,created_at,updated_at
+27ef5a9c-aa3a-4c43-8d9f-e66eecf1691c,f72cc9e9-fcd8-479d-ae98-8a4993300524,ganeshstudent02@gmail.com,starter,15,usd,pending,pending,monthly,2025-10-05T17:20:33.977Z,2025-10-05T17:20:33.977Z
+d595b23a-376e-4ca0-9dd1-9954f75a6d4f,f72cc9e9-fcd8-479d-ae98-8a4993300524,ganeshstudent02@gmail.com,starter,15,usd,pending,pending,monthly,2025-10-05T17:26:50.042Z,2025-10-05T17:26:50.042Z
+2b8cd427-717f-40ca-aa74-0a76919bcc67,f72cc9e9-fcd8-479d-ae98-8a4993300524,ganeshstudent02@gmail.com,starter,15,usd,pending,pending,monthly,2025-10-05T17:27:08.303Z,2025-10-05T17:27:08.303Z
+c643e112-c414-4dd1-98d4-8be19acfdd84,d7db3b4c-dad9-4ca2-b140-abf0dba8e88d,jane.doe.test2@example.com,starter,15,usd,completed,active,monthly,2025-10-05T17:29:00.356Z,2025-10-05T17:29:19.087Z
+414d2633-597d-4fb0-9aef-10a58ae54142,d7db3b4c-dad9-4ca2-b140-abf0dba8e88d,jane.doe.test2@example.com,professional,30,usd,pending,pending,monthly,2025-10-05T17:30:06.969Z,2025-10-05T17:30:06.969Z
+9f5e5e34-54a2-45bc-a37e-8f24f500c58a,d7db3b4c-dad9-4ca2-b140-abf0dba8e88d,jane.doe.test2@example.com,business,50,usd,pending,pending,monthly,2025-10-05T17:30:14.088Z,2025-10-05T17:30:14.088Z
+1995a6cd-9c86-4f59-8bf5-3ff08a45e656,f72cc9e9-fcd8-479d-ae98-8a4993300524,ganeshstudent02@gmail.com,starter,15,usd,pending,pending,monthly,2025-10-06T05:00:43.692Z,2025-10-06T05:00:43.692Z
+d8ba8ddc-e231-4040-b3a0-704557d334d1,f72cc9e9-fcd8-479d-ae98-8a4993300524,ganeshstudent02@gmail.com,starter,15,usd,pending,pending,monthly,2025-10-06T09:56:05.805Z,2025-10-06T09:56:05.805Z
