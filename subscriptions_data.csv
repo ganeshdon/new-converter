@@ -1,0 +1,7 @@
+user_id,subscription_id,plan,billing_interval,status,payment_provider,created_at,updated_at
+f72cc9e9-fcd8-479d-ae98-8a4993300524,sub_TosU7Ph7Eoc4LenuH51Ia,professional,annual,pending,dodo,2025-10-13T09:59:22.141Z,2025-10-13T09:59:22.141Z
+1964fba0-bd4b-47eb-ac56-89d740183018,sub_E47yEHwjQwDnFNyaKLCes,professional,annual,pending,dodo,2025-10-13T09:59:23.246Z,2025-10-13T09:59:23.246Z
+1964fba0-bd4b-47eb-ac56-89d740183018,sub_gf0Ajth8KpYIPAiW7lDo5,professional,annual,pending,dodo,2025-10-13T10:00:13.098Z,2025-10-13T10:00:13.098Z
+1964fba0-bd4b-47eb-ac56-89d740183018,sub_uJQG9Jcs77qoXkrAkPfd5,starter,monthly,pending,dodo,2025-10-13T10:00:29.743Z,2025-10-13T10:00:29.743Z
+f72cc9e9-fcd8-479d-ae98-8a4993300524,sub_3GzhO9ir25r7AbuHZhdkG,starter,monthly,pending,dodo,2025-10-13T10:01:25.757Z,2025-10-13T10:01:25.757Z
+f72cc9e9-fcd8-479d-ae98-8a4993300524,sub_QECE9fHQl7JpSricI4oeY,starter,monthly,pending,dodo,2025-10-16T06:52:18.797Z,2025-10-16T06:52:18.797Z
