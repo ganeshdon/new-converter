@@ -109,6 +109,11 @@ export default function Home() {
       }
 
       setResult(response.data);
+      
+      // Refresh user data to update pages_remaining
+      if (isAuthenticated) {
+        await refreshUser();
+      }
     } catch (error) {
       const errorMsg = error.response?.data?.detail || 'Conversion failed. Please try again.';
       
