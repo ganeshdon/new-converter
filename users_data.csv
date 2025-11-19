@@ -1,0 +1,18 @@
+_id,email,full_name,subscription_tier,pages_remaining,pages_limit,language_preference,created_at,updated_at
+1964fba0-bd4b-47eb-ac56-89d740183018,test@example.com,Test User,daily_free,7,7,en,2025-10-05T13:02:50.633Z,2025-10-05T13:02:50.633Z
+62d232b1-9944-4df3-9829-e9f5ff8f9cfc,existing.1759670137@example.com,Existing User,daily_free,7,7,en,2025-10-05T13:15:37.449Z,2025-10-05T13:15:37.449Z
+cc98c446-5fb3-479e-885c-17cfbaf77059,existing.1759670169@example.com,Existing User,daily_free,7,7,en,2025-10-05T13:16:09.911Z,2025-10-05T13:16:09.911Z
+6c3eee72-8b76-43e9-a2e2-7ffb41b5ad63,testuser1759670654@example.com,Test User,daily_free,7,7,en,2025-10-05T13:24:15.320Z,2025-10-05T13:24:15.320Z
+f72cc9e9-fcd8-479d-ae98-8a4993300524,ganeshstudent02@gmail.com,GANESH S,daily_free,7,7,en,2025-10-05T14:04:59.898Z,2025-10-05T14:04:59.898Z
+b22a112d-2b9a-4f57-8fbf-f05d472b4d84,testuserp77p4p93@example.com,Test User p77p4p93,daily_free,7,7,en,2025-10-05T14:12:53.917Z,2025-10-05T14:12:53.917Z
+608b4545-35b0-46ea-aea5-1168740392a8,existing.1759684058@example.com,Existing User,daily_free,7,7,en,2025-10-05T17:07:38.928Z,2025-10-05T17:07:38.928Z
+4199c455-6d39-4671-8afd-1e06790f61a0,existing.1759684720@example.com,Existing User,daily_free,7,7,en,2025-10-05T17:18:40.430Z,2025-10-05T17:18:40.430Z
+c8e882e1-00c9-435a-9e69-80371c38f246,existing.1759684769@example.com,Existing User,daily_free,7,7,en,2025-10-05T17:19:29.349Z,2025-10-05T17:19:29.349Z
+d7db3b4c-dad9-4ca2-b140-abf0dba8e88d,jane.doe.test2@example.com,Jane Doe,basic,400,400,en,2025-10-05T17:25:04.815Z,2025-10-05T17:29:19.087Z
+90a67735-1778-410b-b9ab-885d02e2ba5b,testpayment@example.com,Test User Payment,daily_free,7,7,en,2025-10-05T17:27:46.821Z,2025-10-05T17:27:46.821Z
+20c64ff5-76ec-4cff-bc3d-f1728faac742,existing.1760100052@example.com,Existing User,daily_free,7,7,en,2025-10-10T12:40:52.588Z,2025-10-10T12:40:52.588Z
+7bea575c-9734-408e-9ddd-1229cffe0d1b,existing.1760101641@example.com,Existing User,daily_free,7,7,en,2025-10-10T13:07:21.433Z,2025-10-10T13:07:21.433Z
+a9ea8887-189e-4e8f-9453-a4a1ccb2cfb1,existing.1760102323@example.com,Existing User,daily_free,7,7,en,2025-10-10T13:18:43.765Z,2025-10-10T13:18:43.765Z
+13b35617-29c5-4e0f-bb1a-fad71fe55520,existing.1760348685@example.com,Existing User,daily_free,7,7,en,2025-10-13T09:44:45.974Z,2025-10-13T09:44:45.974Z
+83a27bdd-3876-4a4d-adb8-c2a1aeea2440,existing.1760348825@example.com,Existing User,daily_free,7,7,en,2025-10-13T09:47:05.380Z,2025-10-13T09:47:05.380Z
+6c239ba3-b727-4b14-931e-9c6bd58549f8,existing.1760349478@example.com,Existing User,daily_free,7,7,en,2025-10-13T09:57:58.649Z,2025-10-13T09:57:58.649Z
