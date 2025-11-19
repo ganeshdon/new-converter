@@ -7,7 +7,7 @@ import { getBrowserFingerprint } from '../utils/fingerprint';
 import Link from 'next/link';
 
 export default function Home() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, refreshUser } = useAuth();
   const router = useRouter();
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
