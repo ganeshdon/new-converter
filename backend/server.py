@@ -993,172 +993,103 @@ async def check_and_reset_daily_pages(user_id: str):
         )
 
 async def extract_with_ai(pdf_path: str):
-    """Use AI to extract bank statement data from PDF - works with or without emergentintegrations"""
+    """Use Google Generative AI to extract bank statement data from PDF"""
     
     try:
-        # Try using emergentintegrations if available (Emergent platform)
-        try:
-            from emergentintegrations.llm.chat import LlmChat, UserMessage, FileContentWithMimeType
-            
-            logger.info("Using emergentintegrations for PDF extraction")
-            
-            # Initialize AI chat with your Gemini API key
-            chat = LlmChat(
-                api_key=GEMINI_API_KEY,
-                session_id=f"pdf-extraction-{os.urandom(8).hex()}",
-                system_message="""You are a specialized bank statement data extraction expert. 
-                Your task is to extract ALL transaction data from PDF bank statements with 100% accuracy.
-                
-                Extract and return data in this exact JSON structure:
-                {
-                  "accountInfo": {
-                    "accountNumber": "string",
-                    "statementDate": "string", 
-                    "beginningBalance": number,
-                    "endingBalance": number
-                  },
-                  "deposits": [
-                    {
-                      "dateCredited": "MM-DD format",
-                      "description": "full description",
-                      "amount": number
-                    }
-                  ],
-                  "atmWithdrawals": [
-                    {
-                      "tranDate": "MM-DD format",
-                      "datePosted": "MM-DD format", 
-                      "description": "full description",
-                      "amount": negative_number
-                    }
-                  ],
-                  "checksPaid": [
-                    {
-                      "datePaid": "MM-DD format",
-                      "checkNumber": "string",
-                      "amount": number,
-                      "referenceNumber": "string"
-                    }
-                  ],
-                  "visaPurchases": [
-                    {
-                      "tranDate": "MM-DD format",
-                      "datePosted": "MM-DD format",
-                      "description": "full description", 
-                      "amount": negative_number
-                    }
-                  ]
-                }
-                
-                CRITICAL REQUIREMENTS:
-                - Extract ALL transactions with exact amounts, dates, and descriptions
-                - Use exact date formats (MM-DD like "05-15")
-                - Negative amounts for withdrawals/debits
-                - Include complete descriptions and reference numbers
-                - Return ONLY valid JSON, no additional text"""
-            ).with_model("gemini", "gemini/gemini-1.5-flash-latest")
-            
-            # Prepare PDF file for processing
-            pdf_file = FileContentWithMimeType(
-                file_path=pdf_path,
-                mime_type="application/pdf"
-            )
-            
-            # Create message with PDF attachment
-            user_message = UserMessage(
-                text="Extract ALL bank statement transaction data from this PDF with complete accuracy. Return only the JSON structure specified in the system message.",
-                file_contents=[pdf_file]
-            )
-            
-            # Get AI response
-            response = await chat.send_message(user_message)
-            logger.info(f"AI Response: {response}")
-            
-        except ImportError:
-            # Fallback to direct Google Generative AI for local development
-            logger.info("emergentintegrations not available, using google-generativeai directly")
-            import google.generativeai as genai
-            
-            genai.configure(api_key=GEMINI_API_KEY)
-            
-            # Upload the PDF file
-            uploaded_file = genai.upload_file(pdf_path)
-            
-            # Create the model - using stable version instead of experimental
-            # Try gemini-1.5-flash-latest first (better rate limits), fallback to gemini-pro
-            try:
-                model = genai.GenerativeModel('gemini-1.5-flash-latest')
-                logger.info("Using gemini-1.5-flash-latest model")
-            except Exception as model_error:
-                logger.warning(f"gemini-1.5-flash-latest not available, trying gemini-pro: {model_error}")
-                try:
-                    model = genai.GenerativeModel('gemini-pro')
-                    logger.info("Using gemini-pro model")
-                except Exception as pro_error:
-                    logger.warning(f"gemini-pro not available, trying gemini-1.5-pro: {pro_error}")
-                    model = genai.GenerativeModel('gemini-1.5-pro')
-                    logger.info("Using gemini-1.5-pro model")
-            
-            # Create the prompt
-            prompt = """You are a specialized bank statement data extraction expert. 
-            Your task is to extract ALL transaction data from PDF bank statements with 100% accuracy.
-            
-            Extract and return data in this exact JSON structure:
-            {
-              "accountInfo": {
-                "accountNumber": "string",
-                "statementDate": "string", 
-                "beginningBalance": number,
-                "endingBalance": number
-              },
-              "deposits": [
-                {
-                  "dateCredited": "MM-DD format",
-                  "description": "full description",
-                  "amount": number
-                }
-              ],
-              "atmWithdrawals": [
-                {
-                  "tranDate": "MM-DD format",
-                  "datePosted": "MM-DD format", 
-                  "description": "full description",
-                  "amount": negative_number
-                }
-              ],
-              "checksPaid": [
-                {
-                  "datePaid": "MM-DD format",
-                  "checkNumber": "string",
-                  "amount": number,
-                  "referenceNumber": "string"
-                }
-              ],
-              "visaPurchases": [
-                {
-                  "tranDate": "MM-DD format",
-                  "datePosted": "MM-DD format",
-                  "description": "full description", 
-                  "amount": negative_number
-                }
-              ]
-            }
-            
-            CRITICAL REQUIREMENTS:
-            - Extract ALL transactions with exact amounts, dates, and descriptions
-            - Use exact date formats (MM-DD like "05-15")
-            - Negative amounts for withdrawals/debits
-            - Include complete descriptions and reference numbers
-            - Return ONLY valid JSON, no additional text
-            
-            Extract ALL bank statement transaction data from this PDF with complete accuracy."""
-            
-            # Generate content
-            result = model.generate_content([prompt, uploaded_file])
-            response = result.text
-            logger.info(f"AI Response: {response}")
+        import google.generativeai as genai
         
-        # Parse JSON response (common for both methods)
+        logger.info("Using google-generativeai for PDF extraction")
+        
+        # Configure Gemini API
+        genai.configure(api_key=GEMINI_API_KEY)
+        
+        # Upload the PDF file
+        logger.info(f"Uploading PDF file: {pdf_path}")
+        uploaded_file = genai.upload_file(pdf_path)
+        logger.info(f"File uploaded successfully: {uploaded_file.name}")
+        
+        # Create the model - try multiple models with fallback
+        model = None
+        models_to_try = [
+            'gemini-1.5-flash-latest',
+            'gemini-1.5-flash',
+            'gemini-1.5-pro-latest',
+            'gemini-1.5-pro'
+        ]
+        
+        for model_name in models_to_try:
+            try:
+                model = genai.GenerativeModel(model_name)
+                logger.info(f"Successfully initialized model: {model_name}")
+                break
+            except Exception as model_error:
+                logger.warning(f"Model {model_name} not available: {model_error}")
+                continue
+        
+        if model is None:
+            raise Exception("No available Gemini models found. Please check your API key and quota.")
+        
+        # Create the prompt
+        prompt = """You are a specialized bank statement data extraction expert. 
+Your task is to extract ALL transaction data from PDF bank statements with 100% accuracy.
+
+Extract and return data in this exact JSON structure:
+{
+  "accountInfo": {
+    "accountNumber": "string",
+    "statementDate": "string", 
+    "beginningBalance": number,
+    "endingBalance": number
+  },
+  "deposits": [
+    {
+      "dateCredited": "MM-DD format",
+      "description": "full description",
+      "amount": number
+    }
+  ],
+  "atmWithdrawals": [
+    {
+      "tranDate": "MM-DD format",
+      "datePosted": "MM-DD format", 
+      "description": "full description",
+      "amount": negative_number
+    }
+  ],
+  "checksPaid": [
+    {
+      "datePaid": "MM-DD format",
+      "checkNumber": "string",
+      "amount": number,
+      "referenceNumber": "string"
+    }
+  ],
+  "visaPurchases": [
+    {
+      "tranDate": "MM-DD format",
+      "datePosted": "MM-DD format",
+      "description": "full description", 
+      "amount": negative_number
+    }
+  ]
+}
+
+CRITICAL REQUIREMENTS:
+- Extract ALL transactions with exact amounts, dates, and descriptions
+- Use exact date formats (MM-DD like "05-15")
+- Negative amounts for withdrawals/debits
+- Include complete descriptions and reference numbers
+- Return ONLY valid JSON, no additional text
+
+Extract ALL bank statement transaction data from this PDF with complete accuracy."""
+        
+        # Generate content
+        logger.info("Generating AI response...")
+        result = model.generate_content([prompt, uploaded_file])
+        response = result.text
+        logger.info(f"AI Response received (length: {len(response)} chars)")
+        
+        # Parse JSON response
         import json
         try:
             # Clean response and extract JSON
@@ -1168,12 +1099,15 @@ async def extract_with_ai(pdf_path: str):
             elif response_text.startswith("```"):
                 response_text = response_text[3:-3]
             
+            response_text = response_text.strip()
+            
             extracted_data = json.loads(response_text)
+            logger.info("Successfully parsed JSON response")
             return extracted_data
             
         except json.JSONDecodeError as e:
             logger.error(f"JSON parsing error: {e}")
-            logger.error(f"Raw response: {response}")
+            logger.error(f"Raw response (first 500 chars): {response[:500]}")
             raise Exception("AI returned invalid JSON format")
             
     except Exception as e:
