@@ -70,7 +70,7 @@ export default function Home() {
     if (isAuthenticated && user) {
       if (user.pages_remaining <= 0) {
         setError('You have used all your free conversions. Please upgrade to continue.');
-        setTimeout(() => router.push('/pricing'), 2000);
+        router.push('/pricing');
         return;
       }
     }
@@ -85,7 +85,6 @@ export default function Home() {
       let response;
       
       if (isAuthenticated) {
-        // Authenticated user - use /api/process-pdf
         response = await axios.post(`${API_URL}/api/process-pdf`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -93,7 +92,6 @@ export default function Home() {
           }
         });
       } else {
-        // Anonymous user - use /api/anonymous/convert
         if (!anonymousData?.can_convert) {
           setError('Free conversion limit reached. Please sign up to get 7 more free conversions!');
           setLoading(false);
@@ -117,14 +115,12 @@ export default function Home() {
         await refreshUser();
       }
     } catch (error) {
-      console.error('Conversion error:', error);
       const errorMsg = error.response?.data?.detail || 'Conversion failed. Please try again.';
       
       // Check if error is due to page limit
-      if (errorMsg.toLowerCase().includes('insufficient pages') || 
-          errorMsg.toLowerCase().includes('page limit')) {
+      if (errorMsg.includes('page limit') || errorMsg.includes('insufficient pages')) {
         setError('You have used all your free conversions. Please upgrade to continue.');
-        setTimeout(() => router.push('/pricing'), 2000);
+        router.push('/pricing');
       } else {
         setError(errorMsg);
       }
@@ -133,43 +129,26 @@ export default function Home() {
     }
   };
 
-  const handleDownload = (format) => {
-    if (!result || !result.data) {
-      setError('No data available for download');
-      return;
-    }
-
+  const handleDownload = async (format) => {
     try {
-      // Convert the data to CSV format
-      let csvContent = '';
-      
-      if (result.data.account_summary) {
-        csvContent += 'Account Summary\n';
-        Object.entries(result.data.account_summary).forEach(([key, value]) => {
-          csvContent += `${key},${value}\n`;
-        });
-        csvContent += '\n';
-      }
+      const response = await axios.get(
+        `${API_URL}/api/download/${result.document_id}?format=${format}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          responseType: 'blob'
+        }
+      );
 
-      if (result.data.transactions && result.data.transactions.length > 0) {
-        csvContent += 'Date,Description,Amount,Balance\n';
-        result.data.transactions.forEach(txn => {
-          csvContent += `${txn.date || ''},${txn.description || ''},${txn.amount || ''},${txn.balance || ''}\n`;
-        });
-      }
-
-      // Create and download the file
-      const blob = new Blob([csvContent], { type: format === 'csv' ? 'text/csv' : 'application/vnd.ms-excel' });
-      const url = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `statement.${format}`);
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Download error:', error);
       setError('Download failed. Please try again.');
     }
   };
@@ -177,7 +156,6 @@ export default function Home() {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto px-4 py-12">
-        {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Convert Bank Statements to Excel/CSV
@@ -239,7 +217,6 @@ export default function Home() {
           )}
         </div>
 
-        {/* Converter Section */}
         <div className="card">
           {!result ? (
             <>
@@ -274,7 +251,7 @@ export default function Home() {
 
               <button
                 onClick={handleConvert}
-                disabled={!file || loading || (isAuthenticated && user && user.pages_remaining <= 0)}
+                disabled={!file || loading}
                 className="mt-6 w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
@@ -302,11 +279,6 @@ export default function Home() {
                 <p className="mt-2 text-gray-600">
                   Your bank statement has been converted
                 </p>
-                {result.pages_used && (
-                  <p className="mt-1 text-sm text-gray-500">
-                    Pages used: {result.pages_used}
-                  </p>
-                )}
               </div>
 
               <div className="flex gap-4 justify-center">
@@ -328,7 +300,6 @@ export default function Home() {
                 onClick={() => {
                   setResult(null);
                   setFile(null);
-                  setError('');
                 }}
                 className="mt-6 text-blue-600 hover:text-blue-700 font-medium"
               >
@@ -366,7 +337,6 @@ export default function Home() {
           )}
         </div>
 
-        {/* Features */}
         <div className="mt-12 grid md:grid-cols-3 gap-6">
           <div className="text-center">
             <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
