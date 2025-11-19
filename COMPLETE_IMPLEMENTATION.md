@@ -256,7 +256,7 @@ python3 -m uvicorn server:app --host 0.0.0.0 --port 8001 --reload
 
 ### Frontend (.env.local):
 ```env
-NEXT_PUBLIC_BACKEND_URL=https://statement-wizard-3.preview.emergentagent.com
+NEXT_PUBLIC_BACKEND_URL=https://bankdoc-nexjs.preview.emergentagent.com
 ```
 
 ### Backend (.env):
@@ -269,7 +269,7 @@ GOOGLE_CLIENT_ID=640479011576-jlk0sceb5lnjsva0q9mg05r09jprp2vd.apps.googleuserco
 GOOGLE_CLIENT_SECRET=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
 DODO_PAYMENTS_API_KEY=NzvS5IynL725XWCv.zbxPW5uYg7SotKCOtrQHTydRlbklYn4D-9n5Am4xYd0BmAT-
 DODO_PAYMENTS_ENVIRONMENT=test_mode
-FRONTEND_URL=https://statement-wizard-3.preview.emergentagent.com
+FRONTEND_URL=https://bankdoc-nexjs.preview.emergentagent.com
 WORDPRESS_BASE_URL=https://mediumblue-shrew-791406.hostingersite.com
 ```
 

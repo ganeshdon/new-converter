@@ -28,7 +28,7 @@ DODO_PAYMENTS_ENVIRONMENT=test_mode
 DODO_PAYMENTS_WEBHOOK_SECRET=whsec_DijdfKgs55M2h3QZZPhUrKi+tI1kbDzm
 
 # Frontend URL (for redirects and CORS)
-FRONTEND_URL=https://statement-wizard-3.preview.emergentagent.com
+FRONTEND_URL=https://bankdoc-nexjs.preview.emergentagent.com
 
 # WordPress Blog Proxy
 WORDPRESS_BASE_URL=https://mediumblue-shrew-791406.hostingersite.com
@@ -42,7 +42,7 @@ WORDPRESS_BASE_URL=https://mediumblue-shrew-791406.hostingersite.com
 
 ```env
 # Backend API URL
-NEXT_PUBLIC_BACKEND_URL=https://statement-wizard-3.preview.emergentagent.com
+NEXT_PUBLIC_BACKEND_URL=https://bankdoc-nexjs.preview.emergentagent.com
 ```
 
 ---
@@ -166,7 +166,7 @@ yarn dev
 
 ## 🔗 API Endpoints
 
-**Backend Base URL:** `https://statement-wizard-3.preview.emergentagent.com`
+**Backend Base URL:** `https://bankdoc-nexjs.preview.emergentagent.com`
 
 **Key Endpoints:**
 - Authentication: `/api/auth/login`, `/api/auth/signup`
@@ -183,7 +183,7 @@ yarn dev
 
 **Backend Health Check:**
 ```bash
-curl https://statement-wizard-3.preview.emergentagent.com/api/health
+curl https://bankdoc-nexjs.preview.emergentagent.com/api/health
 ```
 
 **Frontend to Backend:**
