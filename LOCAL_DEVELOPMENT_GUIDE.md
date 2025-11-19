@@ -273,12 +273,20 @@ pip install -r requirements-local.txt
 REACT_APP_BACKEND_URL=http://localhost:8001
 ```
 
-### Issue 6: "Gemini API Key error"
-**Solution:** Make sure you have a valid Gemini API key in backend `.env`:
+### Issue 6: "Gemini API Key error" or "429 Quota exceeded"
+**Solution:** You need a valid Gemini API key with proper access.
+
+**Quick Fix:**
+1. Get NEW API key from: https://aistudio.google.com/app/apikey
+2. Update backend `.env`:
 ```env
-GEMINI_API_KEY=your_actual_api_key_here
+GEMINI_API_KEY=your_new_api_key_here
 ```
-Get one from: https://makersuite.google.com/app/apikey
+3. Restart backend server
+
+**Detailed instructions:** See `GEMINI_API_SETUP.md`
+
+**Important:** The app now uses `gemini-1.5-flash` (stable, better rate limits) instead of experimental models.
 
 ---
 
