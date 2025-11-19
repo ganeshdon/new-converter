@@ -1084,8 +1084,13 @@ async def extract_with_ai(pdf_path: str):
             # Upload the PDF file
             uploaded_file = genai.upload_file(pdf_path)
             
-            # Create the model
-            model = genai.GenerativeModel('gemini-2.0-flash-exp')
+            # Create the model - using stable version instead of experimental
+            # Try gemini-1.5-flash first (better rate limits), fallback to gemini-1.5-pro
+            try:
+                model = genai.GenerativeModel('gemini-1.5-flash')
+            except Exception as model_error:
+                logger.warning(f"gemini-1.5-flash not available, trying gemini-1.5-pro: {model_error}")
+                model = genai.GenerativeModel('gemini-1.5-pro')
             
             # Create the prompt
             prompt = """You are a specialized bank statement data extraction expert. 
