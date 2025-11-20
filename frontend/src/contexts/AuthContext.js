@@ -183,12 +183,15 @@ export const AuthProvider = ({ children }) => {
     if (!token) return;
     
     try {
-      const response = await fetch(`${API_URL}/api/user/profile`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
+      const opts = { headers: {} };
+      if (token && token !== 'oauth_session') {
+        opts.headers['Authorization'] = `Bearer ${token}`;
+      } else {
+        opts.credentials = 'include';
+      }
+
+      const response = await fetch(`${API_URL}/api/user/profile`, opts);
+
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
@@ -208,14 +211,15 @@ export const AuthProvider = ({ children }) => {
       };
       
       // Only add Authorization header for JWT tokens, not OAuth sessions
+      const opts = { method: 'POST', headers };
       if (token !== 'oauth_session') {
         headers['Authorization'] = `Bearer ${token}`;
+      } else {
+        opts.credentials = 'include';
       }
       
       const response = await fetch(`${API_URL}/api/user/pages/check`, {
-        method: 'POST',
-        headers,
-        credentials: 'include', // Include cookies for OAuth sessions
+        ...opts,
         body: JSON.stringify({ page_count: pageCount })
       });
       

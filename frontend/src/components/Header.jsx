@@ -17,41 +17,44 @@ const Header = () => {
 
   const formatPagesRemaining = () => {
     if (!user) return '';
-    
-    if (user.subscription_tier === 'enterprise') {
+
+    const tier = user.subscription_tier;
+
+    if (tier === 'enterprise') {
       return 'Unlimited';
     }
-    
-    if (user.subscription_tier === 'daily_free') {
+
+    if (tier === 'daily_free') {
       return `${user.pages_remaining}/7 today`;
     }
-    
+
+    // Handle all paid tier names (including Dodo plans: starter, professional, business)
     return `${user.pages_remaining}/${user.pages_limit}`;
   };
 
   const PublicNav = () => (
     <>
-      <Link 
-        to="/" 
-        className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+      <Link
+        to="/"
+        className={`font-medium transition-colors ${location.pathname === '/' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}
       >
         Home
       </Link>
-      <Link 
-        to="/pricing" 
-        className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+      <Link
+        to="/pricing"
+        className={`font-medium transition-colors ${location.pathname.startsWith('/pricing') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}
       >
         Pricing
       </Link>
-      <Link 
-        to="/login" 
-        className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+      <Link
+        to="/login"
+        className={`font-medium transition-colors ${location.pathname === '/login' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}
       >
         Login
       </Link>
-      <Link 
-        to="/signup" 
-        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+      <Link
+        to="/signup"
+        className={`px-4 py-2 rounded-lg transition-colors ${location.pathname === '/signup' ? 'bg-blue-700 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
       >
         Register
       </Link>
@@ -60,45 +63,45 @@ const Header = () => {
 
   const AuthenticatedNav = () => (
     <>
-      <Link 
-        to="/" 
-        className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+      <Link
+        to="/"
+        className={`font-medium transition-colors ${location.pathname === '/' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}
       >
         Home
       </Link>
-      
-      <Link 
-        to="/pricing" 
-        className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+
+      <Link
+        to="/pricing"
+        className={`font-medium transition-colors ${location.pathname.startsWith('/pricing') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}
       >
         Pricing
       </Link>
-      
-      <div className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer" 
-           onClick={() => navigate('/settings')}>
+
+      <div className={`flex items-center space-x-2 cursor-pointer ${location.pathname.startsWith('/settings') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}
+        onClick={() => navigate('/settings')}>
         <CreditCard className="h-4 w-4" />
         <span className="font-medium">
           Pages ({formatPagesRemaining()})
         </span>
       </div>
-      
-      <Link 
-        to="/documents" 
-        className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 font-medium transition-colors"
+
+      <Link
+        to="/documents"
+        className={`flex items-center space-x-2 font-medium transition-colors ${location.pathname.startsWith('/documents') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}
       >
         <FileText className="h-4 w-4" />
         <span>Documents</span>
       </Link>
-      
-      <Link 
-        to="/settings" 
-        className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 font-medium transition-colors"
+
+      <Link
+        to="/settings"
+        className={`flex items-center space-x-2 font-medium transition-colors ${location.pathname.startsWith('/settings') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}
       >
         <Settings className="h-4 w-4" />
         <span>Settings</span>
       </Link>
-      
-      <button 
+
+      <button
         onClick={handleLogout}
         className="flex items-center space-x-2 text-gray-700 hover:text-red-600 font-medium transition-colors"
       >
@@ -116,9 +119,9 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
-            <img 
-              src="/logo.png" 
-              alt="Your Bank Statement Converter" 
+            <img
+              src="/logo.png"
+              alt="Your Bank Statement Converter"
               className="h-10 w-10 object-contain"
             />
             <span className="text-xl font-bold text-gray-900 hidden sm:block">
@@ -166,7 +169,7 @@ const Header = () => {
                 >
                   Pricing
                 </Link>
-                <div 
+                <div
                   className="block px-3 py-2 text-gray-700 hover:text-blue-600 font-medium cursor-pointer"
                   onClick={() => { navigate('/settings'); setMobileMenuOpen(false); }}
                 >

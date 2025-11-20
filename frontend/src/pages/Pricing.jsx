@@ -19,7 +19,7 @@ const Pricing = () => {
   // Check for successful payment on page load
   useEffect(() => {
     const paymentSuccess = searchParams.get('payment');
-    
+
     if (paymentSuccess === 'success' && isAuthenticated) {
       toast.success('Payment successful! Your subscription has been activated.');
       // Refresh user data to get updated subscription
@@ -45,7 +45,7 @@ const Pricing = () => {
       popular: false
     },
     {
-      id: 'professional', 
+      id: 'professional',
       name: 'Professional',
       price: { monthly: 30, annual: 24 },
       pages: 1000,
@@ -86,44 +86,43 @@ const Pricing = () => {
       navigate('/signup');
       return;
     }
-    
+
     if (plan.id === 'enterprise') {
       setShowEnterpriseModal(true);
       return;
     }
-    
+
     setLoadingPlan(plan.id);
-    
+
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
-      
-      const response = await fetch(`${backendUrl}/api/dodo/create-subscription`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          package_id: plan.id,
-          billing_interval: billingInterval
-        })
-      });
-      
+
+      const headers = { 'Content-Type': 'application/json' };
+      const fetchOptions = { method: 'POST', headers, body: JSON.stringify({ package_id: plan.id, billing_interval: billingInterval }) };
+
+      if (token && token !== 'oauth_session') {
+        headers['Authorization'] = `Bearer ${token}`;
+      } else {
+        fetchOptions.credentials = 'include';
+      }
+
+      const response = await fetch(`${backendUrl}/api/dodo/create-subscription`, fetchOptions);
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Failed to create subscription');
       }
-      
+
       const data = await response.json();
-      
+
       // Store subscription_id in sessionStorage for later use
       if (data.session_id) {
         sessionStorage.setItem('pending_subscription_id', data.session_id);
       }
-      
+
       // Redirect to Dodo Payments Checkout
       window.location.href = data.checkout_url;
-      
+
     } catch (error) {
       console.error('Subscription error:', error);
       toast.error(error.message || 'Failed to start subscription process');
@@ -135,7 +134,7 @@ const Pricing = () => {
     if (typeof plan.price[billingInterval] === 'string') {
       return plan.price[billingInterval];
     }
-    
+
     return `$${plan.price[billingInterval]}`;
   };
 
@@ -158,22 +157,20 @@ const Pricing = () => {
         <div className="flex items-center justify-center space-x-4 mb-12">
           <button
             onClick={() => setBillingInterval('monthly')}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-              billingInterval === 'monthly'
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${billingInterval === 'monthly'
                 ? 'bg-blue-600 text-white border-2 border-blue-600'
                 : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300'
-            }`}
+              }`}
             disabled={checkingStatus}
           >
             Monthly Plan
           </button>
           <button
             onClick={() => setBillingInterval('annual')}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-              billingInterval === 'annual'
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${billingInterval === 'annual'
                 ? 'bg-blue-600 text-white border-2 border-blue-600'
                 : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300'
-            }`}
+              }`}
             disabled={checkingStatus}
           >
             Annual Plan
@@ -200,7 +197,7 @@ const Pricing = () => {
                   </div>
                 </div>
               </div>
-              
+
               <Button
                 onClick={() => handlePlanSelect(plan)}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium mb-6 transition-colors"
@@ -213,7 +210,7 @@ const Pricing = () => {
                   </>
                 ) : user?.subscription_tier === plan.id ? 'Current Plan' : plan.buttonText}
               </Button>
-              
+
               {plan.features.length > 0 && (
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
@@ -230,7 +227,7 @@ const Pricing = () => {
       </div>
 
       {/* Enterprise Contact Modal */}
-      <EnterpriseContactModal 
+      <EnterpriseContactModal
         isOpen={showEnterpriseModal}
         onClose={() => setShowEnterpriseModal(false)}
       />

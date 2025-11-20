@@ -21,7 +21,7 @@ const Converter = () => {
   const [anonymousData, setAnonymousData] = useState(null);
   const [browserFingerprint, setBrowserFingerprint] = useState(null);
   const paymentHandledRef = useRef(false); // Track if payment success was already handled
-  
+
   const { user, token, refreshUser, checkPages, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -29,25 +29,25 @@ const Converter = () => {
   // Check for successful payment on page load
   useEffect(() => {
     const paymentSuccess = searchParams.get('payment');
-    
+
     if (paymentSuccess === 'success' && !paymentHandledRef.current) {
       paymentHandledRef.current = true; // Mark as handled
-      
+
       console.log('🔍 Payment success detected');
-      
+
       // Get subscription_id from sessionStorage
       const subscriptionId = sessionStorage.getItem('pending_subscription_id');
       console.log('📝 Subscription ID from storage:', subscriptionId);
       console.log('🔐 Token available:', !!token);
       console.log('👤 Is authenticated:', isAuthenticated);
-      
+
       // Show success message
       toast.success('🎉 Payment successful! Activating your subscription...');
-      
+
       // Function to check and update subscription status
       const checkSubscription = async () => {
         console.log('🚀 Starting subscription check...');
-        
+
         // Check if we have a token (user might not be fully loaded yet)
         if (!token) {
           console.error('❌ No token available');
@@ -60,7 +60,7 @@ const Converter = () => {
           }, 1000);
           return;
         }
-        
+
         if (!subscriptionId) {
           console.error('❌ No subscription ID found in storage');
           // Refresh anyway
@@ -70,29 +70,35 @@ const Converter = () => {
           }
           return;
         }
-        
+
         try {
           const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
           const url = `${backendUrl}/api/dodo/check-subscription/${subscriptionId}`;
-          
+
           console.log('📞 Calling:', url);
           console.log('🔑 Using token:', token.substring(0, 20) + '...');
-          
+
+          // Build headers/options depending on token type (JWT vs OAuth session)
+          const headers = { 'Content-Type': 'application/json' };
+          const fetchOptions = { method: 'POST', headers };
+
+          // For JWT tokens, send Authorization header. For OAuth sessions, rely on cookies.
+          if (token && token !== 'oauth_session') {
+            headers['Authorization'] = `Bearer ${token}`;
+          } else {
+            // Ensure cookies are sent for session-based auth
+            fetchOptions.credentials = 'include';
+          }
+
           // Call backend to check and update subscription
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
-          
+          const response = await fetch(url, fetchOptions);
+
           console.log('📡 Response status:', response.status);
-          
+
           if (response.ok) {
             const result = await response.json();
             console.log('✅ Subscription check result:', result);
-            
+
             if (result.status === 'success') {
               toast.success('🎉 Subscription activated! Your credits have been updated.');
               // Clear the pending subscription
@@ -111,29 +117,32 @@ const Converter = () => {
           console.error('💥 Error checking subscription:', error);
           toast.error('Error checking subscription status.');
         }
-        
+
         // Refresh user data (token check is enough)
         if (token && refreshUser) {
           console.log('🔄 Refreshing user data...');
-          setTimeout(() => {
-            refreshUser().then(() => {
-              console.log('✅ User data refreshed');
-            });
-          }, 1500);
+          setTimeout(async () => {
+            try {
+              const updatedUser = await refreshUser();
+              console.log('✅ User data refreshed:', updatedUser);
+            } catch (error) {
+              console.error('Failed to refresh user:', error);
+            }
+          }, 1000);
         }
       };
-      
+
       // Wait for backend processing, then check subscription
       setTimeout(() => {
         checkSubscription();
       }, 2000);
-      
-      // Clean URL after a brief delay
+
+      // Clean URL after a longer delay to ensure refresh completes
       setTimeout(() => {
         console.log('🧹 Cleaning URL');
         window.history.replaceState({}, document.title, '/');
         paymentHandledRef.current = false; // Reset for future payments
-      }, 4000);
+      }, 5000);
     }
   }, [searchParams, token, isAuthenticated, refreshUser]); // Include necessary deps
 
@@ -143,24 +152,29 @@ const Converter = () => {
       try {
         const fingerprint = await getBrowserFingerprint();
         setBrowserFingerprint(fingerprint);
-        
+
         if (!isAuthenticated) {
           setIsAnonymous(true);
           await checkAnonymousLimit(fingerprint);
+        } else {
+          // User is authenticated, not anonymous
+          setIsAnonymous(false);
         }
       } catch (error) {
         console.error('Fingerprinting failed, using fallback:', error);
         // Fallback fingerprint using simpler methods
         const fallbackFingerprint = generateFallbackFingerprint();
         setBrowserFingerprint(fallbackFingerprint);
-        
+
         if (!isAuthenticated) {
           setIsAnonymous(true);
           await checkAnonymousLimit(fallbackFingerprint);
+        } else {
+          setIsAnonymous(false);
         }
       }
     };
-    
+
     initFingerprint();
   }, [isAuthenticated]);
 
@@ -177,7 +191,7 @@ const Converter = () => {
       !!window.localStorage,
       !!window.sessionStorage
     ];
-    
+
     // Simple hash function
     let hash = 0;
     const str = components.join('|');
@@ -186,7 +200,7 @@ const Converter = () => {
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash;
     }
-    
+
     return 'fallback_' + Math.abs(hash).toString(16) + '_' + Date.now();
   };
 
@@ -194,7 +208,7 @@ const Converter = () => {
   const checkAnonymousLimit = async (fingerprint) => {
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
-      
+
       const response = await fetch(`${backendUrl}/api/anonymous/check`, {
         method: 'POST',
         headers: {
@@ -204,7 +218,7 @@ const Converter = () => {
           browser_fingerprint: fingerprint
         })
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setAnonymousData(data);
@@ -222,17 +236,17 @@ const Converter = () => {
         return 'Free conversion used - Sign up for unlimited access';
       }
     }
-    
+
     if (!user) return '';
-    
+
     if (user.subscription_tier === 'enterprise') {
       return 'Unlimited pages available';
     }
-    
+
     if (user.subscription_tier === 'daily_free') {
       return `${user.pages_remaining} of 7 pages remaining today`;
     }
-    
+
     return `${user.pages_remaining} of ${user.pages_limit} pages remaining this month`;
   };
 
@@ -240,7 +254,7 @@ const Converter = () => {
     if (isAnonymous) {
       return 'Sign up for unlimited conversions with advanced features';
     }
-    
+
     if (user?.subscription_tier === 'daily_free') {
       return 'Pages reset every 24 hours';
     }
@@ -281,40 +295,40 @@ const Converter = () => {
   const processFile = async (file) => {
     try {
       console.log('Processing PDF:', file.name, isAnonymous ? '(Anonymous)' : '(Authenticated)');
-      
+
       const formData = new FormData();
       formData.append('file', file);
-      
+
       const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
-      
+
       let endpoint = '/api/process-pdf';
       let headers = {};
-      
+
       if (isAnonymous) {
         endpoint = '/api/anonymous/convert';
         headers['X-Browser-Fingerprint'] = browserFingerprint;
       } else {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const response = await fetch(`${backendUrl}${endpoint}`, {
         method: 'POST',
         headers,
         body: formData
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Failed to process PDF');
       }
-      
+
       const result = await response.json();
       console.log('AI Extraction Result:', result);
-      
+
       if (!result.success || !result.data) {
         throw new Error('Invalid response from AI processing');
       }
-      
+
       const extractedData = result.data;
       setExtractedData(extractedData);
       setPagesUsed(result.pages_processed || result.pages_used || 1);
@@ -331,11 +345,11 @@ const Converter = () => {
       }
 
       setCurrentStep('results');
-      
-      const message = isAnonymous 
+
+      const message = isAnonymous
         ? 'Free conversion completed! Sign up for unlimited conversions.'
         : `PDF processed successfully! Used ${result.pages_processed || result.pages_used || 1} pages.`;
-      
+
       toast.success(message);
     } catch (error) {
       console.error('Processing error:', error);
@@ -347,14 +361,14 @@ const Converter = () => {
 
   const generateComprehensiveCSV = (data) => {
     let csvLines = [];
-    
+
     const maxTransactions = Math.max(
       data.deposits?.length || 0,
-      data.atmWithdrawals?.length || 0, 
+      data.atmWithdrawals?.length || 0,
       data.checksPaid?.length || 0,
       data.visaPurchases?.length || 0
     );
-    
+
     const headerRow = [
       'Account Summary', 'Value', '',
       'Description', 'Date Credited', 'Amount', '',
@@ -363,7 +377,7 @@ const Converter = () => {
       'Description', 'Tran Date', 'Date Paid', 'Amount'
     ];
     csvLines.push(headerRow.join(','));
-    
+
     const subHeaderRow = [
       'Account Number', data.accountInfo?.accountNumber || '', '',
       'DEPOSITS & OTHER CREDITS', '', '', '',
@@ -372,7 +386,7 @@ const Converter = () => {
       'CARD PURCHASES', '', '', ''
     ];
     csvLines.push(subHeaderRow.join(','));
-    
+
     let rowData = [
       'Statement Date', data.accountInfo?.statementDate || '', '',
       data.deposits?.[0]?.description || '', data.deposits?.[0]?.dateCredited || '', data.deposits?.[0]?.amount ? `$${data.deposits[0].amount.toFixed(2)}` : '', '',
@@ -381,7 +395,7 @@ const Converter = () => {
       data.visaPurchases?.[0]?.description || '', data.visaPurchases?.[0]?.tranDate || '', data.visaPurchases?.[0]?.datePosted || '', data.visaPurchases?.[0]?.amount ? `$${Math.abs(data.visaPurchases[0].amount).toFixed(2)}` : ''
     ];
     csvLines.push(rowData.join(','));
-    
+
     rowData = [
       'Beginning Balance', `$${(data.accountInfo?.beginningBalance || 0).toFixed(2)}`, '',
       data.deposits?.[1]?.description || '', data.deposits?.[1]?.dateCredited || '', data.deposits?.[1]?.amount ? `$${data.deposits[1].amount.toFixed(2)}` : '', '',
@@ -390,7 +404,7 @@ const Converter = () => {
       data.visaPurchases?.[1]?.description || '', data.visaPurchases?.[1]?.tranDate || '', data.visaPurchases?.[1]?.datePosted || '', data.visaPurchases?.[1]?.amount ? `$${Math.abs(data.visaPurchases[1].amount).toFixed(2)}` : ''
     ];
     csvLines.push(rowData.join(','));
-    
+
     rowData = [
       'Ending Balance', `$${(data.accountInfo?.endingBalance || 0).toFixed(2)}`, '',
       data.deposits?.[2]?.description || '', data.deposits?.[2]?.dateCredited || '', data.deposits?.[2]?.amount ? `$${data.deposits[2].amount.toFixed(2)}` : '', '',
@@ -399,7 +413,7 @@ const Converter = () => {
       data.visaPurchases?.[2]?.description || '', data.visaPurchases?.[2]?.tranDate || '', data.visaPurchases?.[2]?.datePosted || '', data.visaPurchases?.[2]?.amount ? `$${Math.abs(data.visaPurchases[2].amount).toFixed(2)}` : ''
     ];
     csvLines.push(rowData.join(','));
-    
+
     for (let i = 3; i < maxTransactions; i++) {
       rowData = [
         '', '', '',
@@ -410,7 +424,7 @@ const Converter = () => {
       ];
       csvLines.push(rowData.join(','));
     }
-    
+
     return csvLines.join('\n');
   };
 
@@ -492,7 +506,7 @@ const Converter = () => {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
             Convert your PDF bank statements into organized spreadsheets
           </p>
-          
+
           {/* Usage Status */}
           <Card className="max-w-lg mx-auto p-4 mb-6">
             <div className="flex items-center justify-between">
@@ -504,7 +518,7 @@ const Converter = () => {
                 )}
                 <span className="font-medium text-gray-900">{formatPagesDisplay()}</span>
               </div>
-              
+
               {isAnonymous ? (
                 <div className="flex space-x-2">
                   <Button
@@ -528,9 +542,9 @@ const Converter = () => {
                 )
               )}
             </div>
-            
+
             <p className="text-sm text-gray-500 mt-1">{getResetMessage()}</p>
-            
+
             {isAnonymous && !anonymousData?.can_convert && (
               <div className="mt-2 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
                 <p className="text-sm text-yellow-800">

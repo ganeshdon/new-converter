@@ -29,53 +29,88 @@ const Settings = () => {
     }
   }, [user]);
 
+  const formatDate = (iso) => {
+    if (!iso) return '-';
+    try {
+      const d = new Date(iso);
+      return d.toLocaleString();
+    } catch (e) {
+      return iso;
+    }
+  };
+
+  const computeNextBillingDate = () => {
+    if (!user) return null;
+    try {
+      if (user.subscription_tier === 'daily_free') {
+        if (user.daily_reset_time) return formatDate(user.daily_reset_time);
+        return 'Every 24 hours';
+      }
+
+      if (user.billing_cycle_start) {
+        const start = new Date(user.billing_cycle_start);
+        // Advance one month forward from start of billing cycle
+        const next = new Date(start);
+        next.setMonth(next.getMonth() + 1);
+        return formatDate(next.toISOString());
+      }
+
+      return 'Next billing date unavailable';
+    } catch (e) {
+      return 'Next billing date unavailable';
+    }
+  };
+
+  // Transactions UI removed — no-op effect kept for future billing side-effects
+  useEffect(() => {}, [user]);
+
   const formatPlanName = (tier) => {
     const plans = {
       'daily_free': 'Daily Free',
       'basic': 'Basic Plan',
-      'premium': 'Premium Plan', 
+      'premium': 'Premium Plan',
       'platinum': 'Platinum Plan',
-      'enterprise': 'Enterprise Plan'
+      'enterprise': 'Enterprise Plan',
+      'starter': 'Starter Plan',
+      'professional': 'Professional Plan',
+      'business': 'Business Plan'
     };
     return plans[tier] || tier;
   };
 
   const formatPagesLimit = () => {
     if (!user) return '';
-    
+
     if (user.subscription_tier === 'enterprise') {
       return 'Unlimited pages';
     }
-    
+
     if (user.subscription_tier === 'daily_free') {
       return `${user.pages_remaining}/${user.pages_limit} pages today (resets daily)`;
     }
-    
+
     return `${user.pages_remaining}/${user.pages_limit} pages this month`;
   };
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.full_name.trim()) {
       toast.error('Full name is required');
       return;
     }
 
     setLoading(true);
-    
+
     try {
-      const response = await fetch(`${API_URL}/api/user/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          full_name: formData.full_name,
-          language_preference: formData.language_preference
-        })
-      });
+      const headers = { 'Content-Type': 'application/json' };
+      const opts = { method: 'PUT', headers, body: JSON.stringify({ full_name: formData.full_name, language_preference: formData.language_preference }) };
+      if (token && token !== 'oauth_session') {
+        headers['Authorization'] = `Bearer ${token}`;
+      } else {
+        opts.credentials = 'include';
+      }
+      const response = await fetch(`${API_URL}/api/user/profile`, opts);
 
       if (response.ok) {
         await refreshUser();
@@ -96,18 +131,20 @@ const Settings = () => {
     const confirmation = window.prompt(
       'This action cannot be undone. Type "DELETE" to confirm account deletion:'
     );
-    
+
     if (confirmation !== 'DELETE') {
       return;
     }
 
     try {
-      const response = await fetch(`${API_URL}/api/user/profile`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const headers = {};
+      const opts = { method: 'DELETE', headers };
+      if (token && token !== 'oauth_session') {
+        headers['Authorization'] = `Bearer ${token}`;
+      } else {
+        opts.credentials = 'include';
+      }
+      const response = await fetch(`${API_URL}/api/user/profile`, opts);
 
       if (response.ok) {
         toast.success('Account deleted successfully');
@@ -132,7 +169,7 @@ const Settings = () => {
   const renderAccountTab = () => (
     <Card className="p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
-      
+
       <form onSubmit={handleProfileUpdate} className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -141,12 +178,12 @@ const Settings = () => {
           <input
             type="text"
             value={formData.full_name}
-            onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Email Address
@@ -161,7 +198,7 @@ const Settings = () => {
             Contact support to change your email address
           </p>
         </div>
-        
+
         <div className="flex justify-end">
           <Button
             type="submit"
@@ -179,7 +216,7 @@ const Settings = () => {
     <div className="space-y-6">
       <Card className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Current Plan</h3>
-        
+
         <div className="bg-blue-50 rounded-lg p-4 mb-4">
           <div className="flex items-center justify-between">
             <div>
@@ -198,7 +235,7 @@ const Settings = () => {
             )}
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-gray-50 rounded-lg p-4">
             <div className="text-sm text-gray-600">Pages Used</div>
@@ -206,7 +243,7 @@ const Settings = () => {
               {user?.pages_limit - user?.pages_remaining || 0}
             </div>
           </div>
-          
+
           <div className="bg-gray-50 rounded-lg p-4">
             <div className="text-sm text-gray-600">Pages Remaining</div>
             <div className="text-2xl font-semibold text-gray-900">
@@ -215,10 +252,10 @@ const Settings = () => {
           </div>
         </div>
       </Card>
-      
+
       <Card className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Billing Information</h3>
-        
+
         <div className="space-y-4">
           <div className="flex justify-between items-center py-3 border-b">
             <span className="text-gray-600">Billing Cycle</span>
@@ -226,14 +263,14 @@ const Settings = () => {
               {user?.subscription_tier === 'daily_free' ? 'Daily Reset' : 'Monthly'}
             </span>
           </div>
-          
+
           <div className="flex justify-between items-center py-3 border-b">
             <span className="text-gray-600">Next Reset</span>
             <span className="font-medium">
-              {user?.subscription_tier === 'daily_free' ? 'Every 24 hours' : 'Next billing date'}
+              {computeNextBillingDate()}
             </span>
           </div>
-          
+
           <div className="flex justify-end pt-4">
             <Button
               onClick={() => navigate('/pricing')}
@@ -250,7 +287,7 @@ const Settings = () => {
   const renderPreferencesTab = () => (
     <Card className="p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Preferences</h3>
-      
+
       <form onSubmit={handleProfileUpdate} className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -258,7 +295,7 @@ const Settings = () => {
           </label>
           <select
             value={formData.language_preference}
-            onChange={(e) => setFormData({...formData, language_preference: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, language_preference: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="en">English</option>
@@ -267,7 +304,7 @@ const Settings = () => {
             <option value="de">Deutsch</option>
           </select>
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Default Export Format
@@ -279,7 +316,7 @@ const Settings = () => {
             <option value="xlsx">Excel (.xlsx)</option>
           </select>
         </div>
-        
+
         <div>
           <label className="flex items-center">
             <input
@@ -291,7 +328,7 @@ const Settings = () => {
             </span>
           </label>
         </div>
-        
+
         <div className="flex justify-end">
           <Button
             type="submit"
@@ -309,7 +346,7 @@ const Settings = () => {
     <div className="space-y-6">
       <Card className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Password & Security</h3>
-        
+
         <div className="space-y-4">
           <Button
             onClick={() => toast.info('Password change feature coming soon')}
@@ -318,7 +355,7 @@ const Settings = () => {
           >
             Change Password
           </Button>
-          
+
           <Button
             onClick={() => toast.info('Two-factor authentication coming soon')}
             variant="outline"
@@ -326,7 +363,7 @@ const Settings = () => {
           >
             Enable Two-Factor Authentication
           </Button>
-          
+
           <Button
             onClick={() => logout()}
             variant="outline"
@@ -336,17 +373,17 @@ const Settings = () => {
           </Button>
         </div>
       </Card>
-      
+
       <Card className="p-6 border-red-200 bg-red-50">
         <div className="flex items-center space-x-2 mb-4">
           <AlertTriangle className="h-5 w-5 text-red-600" />
           <h3 className="text-lg font-semibold text-red-900">Danger Zone</h3>
         </div>
-        
+
         <p className="text-red-700 mb-4">
           Once you delete your account, there is no going back. Please be certain.
         </p>
-        
+
         <Button
           onClick={handleDeleteAccount}
           className="bg-red-600 hover:bg-red-700 text-white"
@@ -391,11 +428,10 @@ const Settings = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                        activeTab === tab.id
+                      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${activeTab === tab.id
                           ? 'bg-blue-50 text-blue-700 border-blue-200'
                           : 'text-gray-600 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       <Icon className="h-5 w-5" />
                       <span className="font-medium">{tab.label}</span>

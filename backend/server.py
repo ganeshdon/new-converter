@@ -424,14 +424,23 @@ async def check_pages(pages_request: PagesCheckRequest, current_user: dict = Dep
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
+    tier = user["subscription_tier"]
+    # Check if daily_free (handle both enum and string values)
+    # Convert enum to string for comparison
+    tier_str = str(tier).lower() if tier else ""
+    is_daily_free = "daily_free" in tier_str
+    
+    logger.info(f"check_pages: user_id={current_user['user_id']}, tier={tier}, is_daily_free={is_daily_free}, pages_remaining={user['pages_remaining']}, requested={pages_request.page_count}")
+    
     # Check if daily free user needs reset
-    if user["subscription_tier"] == SubscriptionTier.DAILY_FREE:
+    if is_daily_free:
         await check_and_reset_daily_pages(user["_id"])
         user = await users_collection.find_one({"_id": user["_id"]})
+        logger.info(f"check_pages after reset: pages_remaining={user['pages_remaining']}")
     
     can_convert = user["pages_remaining"] >= pages_request.page_count
     
-    if user["subscription_tier"] == SubscriptionTier.DAILY_FREE:
+    if is_daily_free:
         daily_reset_time = user["daily_reset_time"]
         if daily_reset_time and daily_reset_time.tzinfo is None:
             daily_reset_time = daily_reset_time.replace(tzinfo=timezone.utc)
@@ -445,7 +454,7 @@ async def check_pages(pages_request: PagesCheckRequest, current_user: dict = Dep
         message = f"You have {user['pages_remaining']} pages remaining this month."
     
     if not can_convert:
-        if user["subscription_tier"] == SubscriptionTier.DAILY_FREE:
+        if is_daily_free:
             message = "You've used all your daily pages. Upgrade to continue or wait for reset."
         else:
             message = "You've used all your monthly pages. Upgrade your plan to continue."
@@ -457,6 +466,10 @@ async def check_pages(pages_request: PagesCheckRequest, current_user: dict = Dep
         reset_date=next_reset,
         message=message
     )
+
+
+# NOTE: Transactions listing endpoint removed per request — transaction records may still
+# be stored by webhook handlers but are no longer exposed via this API.
 
 @api_router.post("/process-pdf")
 async def process_pdf_with_ai(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
@@ -480,7 +493,21 @@ async def process_pdf_with_ai(file: UploadFile = File(...), current_user: dict =
         
         # Check if user has enough pages
         user = await users_collection.find_one({"_id": current_user["user_id"]})
+        tier = user["subscription_tier"]
+        # Check if daily_free (handle both enum and string values)
+        tier_str = str(tier).lower() if tier else ""
+        is_daily_free = "daily_free" in tier_str
+        
+        logger.info(f"process_pdf: user_id={current_user['user_id']}, tier={tier}, is_daily_free={is_daily_free}, page_count={page_count}, pages_remaining={user['pages_remaining']}")
+        
+        # Reset daily pages if needed
+        if is_daily_free:
+            await check_and_reset_daily_pages(user["_id"])
+            user = await users_collection.find_one({"_id": user["_id"]})
+            logger.info(f"process_pdf after reset: pages_remaining={user['pages_remaining']}")
+        
         if user["pages_remaining"] < page_count:
+            logger.error(f"Insufficient pages: need {page_count}, have {user['pages_remaining']}")
             os.unlink(tmp_file_path)
             raise HTTPException(
                 status_code=400, 

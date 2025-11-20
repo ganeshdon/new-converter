@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from datetime import datetime
+import uuid
 from standardwebhooks.webhooks import Webhook
 from motor.motor_asyncio import AsyncIOMotorClient
 import smtplib
@@ -25,6 +26,19 @@ load_dotenv(ROOT_DIR / '.env')
 
 # Setup logging
 logger = logging.getLogger(__name__)
+
+# Plan normalization: map Dodo plan names to internal subscription tier names
+# Use descriptive tier names that work with the app's business logic
+PLAN_TO_TIER_MAPPING = {
+    "starter": "starter",        # Keep as-is (now in SubscriptionTier enum)
+    "professional": "professional",
+    "business": "business",
+    "enterprise": "enterprise"
+}
+
+def normalize_plan_name(plan: str) -> str:
+    """Normalize Dodo plan name to consistent internal tier value."""
+    return PLAN_TO_TIER_MAPPING.get(plan.lower(), plan.lower())
 
 # Helper function to get current user (duplicated from server.py to avoid circular import)
 async def get_current_user(request: Request):
@@ -205,7 +219,54 @@ async def check_subscription_status(subscription_id: str, current_user: dict = D
         
         # Fetch subscription from Dodo
         logger.info(f"📞 Fetching subscription from Dodo API...")
-        subscription = await dodo_client.subscriptions.get(subscription_id)
+
+        async def fetch_subscription(client, subscription_id):
+            """Try multiple possible Dodo client methods to fetch a subscription."""
+            subs = getattr(client, 'subscriptions', None)
+
+            # Try known method names on the subscriptions resource
+            candidate_methods = [
+                'get', 'retrieve', 'fetch', 'get_subscription', 'get_by_id', 'retrieve_subscription'
+            ]
+
+            if subs is not None:
+                for name in candidate_methods:
+                    fn = getattr(subs, name, None)
+                    if callable(fn):
+                        logger.info(f"Trying subscriptions.{name}()")
+                        try:
+                            result = fn(subscription_id)
+                            if hasattr(result, '__await__'):
+                                return await result
+                            return result
+                        except TypeError:
+                            # try as keyword arg
+                            try:
+                                result = fn(id=subscription_id)
+                                if hasattr(result, '__await__'):
+                                    return await result
+                                return result
+                            except Exception:
+                                logger.debug(f"subscriptions.{name} failed with TypeError for id")
+                        except Exception as e:
+                            logger.debug(f"subscriptions.{name} raised: {e}")
+
+            # Try methods on the client itself
+            for name in candidate_methods:
+                fn = getattr(client, name, None)
+                if callable(fn):
+                    logger.info(f"Trying client.{name}()")
+                    try:
+                        result = fn(subscription_id)
+                        if hasattr(result, '__await__'):
+                            return await result
+                        return result
+                    except Exception as e:
+                        logger.debug(f"client.{name} raised: {e}")
+
+            raise Exception("Unable to fetch subscription from Dodo client: no supported method found")
+
+        subscription = await fetch_subscription(dodo_client, subscription_id)
         
         logger.info(f"📡 Subscription status from Dodo: {subscription.status}")
         
@@ -221,12 +282,13 @@ async def check_subscription_status(subscription_id: str, current_user: dict = D
             
             if db_subscription:
                 user_id = db_subscription["user_id"]
-                plan = db_subscription["plan"]
+                plan = normalize_plan_name(db_subscription["plan"])
                 
                 # Determine pages based on plan
                 pages_limit_map = {
                     "starter": 50,
                     "professional": 200,
+                    "business": 500,
                     "enterprise": -1  # -1 means unlimited
                 }
                 pages_limit = pages_limit_map.get(plan, 50)
@@ -234,7 +296,7 @@ async def check_subscription_status(subscription_id: str, current_user: dict = D
                 
                 # Update user with subscription details
                 await db.users.update_one(
-                    {"user_id": user_id},
+                    {"_id": user_id},
                     {
                         "$set": {
                             "subscription_status": "active",
@@ -372,7 +434,7 @@ async def handle_subscription_active(data: dict):
     subscription = await db.subscriptions.find_one({"subscription_id": subscription_id})
     if subscription:
         await db.users.update_one(
-            {"user_id": subscription["user_id"]},
+            {"_id": subscription["user_id"]},
             {
                 "$set": {
                     "subscription_status": "active",
@@ -419,7 +481,7 @@ async def handle_subscription_on_hold(data: dict):
     subscription = await db.subscriptions.find_one({"subscription_id": subscription_id})
     if subscription:
         await db.users.update_one(
-            {"user_id": subscription["user_id"]},
+            {"_id": subscription["user_id"]},
             {"$set": {"subscription_status": "on_hold"}}
         )
 
@@ -444,7 +506,7 @@ async def handle_subscription_cancelled(data: dict):
     subscription = await db.subscriptions.find_one({"subscription_id": subscription_id})
     if subscription:
         await db.users.update_one(
-            {"user_id": subscription["user_id"]},
+            {"_id": subscription["user_id"]},
             {"$set": {"subscription_status": "cancelled"}}
         )
 
@@ -474,14 +536,50 @@ async def handle_payment_succeeded(data: dict):
     logger.info(f"Payment succeeded: {payment_id} for subscription {subscription_id}")
     
     # Record payment transaction
-    await db.payment_transactions.insert_one({
-        "payment_id": payment_id,
-        "subscription_id": subscription_id,
-        "amount": amount,
-        "status": "succeeded",
-        "payment_provider": "dodo",
-        "created_at": datetime.utcnow()
-    })
+    try:
+        # Try to find associated user_id from subscription metadata or subscriptions collection
+        user_id = None
+        package_id = None
+        billing_interval = None
+        subscription_status = None
+
+        # If the webhook provided metadata with user_id, prefer that
+        metadata = data.get("metadata") or {}
+        if isinstance(metadata, dict) and metadata.get("user_id"):
+            user_id = metadata.get("user_id")
+            package_id = metadata.get("package_id") or metadata.get("plan")
+            billing_interval = metadata.get("billing_interval")
+
+        # If we have a subscription_id but no user_id, look it up in our DB
+        if subscription_id and not user_id:
+            sub = await db.subscriptions.find_one({"subscription_id": subscription_id})
+            if sub:
+                user_id = sub.get("user_id")
+                package_id = package_id or sub.get("plan")
+                billing_interval = billing_interval or sub.get("billing_interval")
+                subscription_status = sub.get("status")
+
+        tx_doc = {
+            "transaction_id": payment_id or str(uuid.uuid4()),
+            "payment_id": payment_id,
+            "subscription_id": subscription_id,
+            "user_id": user_id,
+            "package_id": package_id,
+            "amount": amount,
+            "currency": data.get("currency", "usd"),
+            "payment_status": data.get("status") or "succeeded",
+            "subscription_status": subscription_status or data.get("subscription_status"),
+            "billing_interval": billing_interval or data.get("billing_interval"),
+            "payment_provider": "dodo",
+            "metadata": metadata,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+
+        await db.payment_transactions.insert_one(tx_doc)
+        logger.info(f"Recorded payment transaction for user: {user_id}, tx: {tx_doc['transaction_id']}")
+    except Exception as e:
+        logger.error(f"Failed to record payment transaction: {e}")
 
 
 @router.post("/enterprise-contact")

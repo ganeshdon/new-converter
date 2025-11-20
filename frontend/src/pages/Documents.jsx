@@ -22,12 +22,15 @@ const Documents = () => {
   const fetchDocuments = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/documents`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
+      const headers = {};
+      const opts = { headers };
+      if (token && token !== 'oauth_session') {
+        headers['Authorization'] = `Bearer ${token}`;
+      } else {
+        opts.credentials = 'include';
+      }
+      const response = await fetch(`${API_URL}/api/documents`, opts);
+
       if (response.ok) {
         const docs = await response.json();
         setDocuments(docs);
@@ -43,12 +46,15 @@ const Documents = () => {
 
   const handleDownload = async (docId, filename) => {
     try {
-      const response = await fetch(`${API_URL}/api/documents/${docId}/download`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
+      const headers = {};
+      const opts = { headers };
+      if (token && token !== 'oauth_session') {
+        headers['Authorization'] = `Bearer ${token}`;
+      } else {
+        opts.credentials = 'include';
+      }
+      const response = await fetch(`${API_URL}/api/documents/${docId}/download`, opts);
+
       if (response.ok) {
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
@@ -73,13 +79,15 @@ const Documents = () => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/api/documents/${docId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
+      const headers = {};
+      const opts = { method: 'DELETE', headers };
+      if (token && token !== 'oauth_session') {
+        headers['Authorization'] = `Bearer ${token}`;
+      } else {
+        opts.credentials = 'include';
+      }
+      const response = await fetch(`${API_URL}/api/documents/${docId}`, opts);
+
       if (response.ok) {
         setDocuments(documents.filter(doc => doc.id !== docId));
         toast.success('Document deleted successfully');
@@ -112,7 +120,7 @@ const Documents = () => {
   };
 
   const filteredAndSortedDocuments = documents
-    .filter(doc => 
+    .filter(doc =>
       doc.original_filename.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
@@ -164,7 +172,7 @@ const Documents = () => {
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <Filter className="h-4 w-4 text-gray-500" />
@@ -179,7 +187,7 @@ const Documents = () => {
                   <option value="size">File Size</option>
                 </select>
               </div>
-              
+
               <Link to="/">
                 <Button className="bg-blue-600 hover:bg-blue-700">
                   Convert New Document
@@ -197,8 +205,8 @@ const Documents = () => {
               {documents.length === 0 ? 'No documents yet' : 'No documents found'}
             </h3>
             <p className="text-gray-600 mb-6">
-              {documents.length === 0 
-                ? 'Convert your first bank statement to get started!' 
+              {documents.length === 0
+                ? 'Convert your first bank statement to get started!'
                 : 'Try adjusting your search terms'}
             </p>
             {documents.length === 0 && (
@@ -218,7 +226,7 @@ const Documents = () => {
                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                       <FileText className="h-6 w-6 text-blue-600" />
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-medium text-gray-900 truncate">
                         {doc.original_filename}
@@ -230,17 +238,16 @@ const Documents = () => {
                         </div>
                         <span>{formatFileSize(doc.file_size)}</span>
                         <span>{doc.page_count} pages</span>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          doc.status === 'completed' 
-                            ? 'bg-green-100 text-green-800' 
+                        <span className={`px-2 py-1 rounded-full text-xs ${doc.status === 'completed'
+                            ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
-                        }`}>
+                          }`}>
                           {doc.status}
                         </span>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Button
                       onClick={() => handleDownload(doc.id, doc.original_filename)}
@@ -251,7 +258,7 @@ const Documents = () => {
                       <Download className="h-4 w-4 mr-1" />
                       Download
                     </Button>
-                    
+
                     <Button
                       onClick={() => handleDelete(doc.id, doc.original_filename)}
                       size="sm"

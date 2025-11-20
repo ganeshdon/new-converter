@@ -4,11 +4,17 @@ from datetime import datetime
 from enum import Enum
 
 class SubscriptionTier(str, Enum):
+    # Legacy / app-internal tiers
     DAILY_FREE = "daily_free"
     BASIC = "basic"
     PREMIUM = "premium"
     PLATINUM = "platinum"
     ENTERPRISE = "enterprise"
+
+    # Dodo Payments plan names (keep for compatibility with payment webhook and check flows)
+    STARTER = "starter"
+    PROFESSIONAL = "professional"
+    BUSINESS = "business"
 
 class BillingInterval(str, Enum):
     MONTHLY = "monthly"
