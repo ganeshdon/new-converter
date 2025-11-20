@@ -34,11 +34,16 @@ const Converter = () => {
       toast.success('🎉 Payment successful! Your subscription has been activated.');
       
       // Refresh user data to get updated subscription
-      if (isAuthenticated && refreshUser) {
+      if (isAuthenticated) {
         // Wait a moment for backend to process webhook, then refresh
-        setTimeout(() => {
-          refreshUser();
+        const refreshTimer = setTimeout(() => {
+          if (refreshUser) {
+            refreshUser();
+          }
         }, 1000);
+        
+        // Clean up timer
+        return () => clearTimeout(refreshTimer);
       }
       
       // Clean URL after a brief delay
@@ -46,7 +51,8 @@ const Converter = () => {
         window.history.replaceState({}, document.title, '/');
       }, 1500);
     }
-  }, [searchParams, isAuthenticated, refreshUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]); // Only depend on searchParams to prevent infinite loop
 
   // Initialize browser fingerprint for anonymous users
   useEffect(() => {
