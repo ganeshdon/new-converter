@@ -32,6 +32,12 @@ const Header = () => {
   const PublicNav = () => (
     <>
       <Link 
+        to="/" 
+        className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+      >
+        Home
+      </Link>
+      <Link 
         to="/pricing" 
         className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
       >
