@@ -33,62 +33,105 @@ const Converter = () => {
     if (paymentSuccess === 'success' && !paymentHandledRef.current) {
       paymentHandledRef.current = true; // Mark as handled
       
+      console.log('🔍 Payment success detected');
+      
       // Get subscription_id from sessionStorage
       const subscriptionId = sessionStorage.getItem('pending_subscription_id');
+      console.log('📝 Subscription ID from storage:', subscriptionId);
+      console.log('🔐 Token available:', !!token);
+      console.log('👤 Is authenticated:', isAuthenticated);
       
       // Show success message
       toast.success('🎉 Payment successful! Activating your subscription...');
       
       // Function to check and update subscription status
       const checkSubscription = async () => {
-        if (isAuthenticated && token && subscriptionId) {
-          try {
-            const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
-            
-            // Call backend to check and update subscription
-            const response = await fetch(`${backendUrl}/api/dodo/check-subscription/${subscriptionId}`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              }
-            });
-            
-            if (response.ok) {
-              const result = await response.json();
-              console.log('Subscription check result:', result);
-              
-              if (result.status === 'success') {
-                toast.success('🎉 Subscription activated! Your credits have been updated.');
-                // Clear the pending subscription
-                sessionStorage.removeItem('pending_subscription_id');
-              }
-            } else {
-              console.error('Subscription check failed:', response.status);
-            }
-          } catch (error) {
-            console.error('Error checking subscription:', error);
-          }
+        console.log('🚀 Starting subscription check...');
+        
+        if (!isAuthenticated) {
+          console.error('❌ Not authenticated, cannot check subscription');
+          return;
         }
         
-        // Refresh user data regardless
+        if (!token) {
+          console.error('❌ No token available');
+          return;
+        }
+        
+        if (!subscriptionId) {
+          console.error('❌ No subscription ID found in storage');
+          // Refresh anyway
+          if (refreshUser) {
+            console.log('🔄 Refreshing user data anyway...');
+            setTimeout(() => refreshUser(), 1000);
+          }
+          return;
+        }
+        
+        try {
+          const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
+          const url = `${backendUrl}/api/dodo/check-subscription/${subscriptionId}`;
+          
+          console.log('📞 Calling:', url);
+          
+          // Call backend to check and update subscription
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          console.log('📡 Response status:', response.status);
+          
+          if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Subscription check result:', result);
+            
+            if (result.status === 'success') {
+              toast.success('🎉 Subscription activated! Your credits have been updated.');
+              // Clear the pending subscription
+              sessionStorage.removeItem('pending_subscription_id');
+              console.log('🗑️ Cleared pending subscription from storage');
+            } else {
+              console.warn('⚠️ Subscription not yet active:', result);
+              toast.info('Processing your subscription... Please refresh in a few seconds.');
+            }
+          } else {
+            const errorText = await response.text();
+            console.error('❌ Subscription check failed:', response.status, errorText);
+            toast.error('Could not verify subscription. Please refresh the page.');
+          }
+        } catch (error) {
+          console.error('💥 Error checking subscription:', error);
+          toast.error('Error checking subscription status.');
+        }
+        
+        // Refresh user data
         if (isAuthenticated && refreshUser) {
-          setTimeout(() => refreshUser(), 1000);
+          console.log('🔄 Refreshing user data...');
+          setTimeout(() => {
+            refreshUser().then(() => {
+              console.log('✅ User data refreshed');
+            });
+          }, 1500);
         }
       };
       
       // Wait for backend processing, then check subscription
       setTimeout(() => {
         checkSubscription();
-      }, 1500);
+      }, 2000);
       
       // Clean URL after a brief delay
       setTimeout(() => {
+        console.log('🧹 Cleaning URL');
         window.history.replaceState({}, document.title, '/');
         paymentHandledRef.current = false; // Reset for future payments
-      }, 3000);
+      }, 4000);
     }
-  }, [searchParams]); // Only depend on searchParams to prevent infinite loop
+  }, [searchParams, token, isAuthenticated, refreshUser]); // Include necessary deps
 
   // Initialize browser fingerprint for anonymous users
   useEffect(() => {
