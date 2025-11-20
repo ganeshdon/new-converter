@@ -189,6 +189,92 @@ async def create_dodo_portal_session(current_user: dict = Depends(get_current_us
         raise HTTPException(status_code=500, detail=f"Failed to create portal session: {str(e)}")
 
 
+@router.post("/check-subscription/{subscription_id}")
+async def check_subscription_status(subscription_id: str, current_user: dict = Depends(get_current_user)):
+    """
+    Check subscription status with Dodo Payments and update database
+    This is used after payment redirect when webhook might not have fired
+    """
+    try:
+        # Get Dodo client
+        dodo_client = get_dodo_client()
+        
+        # Fetch subscription from Dodo
+        subscription = await dodo_client.subscriptions.get(subscription_id)
+        
+        logger.info(f"Checking subscription {subscription_id}, status: {subscription.status}")
+        
+        # If subscription is active, update database
+        if subscription.status == "active":
+            # MongoDB setup
+            mongo_client = AsyncIOMotorClient(os.getenv("MONGO_URL", "mongodb://localhost:27017"))
+            db_name = os.getenv("DB_NAME", "test_database")
+            db = mongo_client[db_name]
+            
+            # Get subscription from database
+            db_subscription = await db.subscriptions.find_one({"subscription_id": subscription_id})
+            
+            if db_subscription:
+                user_id = db_subscription["user_id"]
+                plan = db_subscription["plan"]
+                
+                # Determine pages based on plan
+                pages_limit_map = {
+                    "starter": 50,
+                    "professional": 200,
+                    "enterprise": -1  # -1 means unlimited
+                }
+                pages_limit = pages_limit_map.get(plan, 50)
+                pages_remaining = pages_limit if pages_limit != -1 else -1
+                
+                # Update user with subscription details
+                await db.users.update_one(
+                    {"user_id": user_id},
+                    {
+                        "$set": {
+                            "subscription_status": "active",
+                            "subscription_tier": plan,
+                            "pages_limit": pages_limit,
+                            "pages_remaining": pages_remaining,
+                            "updated_at": datetime.utcnow()
+                        }
+                    }
+                )
+                
+                # Update subscription status
+                await db.subscriptions.update_one(
+                    {"subscription_id": subscription_id},
+                    {
+                        "$set": {
+                            "status": "active",
+                            "activated_at": datetime.utcnow(),
+                            "updated_at": datetime.utcnow()
+                        }
+                    }
+                )
+                
+                logger.info(f"Successfully updated subscription for user {user_id}")
+                
+                return {
+                    "status": "success",
+                    "subscription_status": "active",
+                    "plan": plan,
+                    "pages_limit": pages_limit,
+                    "pages_remaining": pages_remaining
+                }
+            else:
+                return {"status": "not_found", "message": "Subscription not found in database"}
+        else:
+            return {
+                "status": subscription.status,
+                "message": f"Subscription status: {subscription.status}"
+            }
+            
+    except Exception as e:
+        logger.error(f"Error checking subscription: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/webhook/dodo")
 async def dodo_webhook(request: Request):
     """
