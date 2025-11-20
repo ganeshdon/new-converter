@@ -116,6 +116,11 @@ const Pricing = () => {
       
       const data = await response.json();
       
+      // Store subscription_id in sessionStorage for later use
+      if (data.session_id) {
+        sessionStorage.setItem('pending_subscription_id', data.session_id);
+      }
+      
       // Redirect to Dodo Payments Checkout
       window.location.href = data.checkout_url;
       
