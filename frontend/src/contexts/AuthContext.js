@@ -179,7 +179,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const refreshUser = async () => {
+  const refreshUser = React.useCallback(async () => {
     if (!token) return;
     
     try {
@@ -197,7 +197,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('User refresh error:', error);
     }
-  };
+  }, [token, API_URL]);
 
   const checkPages = async (pageCount) => {
     if (!token) return null;
