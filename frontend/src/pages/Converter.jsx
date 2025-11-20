@@ -29,28 +29,58 @@ const Converter = () => {
   // Check for successful payment on page load
   useEffect(() => {
     const paymentSuccess = searchParams.get('payment');
+    const subscriptionId = searchParams.get('subscription_id');
     
     if (paymentSuccess === 'success' && !paymentHandledRef.current) {
       paymentHandledRef.current = true; // Mark as handled
       
       // Show success message
-      toast.success('🎉 Payment successful! Your subscription has been activated.');
+      toast.success('🎉 Payment successful! Activating your subscription...');
       
-      // Refresh user data to get updated subscription
-      if (isAuthenticated) {
-        // Wait a moment for backend to process webhook, then refresh
-        setTimeout(() => {
-          if (refreshUser) {
-            refreshUser();
+      // Function to check and update subscription status
+      const checkSubscription = async () => {
+        if (isAuthenticated && token && subscriptionId) {
+          try {
+            const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
+            
+            // Call backend to check and update subscription
+            const response = await fetch(`${backendUrl}/api/dodo/check-subscription/${subscriptionId}`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            if (response.ok) {
+              const result = await response.json();
+              console.log('Subscription check result:', result);
+              
+              if (result.status === 'success') {
+                toast.success('🎉 Subscription activated! Your credits have been updated.');
+              }
+            }
+          } catch (error) {
+            console.error('Error checking subscription:', error);
           }
-        }, 1000);
-      }
+        }
+        
+        // Refresh user data regardless
+        if (isAuthenticated && refreshUser) {
+          setTimeout(() => refreshUser(), 500);
+        }
+      };
+      
+      // Wait for backend processing, then check subscription
+      setTimeout(() => {
+        checkSubscription();
+      }, 1000);
       
       // Clean URL after a brief delay
       setTimeout(() => {
         window.history.replaceState({}, document.title, '/');
         paymentHandledRef.current = false; // Reset for future payments
-      }, 1500);
+      }, 2500);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]); // Only depend on searchParams to prevent infinite loop
