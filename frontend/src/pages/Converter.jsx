@@ -48,13 +48,16 @@ const Converter = () => {
       const checkSubscription = async () => {
         console.log('🚀 Starting subscription check...');
         
-        if (!isAuthenticated) {
-          console.error('❌ Not authenticated, cannot check subscription');
-          return;
-        }
-        
+        // Check if we have a token (user might not be fully loaded yet)
         if (!token) {
           console.error('❌ No token available');
+          // Wait for auth to initialize, then try again
+          setTimeout(() => {
+            if (token) {
+              console.log('🔄 Token now available, retrying...');
+              checkSubscription();
+            }
+          }, 1000);
           return;
         }
         
@@ -73,6 +76,7 @@ const Converter = () => {
           const url = `${backendUrl}/api/dodo/check-subscription/${subscriptionId}`;
           
           console.log('📞 Calling:', url);
+          console.log('🔑 Using token:', token.substring(0, 20) + '...');
           
           // Call backend to check and update subscription
           const response = await fetch(url, {
@@ -108,8 +112,8 @@ const Converter = () => {
           toast.error('Error checking subscription status.');
         }
         
-        // Refresh user data
-        if (isAuthenticated && refreshUser) {
+        // Refresh user data (token check is enough)
+        if (token && refreshUser) {
           console.log('🔄 Refreshing user data...');
           setTimeout(() => {
             refreshUser().then(() => {
