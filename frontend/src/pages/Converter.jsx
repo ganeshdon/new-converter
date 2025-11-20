@@ -88,7 +88,6 @@ const Converter = () => {
         paymentHandledRef.current = false; // Reset for future payments
       }, 3000);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]); // Only depend on searchParams to prevent infinite loop
 
   // Initialize browser fingerprint for anonymous users
