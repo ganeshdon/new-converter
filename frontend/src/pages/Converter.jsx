@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import FileUpload from '../components/FileUpload';
 import ProcessingState from '../components/ProcessingState';
@@ -20,6 +20,7 @@ const Converter = () => {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [anonymousData, setAnonymousData] = useState(null);
   const [browserFingerprint, setBrowserFingerprint] = useState(null);
+  const paymentHandledRef = useRef(false); // Track if payment success was already handled
   
   const { user, token, refreshUser, checkPages, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -29,26 +30,26 @@ const Converter = () => {
   useEffect(() => {
     const paymentSuccess = searchParams.get('payment');
     
-    if (paymentSuccess === 'success') {
+    if (paymentSuccess === 'success' && !paymentHandledRef.current) {
+      paymentHandledRef.current = true; // Mark as handled
+      
       // Show success message
       toast.success('🎉 Payment successful! Your subscription has been activated.');
       
       // Refresh user data to get updated subscription
       if (isAuthenticated) {
         // Wait a moment for backend to process webhook, then refresh
-        const refreshTimer = setTimeout(() => {
+        setTimeout(() => {
           if (refreshUser) {
             refreshUser();
           }
         }, 1000);
-        
-        // Clean up timer
-        return () => clearTimeout(refreshTimer);
       }
       
       // Clean URL after a brief delay
       setTimeout(() => {
         window.history.replaceState({}, document.title, '/');
+        paymentHandledRef.current = false; // Reset for future payments
       }, 1500);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
