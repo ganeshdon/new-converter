@@ -195,14 +195,19 @@ async def check_subscription_status(subscription_id: str, current_user: dict = D
     Check subscription status with Dodo Payments and update database
     This is used after payment redirect when webhook might not have fired
     """
+    logger.info(f"🔍 CHECK SUBSCRIPTION called for: {subscription_id}")
+    logger.info(f"👤 User: {current_user.get('email')}")
+    
     try:
         # Get Dodo client
         dodo_client = get_dodo_client()
+        logger.info(f"✅ Dodo client initialized")
         
         # Fetch subscription from Dodo
+        logger.info(f"📞 Fetching subscription from Dodo API...")
         subscription = await dodo_client.subscriptions.get(subscription_id)
         
-        logger.info(f"Checking subscription {subscription_id}, status: {subscription.status}")
+        logger.info(f"📡 Subscription status from Dodo: {subscription.status}")
         
         # If subscription is active, update database
         if subscription.status == "active":
