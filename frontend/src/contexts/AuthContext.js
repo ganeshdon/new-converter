@@ -199,7 +199,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token, API_URL]);
 
-  const checkPages = async (pageCount) => {
+  const checkPages = React.useCallback(async (pageCount) => {
     if (!token) return null;
     
     try {
@@ -226,7 +226,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Pages check error:', error);
     }
     return null;
-  };
+  }, [token, API_URL]);
 
   const value = {
     user,
