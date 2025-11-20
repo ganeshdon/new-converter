@@ -104,7 +104,7 @@ async def create_dodo_subscription(
             product_id=product_id,
             quantity=1,
             payment_link=True,
-            return_url=f"{FRONTEND_URL}/?payment=success&subscription_id={{subscription_id}}",
+            return_url=f"{FRONTEND_URL}/?payment=success",
             customer={
                 "email": user_email,
                 "name": user_name
