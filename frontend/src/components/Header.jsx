@@ -153,6 +153,13 @@ const Header = () => {
             {isAuthenticated ? (
               <>
                 <Link
+                  to="/"
+                  className="block px-3 py-2 text-gray-700 hover:text-blue-600 font-medium"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link
                   to="/pricing"
                   className="block px-3 py-2 text-gray-700 hover:text-blue-600 font-medium"
                   onClick={() => setMobileMenuOpen(false)}
@@ -188,6 +195,13 @@ const Header = () => {
               </>
             ) : (
               <>
+                <Link
+                  to="/"
+                  className="block px-3 py-2 text-gray-700 hover:text-blue-600 font-medium"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
                 <Link
                   to="/pricing"
                   className="block px-3 py-2 text-gray-700 hover:text-blue-600 font-medium"
