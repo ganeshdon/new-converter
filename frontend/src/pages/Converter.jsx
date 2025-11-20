@@ -29,10 +29,12 @@ const Converter = () => {
   // Check for successful payment on page load
   useEffect(() => {
     const paymentSuccess = searchParams.get('payment');
-    const subscriptionId = searchParams.get('subscription_id');
     
     if (paymentSuccess === 'success' && !paymentHandledRef.current) {
       paymentHandledRef.current = true; // Mark as handled
+      
+      // Get subscription_id from sessionStorage
+      const subscriptionId = sessionStorage.getItem('pending_subscription_id');
       
       // Show success message
       toast.success('🎉 Payment successful! Activating your subscription...');
@@ -58,7 +60,11 @@ const Converter = () => {
               
               if (result.status === 'success') {
                 toast.success('🎉 Subscription activated! Your credits have been updated.');
+                // Clear the pending subscription
+                sessionStorage.removeItem('pending_subscription_id');
               }
+            } else {
+              console.error('Subscription check failed:', response.status);
             }
           } catch (error) {
             console.error('Error checking subscription:', error);
@@ -67,20 +73,20 @@ const Converter = () => {
         
         // Refresh user data regardless
         if (isAuthenticated && refreshUser) {
-          setTimeout(() => refreshUser(), 500);
+          setTimeout(() => refreshUser(), 1000);
         }
       };
       
       // Wait for backend processing, then check subscription
       setTimeout(() => {
         checkSubscription();
-      }, 1000);
+      }, 1500);
       
       // Clean URL after a brief delay
       setTimeout(() => {
         window.history.replaceState({}, document.title, '/');
         paymentHandledRef.current = false; // Reset for future payments
-      }, 2500);
+      }, 3000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]); // Only depend on searchParams to prevent infinite loop
