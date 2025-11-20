@@ -189,7 +189,7 @@ async def create_dodo_portal_session(current_user: dict = Depends(get_current_us
         raise HTTPException(status_code=500, detail=f"Failed to create portal session: {str(e)}")
 
 
-@router.post("/check-subscription/{subscription_id}")
+@router.post("/dodo/check-subscription/{subscription_id}")
 async def check_subscription_status(subscription_id: str, current_user: dict = Depends(get_current_user)):
     """
     Check subscription status with Dodo Payments and update database
