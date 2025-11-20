@@ -29,14 +29,24 @@ const Converter = () => {
   useEffect(() => {
     const paymentSuccess = searchParams.get('payment');
     
-    if (paymentSuccess === 'success' && isAuthenticated) {
-      toast.success('🎉 Payment successful! Your subscription has been activated. You can now convert unlimited pages!');
+    if (paymentSuccess === 'success') {
+      // Show success message
+      toast.success('🎉 Payment successful! Your subscription has been activated.');
+      
       // Refresh user data to get updated subscription
-      refreshUser();
-      // Clean URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+      if (isAuthenticated && refreshUser) {
+        // Wait a moment for backend to process webhook, then refresh
+        setTimeout(() => {
+          refreshUser();
+        }, 1000);
+      }
+      
+      // Clean URL after a brief delay
+      setTimeout(() => {
+        window.history.replaceState({}, document.title, '/');
+      }, 1500);
     }
-  }, [isAuthenticated, searchParams, refreshUser]);
+  }, [searchParams, isAuthenticated, refreshUser]);
 
   // Initialize browser fingerprint for anonymous users
   useEffect(() => {
